@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read Before Using - SAHARA SAATHI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-secondary: rgba(94, 82, 64, 0.12);
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-card-border: rgba(94, 82, 64, 0.12);
+            --color-success: var(--color-teal-500);
+            --color-focus-ring: rgba(33, 128, 141, 0.4);
+            --font-family-base: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-size-base: 14px;
+            --font-size-md: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-2xl: 20px;
+            --font-size-3xl: 24px;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.5;
+            --letter-spacing-tight: -0.01em;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --radius-sm: 6px;
+            --radius-base: 8px;
+            --radius-md: 10px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --duration-fast: 150ms;
+            --duration-normal: 250ms;
+            --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+            --container-xl: 1280px;
+        }
+
+        html {
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-normal);
+            color: var(--color-text);
+            background-color: var(--color-background);
+            -webkit-font-smoothing: antialiased;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(to right, #cffafe, #93c5fd, #818cf8);
+            scroll-behavior: smooth;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+            font-weight: var(--font-weight-bold);
+            line-height: var(--line-height-tight);
+            color: var(--color-text);
+            letter-spacing: var(--letter-spacing-tight);
+        }
+
+        h1 { font-size: 3rem; font-weight: 800; }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+        p { margin: 0 0 var(--space-16) 0; }
+        a { color: var(--color-primary); text-decoration: none; transition: color var(--duration-fast) var(--ease-standard); }
+        a:hover { color: var(--color-primary-hover); }
+
+        .container {
+            width: 100%;
+            margin-right: auto;
+            margin-left: auto;
+            padding-right: var(--space-16);
+            padding-left: var(--space-16);
+            max-width: var(--container-xl);
+        }
+
+        .readme-section {
+            padding: 80px var(--space-16);
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            margin: var(--space-32) auto;
+            max-width: 800px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .readme-header {
+            text-align: center;
+            margin-bottom: var(--space-32);
+            padding-bottom: var(--space-24);
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .readme-content {
+            line-height: var(--line-height-normal);
+        }
+
+        .readme-content p {
+            margin-bottom: var(--space-24);
+            font-size: var(--font-size-lg);
+        }
+
+        .role-section {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-card-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-24);
+            margin-bottom: var(--space-24);
+        }
+
+        .role-section h3 {
+            color: var(--color-primary);
+            margin-bottom: var(--space-16);
+        }
+
+        .credentials {
+            background-color: var(--color-secondary);
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            font-family: monospace;
+            font-size: var(--font-size-base);
+            margin-bottom: var(--space-16);
+            color: black;
+            font-weight: bold;
+        }
+
+        .credentials strong {
+            color: black;
+            font-weight: bold;
+        }
+
+        .credentials strong {
+            color: var(--color-primary);
+        }
+
+        .note {
+            background-color: rgba(255, 84, 89, 0.1);
+            border: 1px solid var(--color-red-400);
+            border-radius: var(--radius-base);
+            padding: var(--space-16);
+            margin-top: var(--space-24);
+        }
+
+        .note h4 {
+            color: var(--color-red-500);
+            margin-bottom: var(--space-8);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .readme-section {
+                padding: 40px var(--space-16);
+                margin: var(--space-16) auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <section class="readme-section">
+            <div class="readme-header">
+                <h1>Read Before Using</h1>
+                <p>Welcome to SAHARA SAATHI - SIH 2025 Project </p>
+            </div>
+
+            <div class="readme-content">
+                <p>A very warm welcome to our SIH 2025 project (MVP). Alongside the frontend, we have also created a backend hosted on Render.com. We have integrated AI for various purposes that you'll discover after logging in.</p>
+
+                <p>However, please note that many features are still in development and will be rolled out in the future, especially for the admin, saathi, and store panels.</p>
+
+                <h2>How to Register</h2>
+
+                <div class="role-section">
+                    <h3>For Patients</h3>
+                    <p>Simply register and login as you would on any other website. Fill in your details and create an account to access patient features.</p>
+                </div>
+
+                <div class="role-section">
+                    <h3>For Other Roles (Doctor, Store, Saathi, Admin)</h3>
+                    <p>Since access for these roles will be provided by admin/authorities, we have added demo profiles with working backend functionality for testing purposes.</p>
+
+                    <h4>Doctor Credentials</h4>
+                    <div class="credentials">
+                        <p>1. <strong>ID: DOC001</strong><br>
+                        <strong>Password:password123</strong><br>
+                        <strong>Name of Doctor:</strong></p>
+                    </div>
+                    <div class="credentials">
+                        <p>2. <strong>ID: DOC002</strong><br>
+                        <strong>Password:password123</strong><br>
+                        <strong>Name of Doctor:</strong></p>
+                    </div>
+                    <div class="credentials">
+                        <p>3. <strong>ID: DOC003</strong><br>
+                        <strong>Password:password123</strong><br>
+                        <strong>Name of Doctor:</strong></p>
+                    </div>
+
+                    <h4>Store Credentials</h4>
+                    <div class="credentials">
+                        <p><strong>ID: store</strong><br>
+                        <strong>Password: store123</strong><br>
+                        <strong>Name: Store Demo</strong></p>
+                    </div>
+
+                    <h4>Saathi Credentials</h4>
+                    <div class="credentials">
+                        <p><strong>ID: saathi</strong><br>
+                        <strong>Password: saathi123</strong><br>
+                        <strong>Name: Saathi Demo</strong></p>
+                    </div>
+
+                    <h4>Admin Credentials</h4>
+                    <div class="credentials">
+                        <p><strong>ID: admin</strong><br>
+                        <strong>Password: admin123</strong><br>
+                        <strong>Name: Admin Demo</strong></p>
+                    </div>
+                </div>
+
+                <p>We have also connected the backends for students and doctors for appointment updates, calls, texts, etc.</p>
+
+                <div class="note">
+                    <h4>Important Note</h4>
+                    <p>This is an MVP (Minimum Viable Product) for the Smart India Hackathon 2025. Some features may be limited or under development. Please use the demo credentials for testing non-patient roles.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

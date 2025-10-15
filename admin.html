@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sehat Sahara - Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: rgba(245, 245, 245, 0.6);
+            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --text-color: #0f172a;
+            --text-color-secondary: #475569;
+            --primary-color: #0d9488;
+            --primary-color-light: #2dd4bf;
+            --primary-color-dark: #14b8a6;
+            --sos-color: #ef4444;
+            --border-color: rgba(0, 0, 0, 0.07);
+            --shadow-color: rgba(100, 116, 139, 0.1);
+            --font-family: 'Poppins', sans-serif;
+            --color-secondary: #f1f5f9;
+            --radius-lg: 16px;
+            --color-video: #3b82f6;
+            --color-audio: #16a34a;
+            --color-photo: #f97316;
+            --color-pending: #f59e0b;
+            --color-paid: #22c55e;
+            --color-verified: #22c55e;
+            --color-suspended: #ef4444;
+            --color-unverified: #f59e0b;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: rgba(20, 20, 30, 0.75);
+            --card-bg-color: rgba(30, 41, 59, 0.6);
+            --text-color: #e2e8f0;
+            --text-color-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.12);
+            --primary-color: var(--primary-color-dark);
+            --color-secondary: #334155;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: var(--font-family); 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            line-height: 1.6; 
+            padding-bottom: 80px; /* Space for bottom nav */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .main-container { position: relative; min-height: 100vh; width: 100vw; }
+        .background-image { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-image: url('https://i.ibb.co/84XpXLXW/hero-pic.png'); 
+            background-size: cover; background-position: center; 
+            filter: blur(14px) brightness(0.9); 
+            transform: scale(1.15); z-index: -1; 
+            transition: filter 0.3s;
+        }
+        [data-theme="dark"] .background-image { filter: blur(14px) brightness(0.6); }
+
+        .page-content { flex-grow: 1; padding: 1rem; max-width: 1200px; margin: 0 auto; width: 100%; padding-top: 80px; }
+        
+        /* Header */
+        .header {
+            position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 2rem); max-width: 1200px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1.25rem; z-index: 1000;
+            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
+            border-radius: 999px;
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+        }
+        .header .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .header .actions { display: flex; align-items: center; gap: 0.75rem; }
+        
+        .top-nav { display: none; align-items: center; gap: 0.25rem; }
+        .top-nav a { text-decoration: none; color: var(--text-color-secondary); font-weight: 500; padding: 0.5rem 1.25rem; border-radius: 999px; transition: all 0.25s ease; position: relative; }
+        .top-nav a:hover { color: var(--text-color); background-color: rgba(128, 128, 128, 0.1); }
+        .top-nav a.active { color: var(--text-color); background-color: rgba(128, 128, 128, 0.15); }
+
+        .btn { padding: 0.6rem 1.2rem; border-radius: 9999px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.25s ease; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+        .btn-sos { background-color: var(--sos-color); color: white; }
+        .btn-primary { background-color: var(--primary-color); color: white; border: 2px solid var(--primary-color); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 12px; }
+        .btn-neutral { background-color: white; color: var(--text-color-secondary); border: 1px solid var(--border-color); }
+        .btn-neutral:hover { background-color: #f8fafc; }
+
+        [data-theme="dark"] .btn-neutral {
+            background-color: var(--color-secondary);
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .btn-neutral:hover {
+            background-color: #475569;
+        }
+
+
+        .card { 
+            background-color: var(--card-bg-color); border-radius: var(--radius-lg); 
+            padding: 1.5rem; border: 1px solid var(--border-color); 
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); 
+            box-shadow: 0 8px 32px 0 var(--shadow-color); transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 var(--shadow-color); }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Dashboard Screen */
+        .welcome-card { 
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-color-light)); 
+            color: white; 
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+        }
+        .welcome-card h1 { font-size: 2.25rem; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .info-card { cursor: pointer; transition: all 0.2s ease-in-out; }
+        .info-card:hover { transform: scale(1.03); box-shadow: 0 10px 30px 0 var(--shadow-color); }
+        .info-card h3 { font-size: 1rem; }
+        .info-card .highlight { font-size: 1.25rem; font-weight: 600; }
+        
+        /* Page Headers */
+        .page-header { text-align: center; margin-bottom: 2rem; margin-top: 2rem; }
+        .page-header h1 { font-size: 2rem; }
+        
+        /* Table Styles */
+        .table-container { overflow-x: auto; }
+        .styled-table { width: 100%; border-collapse: collapse; }
+        .styled-table thead tr { background-color: var(--primary-color); color: #ffffff; text-align: left; }
+        .styled-table th, .styled-table td { padding: 12px 15px; }
+        .styled-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .styled-table tbody tr:nth-of-type(even) { background-color: rgba(0,0,0,0.03); }
+        .styled-table tbody tr:last-of-type { border-bottom: 2px solid var(--primary-color); }
+        [data-theme="dark"] .styled-table tbody tr:nth-of-type(even) { background-color: rgba(255,255,255,0.03); }
+        
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: white; text-transform: capitalize; }
+        .status-verified, .status-resolved, .status-paid { background-color: var(--color-verified); }
+        .status-suspended, .status-high { background-color: var(--color-suspended); }
+        .status-unverified, .status-pending, .status-medium { background-color: var(--color-unverified); }
+
+        .actions-cell button { margin-right: 5px; }
+
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; background-color: var(--card-bg-color); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 -4px 20px var(--shadow-color); border-top: 1px solid var(--border-color); padding: 0.5rem 0; z-index: 1000; }
+        .nav-button { background: none; border: none; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-color-secondary); padding: 0.5rem 0; transition: color 0.2s ease; }
+        .nav-button.active { color: var(--primary-color); font-weight: 600; }
+        .nav-button svg { width: 24px; height: 24px; }
+        .nav-button span { font-size: 12px; }
+        
+        /* Language & Theme */
+        .language-dropdown { position: relative; }
+        .language-dropdown-toggle { cursor: pointer; background: transparent; border: none; color: var(--text-color-secondary); font-size: 1rem; padding: 8px; display: flex; align-items: center; border-radius: 999px; }
+        .language-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 150px; border-radius: var(--radius-lg); padding: 8px; background: var(--card-bg-color); border: 1px solid var(--border-color); z-index: 1001; }
+        .language-dropdown.open .language-dropdown-menu { display: block; }
+        .language-option { display: block; padding: 8px 12px; color: var(--text-color-secondary); border-radius: 8px; cursor: pointer; text-decoration: none;}
+        .theme-toggle { cursor: pointer; background-color: transparent; border: none; padding: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-color-secondary); }
+
+        /* Modals */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card-bg-color); border-radius: var(--radius-lg); padding: 2rem; max-width: 500px; width: calc(100% - 2rem); text-align: left; }
+        .modal-content h3 { margin-bottom: 1rem; text-align: center; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
+        
+        /* Responsive */
+        @media (min-width: 768px) { .bottom-nav { display: none; } .top-nav { display: flex; } .header .actions { gap: 1rem; } .header { border-radius: 999px; } }
+        @media (max-width: 767px) { 
+            .header { position: static; transform: none; width: 100%; border-radius: 0; padding: 1rem; } 
+            .page-content { padding-top: 1rem; } 
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="main-container">
+        <div class="background-image"></div>
+        <header class="header">
+            <div class="logo">Sehat Sahara</div>
+            <nav class="top-nav">
+                <a href="#" class="active" data-screen="dashboardScreen" data-key="dashboard">Dashboard</a>
+                <a href="#" data-screen="userManagementScreen" data-key="user_management">User Management</a>
+                <a href="#" data-screen="grievancesScreen" data-key="grievances">Grievances</a>
+                <a href="#" data-screen="paymentsScreen" data-key="payments">Payments</a>
+            </nav>
+            <div class="actions">
+                <div class="language-dropdown">
+                    <button class="language-dropdown-toggle"><span id="selectedLanguage">English</span></button>
+                    <div class="language-dropdown-menu"></div>
+                </div>
+                <button class="theme-toggle" id="themeToggle">
+                    <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                 <button class="btn" id="logoutBtn" style="background-color: var(--text-color-secondary); color: white;" data-key="logout">Logout</button>
+            </div>
+        </header>
+        <div class="page-content">
+            <main class="main">
+                <!-- Dashboard Screen -->
+                <section id="dashboardScreen" class="screen active">
+                     <div class="welcome-card card">
+                        <h1 data-key="admin_command_center">Admin Command Center ⚙️</h1>
+                        <p data-key="system_activity_view">High-level view of system activity.</p>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-card card"><h3 data-key="daily_consultations">Daily Consultations</h3><p class="highlight">1,204</p><p data-key="from_yesterday">+5% from yesterday</p></div>
+                        <div class="info-card card"><h3 data-key="active_users">Active Users</h3><p class="highlight">3,512</p><p data-key="user_types">Doctors, Pharmacies, Saathis</p></div>
+                        <div class="info-card card"><h3 data-key="disease_trends">Disease Trends</h3><p class="highlight" data-key="fever">Fever</p><p data-key="most_reported_symptom">Most reported symptom</p></div>
+                        <div class="info-card card"><h3 data-key="medicine_stock">Medicine Stock</h3><p class="highlight">85%</p><p data-key="average_availability">Average availability</p></div>
+                    </div>
+                </section>
+                
+                <!-- User Management Screen -->
+                <section id="userManagementScreen" class="screen">
+                    <div class="page-header"><h1 data-key="user_management">User Management</h1></div>
+                    <div class="card table-container">
+                        <table class="styled-table" id="userTable">
+                            <thead>
+                                <tr>
+                                    <th data-key="name">Name</th>
+                                    <th data-key="role">Role</th>
+                                    <th data-key="contact">Contact</th>
+                                    <th data-key="status">Status</th>
+                                    <th data-key="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <!-- Grievance Management Screen -->
+                <section id="grievancesScreen" class="screen">
+                    <div class="page-header"><h1 data-key="grievances">Grievance Management</h1></div>
+                     <div class="card table-container">
+                        <table class="styled-table" id="grievanceTable">
+                             <thead>
+                                <tr>
+                                    <th data-key="report_id">Report ID</th>
+                                    <th data-key="patient">Patient</th>
+                                    <th data-key="subject">Subject</th>
+                                    <th data-key="priority">Priority</th>
+                                    <th data-key="status">Status</th>
+                                    <th data-key="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Payment & Payroll Screen -->
+                <section id="paymentsScreen" class="screen">
+                    <div class="page-header"><h1 data-key="payments">Payment & Payroll</h1></div>
+                    <div class="card table-container">
+                        <table class="styled-table" id="paymentTable">
+                            <thead>
+                                <tr>
+                                    <th data-key="user">User</th>
+                                    <th data-key="role">Role</th>
+                                    <th data-key="amount">Amount</th>
+                                    <th data-key="date">Date</th>
+                                    <th data-key="status">Status</th>
+                                    <th data-key="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+    
+    <nav class="bottom-nav">
+        <button class="nav-button active" data-screen="dashboardScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span data-key="dashboard">Dashboard</span></button>
+        <button class="nav-button" data-screen="userManagementScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span data-key="users_nav">Users</span></button>
+        <button class="nav-button" data-screen="grievancesScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span data-key="grievances">Grievances</span></button>
+        <button class="nav-button" data-screen="paymentsScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span data-key="payments">Payments</span></button>
+    </nav>
+    
+    <!-- Modals -->
+    <div id="confirmationModal" class="modal"><div class="modal-content" style="text-align:center;"><h3 id="modalTitle"></h3><p id="modalMessage"></p><button class="btn btn-primary" id="closeModal">OK</button></div></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const translations = {
+                en: { dashboard: "Dashboard", user_management: "User Management", users_nav: "Users", grievances: "Grievances", payments: "Payments", logout: "Logout", admin_command_center: "Admin Command Center ⚙️", system_activity_view: "High-level view of system activity.", daily_consultations: "Daily Consultations", from_yesterday: "+5% from yesterday", active_users: "Active Users", user_types: "Doctors, Pharmacies, Saathis", disease_trends: "Disease Trends", most_reported_symptom: "Most reported symptom", fever: "Fever", medicine_stock: "Medicine Stock", average_availability: "Average availability", name: "Name", role: "Role", contact: "Contact", status: "Status", actions: "Actions", report_id: "Report ID", patient: "Patient", subject: "Subject", priority: "Priority", user: "User", amount: "Amount", date: "Date", verify: "Verify", suspend: "Suspend", unsuspend: "Un-suspend", remove: "Remove", view: "View", resolve: "Resolve", process: "Process", paid: "Paid", logged_out: "Logged Out", logged_out_message: "You have been successfully logged out." },
+                hi: { dashboard: "डैशबोर्ड", user_management: "उपयोगकर्ता प्रबंधन", users_nav: "उपयोगकर्ता", grievances: "शिकायतें", payments: "भुगतान", logout: "लॉग आउट", admin_command_center: "व्यवस्थापक कमांड सेंटर ⚙️", system_activity_view: "सिस्टम गतिविधि का उच्च-स्तरीय दृश्य।", daily_consultations: "दैनिक परामर्श", from_yesterday: "कल से +5%", active_users: "सक्रिय उपयोगकर्ता", user_types: "डॉक्टर, फार्मेसी, साथी", disease_trends: "रोग की प्रवृत्ति", most_reported_symptom: "सबसे अधिक रिपोर्ट किया गया लक्षण", fever: "बुखार", medicine_stock: "दवा स्टॉक", average_availability: "औसत उपलब्धता", name: "नाम", role: "भूमिका", contact: "संपर्क", status: "स्थिति", actions: "कार्रवाइयाँ", report_id: "रिपोर्ट आईडी", patient: "मरीज़", subject: "विषय", priority: "प्राथमिकता", user: "उपयोगकर्ता", amount: "रकम", date: "तारीख", verify: "सत्यापित करें", suspend: "निलंबित करें", unsuspend: "निलंबन हटाएँ", remove: "हटाएँ", view: "देखें", resolve: "समाधान करें", process: "प्रोसेस करें", paid: "भुगतान किया गया", logged_out: "लॉग आउट", logged_out_message: "आप सफलतापूर्वक लॉग आउट हो गए हैं।" },
+                pa: { dashboard: "ਡੈਸ਼ਬੋਰਡ", user_management: "ਉਪਭੋਗਤਾ ਪ੍ਰਬੰਧਨ", users_nav: "ਉਪਭੋਗਤਾ", grievances: "ਸ਼ਿਕਾਇਤਾਂ", payments: "ਭੁਗਤਾਨ", logout: "ਲੌਗ ਆਉਟ", admin_command_center: "ਪ੍ਰਸ਼ਾਸਕ ਕਮਾਂਡ ਸੈਂਟਰ ⚙️", system_activity_view: "ਸਿਸਟਮ ਗਤੀਵਿਧੀ ਦਾ ਉੱਚ-ਪੱਧਰੀ ਦ੍ਰਿਸ਼।", daily_consultations: "ਰੋਜ਼ਾਨਾ ਸਲਾਹ-ਮਸ਼ਵਰੇ", from_yesterday: "ਕੱਲ੍ਹ ਤੋਂ +5%", active_users: "ਸਰਗਰਮ ਉਪਭੋਗਤਾ", user_types: "ਡਾਕਟਰ, ਫਾਰਮੇਸੀ, ਸਾਥੀ", disease_trends: "ਬਿਮਾਰੀ ਦੇ ਰੁਝਾਨ", most_reported_symptom: "ਸਭ ਤੋਂ ਵੱਧ ਰਿਪੋਰਟ ਕੀਤੇ ਲੱਛਣ", fever: "ਬੁਖਾਰ", medicine_stock: "ਦਵਾਈਆਂ ਦਾ ਸਟਾਕ", average_availability: "ਔਸਤ ਉਪਲਬਧਤਾ", name: "ਨਾਮ", role: "ਭੂਮਿਕਾ", contact: "ਸੰਪਰਕ", status: "ਸਥਿਤੀ", actions: "ਕਾਰਵਾਈਆਂ", report_id: "ਰਿਪੋਰਟ ਆਈਡੀ", patient: "ਮਰੀਜ਼", subject: "ਵਿਸ਼ਾ", priority: "ਤਰਜੀਹ", user: "ਉਪਭੋਗਤਾ", amount: "ਰਕਮ", date: "ਮਿਤੀ", verify: "ਤਸਦੀਕ ਕਰੋ", suspend: "ਮੁਅੱਤਲ ਕਰੋ", unsuspend: "ਮੁਅੱਤਲੀ ਹਟਾਓ", remove: "ਹਟਾਓ", view: "ਵੇਖੋ", resolve: "ਹੱਲ ਕਰੋ", process: "ਪ੍ਰਕਿਰਿਆ", paid: "ਭੁਗਤਾਨ ਕੀਤਾ", logged_out: "ਲੌਗ ਆਉਟ", logged_out_message: "ਤੁਸੀਂ ਸਫਲਤਾਪੂਰਵਕ ਲੌਗ ਆਉਟ ਹੋ ਗਏ ਹੋ।" }
+            };
+
+            const appData = {
+                en: {
+                    users: [ { id: 1, name: "Dr. Anjali Verma", role: "Doctor", contact: "dr.anjali@ss.com", status: "Verified" }, { id: 2, name: "Wellness Pharmacy", role: "Pharmacy", contact: "wellness@ph.com", status: "Verified" }, { id: 3, name: "Ravi Kumar", role: "Sehat Saathi", contact: "ravi.k@ss.com", status: "Unverified" }, { id: 4, name: "Dr. Sameer Khan", role: "Doctor", contact: "dr.sameer@ss.com", status: "Suspended" }, { id: 5, name: "City Medicals", role: "Pharmacy", contact: "city.med@ph.com", status: "Verified" } ],
+                    grievances: [ { id: 'G101', patient: "Amit Patel", subject: "Incorrect prescription", priority: "High", status: "Pending" }, { id: 'G102', patient: "Sunita Reddy", subject: "Doctor did not join call", priority: "High", status: "Pending" }, { id: 'G103', patient: "Karan Verma", subject: "Payment failed", priority: "Medium", status: "Resolved" } ],
+                    payments: [ { id: 1, user: "Dr. Anjali Verma", role: "Doctor", amount: 12500, date: "2025-09-28", status: "Paid" }, { id: 2, user: "Ravi Kumar", role: "Sehat Saathi", amount: 3500, date: "2025-09-28", status: "Pending" }, { id: 3, user: "Dr. Sameer Khan", role: "Doctor", amount: 9800, date: "2025-09-28", status: "Paid" } ],
+                    status_map: { Verified: "Verified", Unverified: "Unverified", Suspended: "Suspended", High: "High", Medium: "Medium", Pending: "Pending", Resolved: "Resolved", Paid: "Paid" }
+                },
+                hi: {
+                    users: [ { id: 1, name: "डॉ. अंजलि वर्मा", role: "चिकित्सक", contact: "dr.anjali@ss.com", status: "सत्यापित" }, { id: 2, name: "वेलनेस फार्मेसी", role: "फार्मेसी", contact: "wellness@ph.com", status: "सत्यापित" }, { id: 3, name: "रवि कुमार", role: "सेहत साथी", contact: "ravi.k@ss.com", status: "असत्यापित" }, { id: 4, name: "डॉ. समीर खान", role: "चिकित्सक", contact: "dr.sameer@ss.com", status: "निलंबित" }, { id: 5, name: "सिटी मेडिकल्स", role: "फार्मेसी", contact: "city.med@ph.com", status: "सत्यापित" } ],
+                    grievances: [ { id: 'G101', patient: "अमित पटेल", subject: "गलत नुस्खा", priority: "उच्च", status: "लंबित" }, { id: 'G102', patient: "सुनीता रेड्डी", subject: "डॉक्टर कॉल में शामिल नहीं हुए", priority: "उच्च", status: "लंबित" }, { id: 'G103', patient: "करण वर्मा", subject: "भुगतान विफल", priority: "मध्यम", status: "हल हो गया" } ],
+                    payments: [ { id: 1, user: "डॉ. अंजलि वर्मा", role: "चिकित्सक", amount: 12500, date: "2025-09-28", status: "भुगतान किया गया" }, { id: 2, user: "रवि कुमार", role: "सेहत साथी", amount: 3500, date: "2025-09-28", status: "लंबित" }, { id: 3, user: "डॉ. समीर खान", role: "चिकित्सक", amount: 9800, date: "2025-09-28", status: "भुगतान किया गया" } ],
+                    status_map: { Verified: "सत्यापित", Unverified: "असत्यापित", Suspended: "निलंबित", High: "उच्च", Medium: "मध्यम", Pending: "लंबित", Resolved: "हल हो गया", Paid: "भुगतान किया गया" }
+                },
+                pa: {
+                    users: [ { id: 1, name: "ਡਾ. ਅੰਜਲੀ ਵਰਮਾ", role: "ਡਾਕਟਰ", contact: "dr.anjali@ss.com", status: "ਤਸਦੀਕਸ਼ੁਦਾ" }, { id: 2, name: "ਵੈਲਨੈਸ ਫਾਰਮੇਸੀ", role: "ਫਾਰਮੇਸੀ", contact: "wellness@ph.com", status: "ਤਸਦੀਕਸ਼ੁਦਾ" }, { id: 3, name: "ਰਵੀ ਕੁਮਾਰ", role: "ਸਿਹਤ ਸਾਥੀ", contact: "ravi.k@ss.com", status: "ਗੈਰ-ਪ੍ਰਮਾਣਿਤ" }, { id: 4, name: "ਡਾ. ਸਮੀਰ ਖਾਨ", role: "ਡਾਕਟਰ", contact: "dr.sameer@ss.com", status: "ਮੁਅੱਤਲ" }, { id: 5, name: "ਸਿਟੀ ਮੈਡੀਕਲਜ਼", role: "ਫਾਰਮੇਸੀ", contact: "city.med@ph.com", status: "ਤਸਦੀਕਸ਼ੁਦਾ" } ],
+                    grievances: [ { id: 'G101', patient: "ਅਮਿਤ ਪਟੇਲ", subject: "ਗਲਤ ਨੁਸਖ਼ਾ", priority: "ਉੱਚ", status: "ਬਕਾਇਆ" }, { id: 'G102', patient: "ਸੁਨੀਤਾ ਰੈੱਡੀ", subject: "ਡਾਕਟਰ ਕਾਲ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ ਹੋਏ", priority: "ਉੱਚ", status: "ਬਕਾਇਆ" }, { id: 'G103', patient: "ਕਰਨ ਵਰਮਾ", subject: "ਭੁਗਤਾਨ ਅਸਫਲ", priority: "ਮੱਧਮ", status: "ਹੱਲ ਹੋ ਗਿਆ" } ],
+                    payments: [ { id: 1, user: "ਡਾ. ਅੰਜਲੀ ਵਰਮਾ", role: "ਡਾਕਟਰ", amount: 12500, date: "2025-09-28", status: "ਭੁਗਤਾਨ ਕੀਤਾ" }, { id: 2, user: "ਰਵੀ ਕੁਮਾਰ", role: "ਸਿਹਤ ਸਾਥੀ", amount: 3500, date: "2025-09-28", status: "ਬਕਾਇਆ" }, { id: 3, user: "ਡਾ. ਸਮੀਰ ਖਾਨ", role: "ਡਾਕਟਰ", amount: 9800, date: "2025-09-28", status: "ਭੁਗਤਾਨ ਕੀਤਾ" } ],
+                    status_map: { Verified: "ਤਸਦੀਕਸ਼ੁਦਾ", Unverified: "ਗੈਰ-ਪ੍ਰਮਾਣਿਤ", Suspended: "ਮੁਅੱਤਲ", High: "ਉੱਚ", Medium: "ਮੱਧਮ", Pending: "ਬਕਾਇਆ", Resolved: "ਹੱਲ ਹੋ ਗਿਆ", Paid: "ਭੁਗਤਾਨ ਕੀਤਾ" }
+                }
+            };
+            let currentLanguage = 'en';
+
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId)?.classList.add('active');
+                
+                document.querySelectorAll('.nav-button, .top-nav a').forEach(link => {
+                    link.classList.toggle('active', link.dataset.screen === screenId);
+                });
+            }
+            
+            function setupNavigation() {
+                document.querySelectorAll('[data-screen]').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showScreen(el.dataset.screen);
+                    });
+                });
+            }
+
+            function setupThemeAndLanguage() {
+                const themeToggle = document.getElementById('themeToggle');
+                const themeIcon = document.getElementById('themeIcon');
+                const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+                const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+                themeToggle.addEventListener('click', () => {
+                    const currentTheme = document.body.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.body.setAttribute('data-theme', newTheme);
+                    themeIcon.innerHTML = newTheme === 'dark' ? sunIcon : moonIcon;
+                });
+                
+                const langDropdown = document.querySelector('.language-dropdown');
+                const langMenu = langDropdown.querySelector('.language-dropdown-menu');
+                const langOptions = { en: "English", hi: "हिन्दी", pa: "ਪੰਜਾਬੀ" };
+
+                Object.keys(langOptions).forEach(lang => {
+                    const option = document.createElement('a');
+                    option.href = "#"; option.className = 'language-option'; option.dataset.lang = lang;
+                    option.textContent = langOptions[lang];
+                    langMenu.appendChild(option);
+                });
+
+                langDropdown.querySelector('.language-dropdown-toggle').addEventListener('click', () => langDropdown.classList.toggle('open'));
+                document.addEventListener('click', e => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('open'); });
+                
+                langMenu.addEventListener('click', e => {
+                    e.preventDefault();
+                    if (e.target.classList.contains('language-option')) {
+                        currentLanguage = e.target.dataset.lang;
+                        document.getElementById('selectedLanguage').textContent = e.target.textContent;
+                        updateUI();
+                        langDropdown.classList.remove('open');
+                    }
+                });
+            }
+
+            function updateUIText() {
+                const langPack = translations[currentLanguage] || translations.en;
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    if (langPack[key]) {
+                        el.textContent = langPack[key];
+                    }
+                });
+            }
+
+            function getStatusClass(status) {
+                const statusClassMap = {
+                    "Verified": "verified", "Resolved": "resolved", "Paid": "paid",
+                    "Suspended": "suspended", "High": "high",
+                    "Unverified": "unverified", "Pending": "pending", "Medium": "medium"
+                };
+                 const englishStatus = Object.keys(appData.en.status_map).find(key => 
+                    appData.en.status_map[key] === status || 
+                    appData.hi.status_map[key] === status || 
+                    appData.pa.status_map[key] === status
+                );
+                return statusClassMap[englishStatus] || 'neutral';
+            }
+
+
+            function populateUserTable() {
+                const tableBody = document.querySelector('#userTable tbody');
+                const data = appData[currentLanguage].users;
+                const langPack = translations[currentLanguage];
+                tableBody.innerHTML = data.map(user => `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.role}</td>
+                        <td>${user.contact}</td>
+                        <td><span class="status-badge status-${getStatusClass(user.status)}">${user.status}</span></td>
+                        <td class="actions-cell">
+                            ${user.status === appData[currentLanguage].status_map.Unverified ? `<button class="btn btn-sm btn-primary">${langPack.verify}</button>` : ''}
+                            ${user.status !== appData[currentLanguage].status_map.Suspended ? `<button class="btn btn-sm btn-sos">${langPack.suspend}</button>` : `<button class="btn btn-sm btn-primary">${langPack.unsuspend}</button>`}
+                            <button class="btn btn-sm btn-neutral">${langPack.remove}</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            function populateGrievanceTable() {
+                 const tableBody = document.querySelector('#grievanceTable tbody');
+                 const data = appData[currentLanguage].grievances;
+                 const langPack = translations[currentLanguage];
+                tableBody.innerHTML = data.map(g => `
+                    <tr>
+                        <td>${g.id}</td>
+                        <td>${g.patient}</td>
+                        <td>${g.subject}</td>
+                        <td><span class="status-badge status-${getStatusClass(g.priority)}">${g.priority}</span></td>
+                        <td><span class="status-badge status-${getStatusClass(g.status)}">${g.status}</span></td>
+                        <td class="actions-cell">
+                            <button class="btn btn-sm btn-primary">${langPack.view}</button>
+                             ${g.status === appData[currentLanguage].status_map.Pending ? `<button class="btn btn-sm btn-neutral">${langPack.resolve}</button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            function populatePaymentTable() {
+                const tableBody = document.querySelector('#paymentTable tbody');
+                const data = appData[currentLanguage].payments;
+                const langPack = translations[currentLanguage];
+                tableBody.innerHTML = data.map(p => `
+                    <tr>
+                        <td>${p.user}</td>
+                        <td>${p.role}</td>
+                        <td>₹${p.amount.toLocaleString()}</td>
+                        <td>${p.date}</td>
+                        <td><span class="status-badge status-${getStatusClass(p.status)}">${p.status}</span></td>
+                        <td class="actions-cell">
+                            ${p.status === appData[currentLanguage].status_map.Pending ? `<button class="btn btn-sm btn-primary">${langPack.process}</button>` : `<button class="btn btn-sm btn-neutral" disabled>${langPack.paid}</button>`}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            function setupModals() {
+                document.getElementById('closeModal').addEventListener('click', () => document.getElementById('confirmationModal').classList.remove('active'));
+            }
+
+            function showConfirmationModal(titleKey, messageKey) {
+                const langPack = translations[currentLanguage];
+                document.getElementById('modalTitle').textContent = langPack[titleKey];
+                document.getElementById('modalMessage').textContent = langPack[messageKey];
+                document.getElementById('confirmationModal').classList.add('active');
+            }
+            
+            function updateUI(){
+                updateUIText();
+                populateUserTable();
+                populateGrievanceTable();
+                populatePaymentTable();
+            }
+
+            function initializeApp() {
+                setupNavigation();
+                setupThemeAndLanguage();
+                setupModals();
+                updateUI();
+                
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    showConfirmationModal("logged_out", "logged_out_message");
+                });
+            }
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
+

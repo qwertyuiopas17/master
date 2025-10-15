@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sehat Sahara - Pharmacy Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 
+        IMPORTANT: To enable the map feature, you need to replace 'YOUR_API_KEY' below 
+        with your own Google Maps JavaScript API key. 
+        You can get a key from the Google Cloud Platform Console.
+    -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer onerror="mapApiError()"></script>
+    <style>
+        :root {
+            --bg-color: rgba(245, 245, 245, 0.6);
+            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --text-color: #0f172a;
+            --text-color-secondary: #475569;
+            --primary-color: #16a34a; /* Pharmacy Green */
+            --primary-color-light: #4ade80;
+            --primary-color-dark: #15803d;
+            --sos-color: #ef4444;
+            --border-color: rgba(0, 0, 0, 0.07);
+            --shadow-color: rgba(100, 116, 139, 0.1);
+            --font-family: 'Poppins', sans-serif;
+            --color-secondary: #f1f5f9;
+            --radius-lg: 16px;
+            --color-alert: #f97316;
+            --color-new: #3b82f6;
+            --color-delivered: #22c55e;
+            --color-pending: #f59e0b;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: rgba(20, 20, 30, 0.75);
+            --card-bg-color: rgba(30, 41, 59, 0.6);
+            --text-color: #e2e8f0;
+            --text-color-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.12);
+            --primary-color: var(--primary-color-dark);
+            --color-secondary: #334155;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: var(--font-family); 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            line-height: 1.6; 
+            padding-bottom: 80px; /* Space for bottom nav */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .main-container { position: relative; min-height: 100vh; width: 100vw; }
+        .background-image { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-image: url('https://i.ibb.co/84XpXLXW/hero-pic.png'); 
+            background-size: cover; background-position: center; 
+            filter: blur(14px) brightness(0.9); 
+            transform: scale(1.15); z-index: -1; 
+            transition: filter 0.3s;
+        }
+        [data-theme="dark"] .background-image { filter: blur(14px) brightness(0.6); }
+
+        .page-content { flex-grow: 1; padding: 1rem; max-width: 1200px; margin: 0 auto; width: 100%; padding-top: 80px; }
+        
+        .header {
+            position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 2rem); max-width: 1200px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1.25rem; z-index: 1000;
+            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
+            border-radius: 999px;
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+        }
+        .header .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .header .actions { display: flex; align-items: center; gap: 0.75rem; }
+        
+        .top-nav { display: none; align-items: center; gap: 0.25rem; }
+        .top-nav a { text-decoration: none; color: var(--text-color-secondary); font-weight: 500; padding: 0.5rem 1.25rem; border-radius: 999px; transition: all 0.25s ease; position: relative; }
+        .top-nav a:hover { color: var(--text-color); background-color: rgba(128, 128, 128, 0.1); }
+        .top-nav a.active { color: var(--text-color); background-color: rgba(128, 128, 128, 0.15); }
+
+        .btn { padding: 0.6rem 1.2rem; border-radius: 9999px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.25s ease; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+        .btn-primary { background-color: var(--primary-color); color: white; border: 2px solid var(--primary-color); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 12px; }
+        .btn:disabled { background-color: var(--text-color-secondary); border-color: var(--text-color-secondary); opacity: 0.7; cursor: not-allowed; }
+        .btn:disabled:hover { transform: none; box-shadow: none; }
+
+        .card { 
+            background-color: var(--card-bg-color); border-radius: var(--radius-lg); 
+            padding: 1.5rem; border: 1px solid var(--border-color); 
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); 
+            box-shadow: 0 8px 32px 0 var(--shadow-color); transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 var(--shadow-color); }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .page-header { text-align: center; margin-bottom: 2rem; margin-top: 1rem; }
+        .page-header h1 { font-size: 2rem; }
+        .page-header p { color: var(--text-color-secondary); }
+
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; }
+        .info-card { cursor: pointer; transition: all 0.2s ease-in-out; }
+        .info-card h3 { font-size: 1rem; }
+        .info-card .highlight { font-size: 1.5rem; font-weight: 600; }
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+        .list-item:last-child { border-bottom: none; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: white; text-transform: capitalize; }
+        .status-new { background-color: var(--color-new); }
+        .status-pending { background-color: var(--color-pending); }
+        .status-delivered { background-color: var(--color-delivered); }
+        .alert-indicator { width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-alert); margin-right: 0.5rem; }
+
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-control { width: 100%; padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--color-secondary); color: var(--text-color); }
+        
+        #map { height: 400px; width: 100%; border-radius: var(--radius-lg); margin-top: 1.5rem; background-color: var(--color-secondary); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; background-color: var(--card-bg-color); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 -4px 20px var(--shadow-color); border-top: 1px solid var(--border-color); padding: 0.5rem 0; z-index: 1000; }
+        .nav-button { background: none; border: none; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-color-secondary); padding: 0.5rem 0; transition: color 0.2s ease; }
+        .nav-button.active { color: var(--primary-color); font-weight: 600; }
+        .nav-button svg { width: 24px; height: 24px; }
+        .nav-button span { font-size: 12px; }
+        
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+        .modal.active { display: flex; opacity: 1;}
+        .modal-content { background: var(--card-bg-color); border-radius: var(--radius-lg); padding: 2rem; max-width: 500px; width: calc(100% - 2rem); text-align: center; transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
+
+        .theme-toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            border-radius: 999px;
+            background-color: var(--color-secondary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            padding: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle-icon-container {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .theme-toggle-icon-container svg {
+            width: 14px;
+            height: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .sun-icon { color: #f59e0b; }
+        .moon-icon { color: #4f46e5; }
+
+        [data-theme="dark"] .theme-toggle {
+            background-color: #334155;
+        }
+
+        [data-theme="dark"] .theme-toggle .theme-toggle-icon-container {
+            transform: translateX(24px);
+            background-color: #1e293b;
+        }
+
+        [data-theme="dark"] body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        @media (min-width: 768px) { .bottom-nav { display: none; } .top-nav { display: flex; } }
+        @media (max-width: 767px) { 
+            .header { position: static; transform: none; width: 100%; border-radius: 0; padding: 1rem; } 
+            .page-content { padding-top: 1rem; } 
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="main-container">
+        <div class="background-image"></div>
+        <header class="header">
+            <div class="logo">City Pharmacy</div>
+            <nav class="top-nav">
+                <a href="#" class="active" data-screen="dashboardScreen">Dashboard</a>
+                <a href="#" data-screen="inventoryScreen">Inventory</a>
+                <a href="#" data-screen="ordersScreen">Orders</a>
+                <a href="#" data-screen="prescriptionsScreen">Prescriptions</a>
+                <a href="#" data-screen="profileScreen">Profile</a>
+            </nav>
+            <div class="actions">
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="theme-toggle-icon-container">
+                         <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </span>
+                </button>
+                 <button class="btn" id="logoutBtn" style="background-color: var(--text-color-secondary); color: white;">Logout</button>
+            </div>
+        </header>
+        <div class="page-content">
+            <main class="main">
+                <!-- Dashboard Screen -->
+                <section id="dashboardScreen" class="screen active">
+                    <div class="page-header"><h1>Dashboard</h1><p>Your daily summary and alerts.</p></div>
+                    <div class="info-grid">
+                        <div class="info-card card" data-screen="ordersScreen"><h3>New Orders</h3><p class="highlight">8</p></div>
+                        <div class="info-card card" data-screen="ordersScreen"><h3>Pending Deliveries</h3><p class="highlight">12</p></div>
+                        <div class="info-card card" data-screen="prescriptionsScreen"><h3>Prescriptions</h3><p class="highlight">5</p></div>
+                        <div class="info-card card" data-screen="inventoryScreen"><h3>Low Stock Alerts</h3><p class="highlight">3</p></div>
+                    </div>
+                    <div class="card">
+                        <h3>High Demand Alerts</h3>
+                        <div id="highDemandList"></div>
+                    </div>
+                    <div class="card">
+                        <h3>Recent Orders</h3>
+                        <div id="recentOrdersList"></div>
+                    </div>
+                </section>
+                
+                <!-- Inventory Management Screen -->
+                <section id="inventoryScreen" class="screen">
+                    <div class="page-header"><h1>Inventory Management</h1><p>Track and update your medicine stock.</p></div>
+                    <div class="card">
+                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Available Medicines</h3>
+                            <button class="btn btn-primary btn-sm add-new-medicine-btn">Add New</button>
+                        </div>
+                        <div id="inventoryList"></div>
+                    </div>
+                </section>
+
+                <!-- Order Management Screen -->
+                <section id="ordersScreen" class="screen">
+                    <div class="page-header"><h1>Order Management</h1><p>Manage and track home delivery requests.</p></div>
+                    <div class="card">
+                        <h3>Incoming Orders</h3>
+                        <div id="ordersList"></div>
+                    </div>
+                    <div class="card">
+                        <h3>Delivery Tracking</h3>
+                        <div id="map"></div>
+                    </div>
+                </section>
+
+                <!-- Digital Prescriptions Screen -->
+                <section id="prescriptionsScreen" class="screen">
+                    <div class="page-header"><h1>Digital Prescriptions</h1><p>View and manage prescriptions from doctors.</p></div>
+                    <div class="card">
+                         <h3>Received Prescriptions</h3>
+                        <div id="prescriptionsList"></div>
+                    </div>
+                </section>
+                
+                <!-- Profile Management Screen -->
+                <section id="profileScreen" class="screen">
+                    <div class="page-header"><h1>Pharmacy Profile</h1><p>Update your pharmacy's details.</p></div>
+                     <form class="card" id="profileForm">
+                        <div class="form-group">
+                            <label for="pharmacyName">Pharmacy Name</label>
+                            <input type="text" id="pharmacyName" class="form-control" value="City Pharmacy">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactNumber">Contact Number</label>
+                            <input type="tel" id="contactNumber" class="form-control" value="+91 98765 43210">
+                        </div>
+                         <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" class="form-control" rows="3">123 Health St, Wellness Colony, Kolkata, WB 700091</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="operatingHours">Operating Hours</label>
+                            <input type="text" id="operatingHours" class="form-control" value="9:00 AM - 10:00 PM">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+                    </form>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <nav class="bottom-nav">
+        <button class="nav-button active" data-screen="dashboardScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span>Dashboard</span></button>
+        <button class="nav-button" data-screen="inventoryScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h4"/><path d="m21.5 17-1.4-1.4A2 2 0 0 0 18.7 15H17v-2.3a2 2 0 0 0-.4-1.1l-1.5-2.1"/><path d="m6 6 4 4"/><path d="m10 6-4 4"/><path d="M12 20h4"/><path d="M14 18v4"/></svg><span>Inventory</span></button>
+        <button class="nav-button" data-screen="ordersScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg><span>Orders</span></button>
+        <button class="nav-button" data-screen="prescriptionsScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg><span>Prescriptions</span></button>
+        <button class="nav-button" data-screen="profileScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Profile</span></button>
+    </nav>
+    
+    <div id="appModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <div id="modalBody"></div>
+            <div id="modalFooter" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        // This is a global function that Google Maps API will call
+        function initMap() {
+            const kolkata = { lat: 22.5726, lng: 88.3639 };
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: kolkata,
+                styles: [ // Optional: Add a custom map style
+                    { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] }, { elementType: "labels.icon", stylers: [{ visibility: "off" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] }, { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] }, { featureType: "poi", elementType: "geometry", stylers: [{ color: "#eeeeee" }] }, { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] }, { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] }, { featureType: "road.arterial", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] }, { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#dadada" }] }, { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] }, { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] }, { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] }, { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#eeeeee" }] }, { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9c9c9" }] }, { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] }
+                ]
+            });
+             // Example delivery markers
+            const deliveryLocations = [
+                { lat: 22.5850, lng: 88.3426, title: "Order #1024" }, // Howrah
+                { lat: 22.5448, lng: 88.3426, title: "Order #1025" }, // Park Street Area
+                { lat: 22.6520, lng: 88.4382, title: "Order #1026" }  // Dum Dum
+            ];
+            deliveryLocations.forEach(loc => {
+                new google.maps.Marker({ position: loc, map: map, title: loc.title });
+            });
+        }
+
+        // Function to handle map API loading errors
+        function mapApiError() {
+            const mapDiv = document.getElementById("map");
+            if (mapDiv) {
+                mapDiv.innerHTML = `
+                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; padding: 1rem; background-color: var(--color-secondary); border-radius: var(--radius-lg);">
+                        <h3 style="color: var(--sos-color);">Could not load map</h3>
+                        <p style="color: var(--text-color-secondary); margin-top: 0.5rem;">
+                            Please replace "YOUR_API_KEY" with a valid Google Maps API key in the HTML file to enable map functionality.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            let appData = {
+                highDemand: ["Paracetamol 500mg", "Azithromycin 500mg", "Vitamin C Tablets"],
+                recentOrders: [ { id: 1024, customer: "Amit Kumar", status: "Pending" }, { id: 1023, customer: "Sunita Devi", status: "Delivered" }, { id: 1022, customer: "Rohan Bose", status: "Delivered" }, ],
+                inventory: [ { name: "Paracetamol 500mg", stock: 25 }, { name: "Aspirin 75mg", stock: 150 }, { name: "Cetirizine 10mg", stock: 80 }, { name: "Azithromycin 500mg", stock: 12 }, { name: "Vitamin C Tablets", stock: 45 }, ],
+                orders: [ { id: 1024, customer: "Amit Kumar", address: "Howrah, WB", status: "Pending"}, { id: 1025, customer: "Priya Sharma", address: "Park Street, Kolkata", status: "New"}, { id: 1026, customer: "Vikram Singh", address: "Salt Lake, Kolkata", status: "New"}, ],
+                prescriptions: [ { id: 501, patient: "Anjali Das", doctor: "Dr. R. Gupta" }, { id: 502, patient: "Sameer Khan", doctor: "Dr. S. Bannerjee" }, ]
+            };
+            
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                const targetScreen = document.getElementById(screenId);
+                if (targetScreen) {
+                    targetScreen.classList.add('active');
+                }
+                
+                document.querySelectorAll('.nav-button, .top-nav a').forEach(link => {
+                    link.classList.toggle('active', link.dataset.screen === screenId);
+                });
+            }
+            
+            function setupNavigation() {
+                document.body.addEventListener('click', e => {
+                    const target = e.target.closest('[data-screen]');
+                    if (target) {
+                        e.preventDefault();
+                        showScreen(target.dataset.screen);
+                    }
+                });
+            }
+
+            function setupTheme() {
+                const themeToggle = document.getElementById('themeToggle');
+                const themeIcon = document.getElementById('themeIcon');
+                
+                const sunIconPaths = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+                const moonIconPaths = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+
+                const updateIcon = (theme) => {
+                    if (theme === 'dark') {
+                        themeIcon.innerHTML = sunIconPaths;
+                        themeIcon.classList.remove('moon-icon');
+                        themeIcon.classList.add('sun-icon');
+                    } else {
+                        themeIcon.innerHTML = moonIconPaths;
+                        themeIcon.classList.remove('sun-icon');
+                        themeIcon.classList.add('moon-icon');
+                    }
+                };
+
+                themeToggle.addEventListener('click', () => {
+                    const currentTheme = document.body.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.body.setAttribute('data-theme', newTheme);
+                    updateIcon(newTheme);
+                });
+
+                // Set initial icon
+                updateIcon(document.body.getAttribute('data-theme') || 'light');
+            }
+            
+            function showModal(title, body, footer) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalBody').innerHTML = body;
+                const modalFooter = document.getElementById('modalFooter');
+                if (footer) {
+                    modalFooter.innerHTML = footer;
+                    modalFooter.style.display = 'flex';
+                } else {
+                    modalFooter.style.display = 'none';
+                }
+                document.getElementById('appModal').classList.add('active');
+            }
+
+            function hideModal() {
+                document.getElementById('appModal').classList.remove('active');
+            }
+
+            function renderDashboard() {
+                const highDemandContainer = document.getElementById('highDemandList');
+                highDemandContainer.innerHTML = appData.highDemand.map(item => `
+                    <div class="list-item">
+                        <div style="display: flex; align-items: center;"><span class="alert-indicator"></span> ${item}</div>
+                        <button class="btn btn-primary btn-sm" data-screen="inventoryScreen">Check Stock</button>
+                    </div>`).join('');
+
+                const recentOrdersContainer = document.getElementById('recentOrdersList');
+                recentOrdersContainer.innerHTML = appData.recentOrders.map(order => `
+                    <div class="list-item">
+                        <div><strong>Order #${order.id}</strong> - ${order.customer}</div>
+                        <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                    </div>`).join('');
+            }
+
+            function renderInventory() {
+                const container = document.getElementById('inventoryList');
+                container.innerHTML = appData.inventory.map(item => `
+                    <div class="list-item">
+                        <div>
+                           <strong>${item.name}</strong><br>
+                           <small>Stock: <span style="${item.stock < 30 ? 'color: var(--color-alert); font-weight: 600;' : ''}">${item.stock}</span> units</small>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                           <input type="number" value="${item.stock}" class="form-control" style="width: 80px;">
+                           <button class="btn btn-primary btn-sm update-stock-btn" data-name="${item.name}">Update</button>
+                        </div>
+                    </div>`).join('');
+            }
+
+            function renderOrders() {
+                const container = document.getElementById('ordersList');
+                 container.innerHTML = appData.orders.map(order => {
+                     let buttonHtml = `<button class="btn btn-primary btn-sm accept-order-btn" data-id="${order.id}">Accept</button>`;
+                     if (order.status !== 'New') {
+                         buttonHtml = `<button class="btn btn-sm" disabled>Accepted</button>`;
+                     }
+                     return `
+                        <div class="list-item">
+                            <div><strong>Order #${order.id}</strong> - ${order.customer}<br><small>${order.address}</small></div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                 <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                                 ${buttonHtml}
+                            </div>
+                        </div>`;
+                 }).join('');
+            }
+
+            function renderPrescriptions() {
+                const container = document.getElementById('prescriptionsList');
+                 container.innerHTML = appData.prescriptions.map(p => `
+                    <div class="list-item">
+                        <div><strong>Patient: ${p.patient}</strong><br><small>From: ${p.doctor}</small></div>
+                        <button class="btn btn-primary btn-sm view-prescription-btn" data-id="${p.id}">View & Process</button>
+                    </div>`).join('');
+            }
+
+            function setupEventListeners() {
+                document.body.addEventListener('click', function(e) {
+                    if (e.target.matches('.update-stock-btn')) {
+                        const medicineName = e.target.dataset.name;
+                        const input = e.target.previousElementSibling;
+                        const newStock = parseInt(input.value, 10);
+                        const medicine = appData.inventory.find(m => m.name === medicineName);
+                        if (medicine && !isNaN(newStock) && newStock >= 0) {
+                            medicine.stock = newStock;
+                            renderInventory();
+                            showModal('Inventory Updated', `<p>Stock for <strong>${medicineName}</strong> updated.</p>`, `<button class="btn btn-primary modal-close-btn">OK</button>`);
+                        }
+                    }
+                    if (e.target.matches('.add-new-medicine-btn')) {
+                        const modalBody = `<form id="addMedicineForm" style="text-align: left;"><div class="form-group"><label for="medicineName">Medicine Name</label><input type="text" id="medicineNameInput" class="form-control" required></div><div class="form-group"><label for="medicineStock">Initial Stock</label><input type="number" id="medicineStockInput" class="form-control" required></div></form>`;
+                        const modalFooter = `<button class="btn modal-close-btn" style="background-color: var(--text-color-secondary); color: white;">Cancel</button><button class="btn btn-primary" id="confirmAddMedicine">Add</button>`;
+                        showModal('Add New Medicine', modalBody, modalFooter);
+                    }
+                     if (e.target.matches('.accept-order-btn')) {
+                        const orderId = parseInt(e.target.dataset.id, 10);
+                        const order = appData.orders.find(o => o.id === orderId);
+                        if (order) {
+                            order.status = 'Pending';
+                            renderOrders();
+                        }
+                    }
+                    if (e.target.matches('.view-prescription-btn')) {
+                        const pId = parseInt(e.target.dataset.id, 10);
+                        const p = appData.prescriptions.find(pr => pr.id === pId);
+                        if (p) {
+                            const body = `<div style="text-align: left;"><p><strong>Patient:</strong> ${p.patient}</p><p><strong>Doctor:</strong> ${p.doctor}</p><hr style="margin: 1rem 0; border-color: var(--border-color);"><p><strong>Medicines:</strong></p><ul><li>Paracetamol 500mg - 1 strip</li><li>Azithromycin 500mg - 1 strip</li></ul></div>`;
+                            showModal(`Prescription #${p.id}`, body, `<button class="btn btn-primary modal-close-btn">Process Order</button>`);
+                        }
+                    }
+                    if (e.target.id === 'confirmAddMedicine') {
+                        const name = document.getElementById('medicineNameInput').value;
+                        const stock = parseInt(document.getElementById('medicineStockInput').value, 10);
+                        if (name && !isNaN(stock) && stock >= 0) {
+                            appData.inventory.unshift({ name, stock });
+                            renderInventory();
+                            hideModal();
+                        } else {
+                            alert("Please fill out all fields correctly.");
+                        }
+                    }
+                    if (e.target.matches('.modal-close-btn')) {
+                        hideModal();
+                    }
+                });
+
+                document.getElementById('profileForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    showModal('Profile Saved', '<p>Your profile details have been updated successfully.</p>', '<button class="btn btn-primary modal-close-btn">OK</button>');
+                });
+                
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                     showModal('Logout', '<p>Are you sure you want to log out?</p>', `<button class="btn" onclick="alert('Logged out!')" style="background-color: var(--sos-color); color: white;">Yes, Logout</button><button class="btn modal-close-btn" style="background-color: var(--text-color-secondary); color: white;">Cancel</button>`);
+                });
+            }
+
+            function initializeApp() {
+                setupNavigation();
+                setupTheme();
+                renderDashboard();
+                renderInventory();
+                renderOrders();
+                renderPrescriptions();
+                setupEventListeners();
+            }
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
+
+

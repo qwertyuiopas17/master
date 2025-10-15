@@ -1,0 +1,1290 @@
+<!-- line 708 for admin,doc,saathi,pharmachy id pass -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <title>SAHARA SAATHI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+
+
+ <meta name="theme-color" content="#21808D">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+
+
+
+    <style>
+        :root {
+         /* Primitive Color Tokens */
+         --color-white: rgba(255, 255, 255, 1);
+         --color-black: rgba(0, 0, 0, 1);
+         --color-cream-50: rgba(252, 252, 249, 1);
+         --color-cream-100: rgba(255, 255, 253, 1);
+         --color-gray-200: rgba(245, 245, 245, 1);
+         --color-gray-300: rgba(167, 169, 169, 1);
+         --color-gray-400: rgba(119, 124, 124, 1);
+         --color-slate-500: rgba(98, 108, 113, 1);
+         --color-brown-600: rgba(94, 82, 64, 1);
+         --color-charcoal-700: rgba(31, 33, 33, 1);
+         --color-charcoal-800: rgba(38, 40, 40, 1);
+         --color-slate-900: rgba(19, 52, 59, 1);
+         --color-teal-300: rgba(50, 184, 198, 1);
+         --color-teal-400: rgba(45, 166, 178, 1);
+         --color-teal-500: rgba(33, 128, 141, 1);
+         --color-teal-600: rgba(29, 116, 128, 1);
+         --color-teal-700: rgba(26, 104, 115, 1);
+         --color-teal-800: rgba(41, 150, 161, 1);
+         --color-red-400: rgba(255, 84, 89, 1);
+         --color-red-500: rgba(192, 21, 47, 1);
+         --color-orange-400: rgba(230, 129, 97, 1);
+         --color-orange-500: rgba(168, 75, 47, 1);
+
+         /* RGB versions for opacity control */
+         --color-brown-600-rgb: 94, 82, 64;
+         --color-teal-500-rgb: 33, 128, 141;
+         --color-slate-900-rgb: 19, 52, 59;
+         --color-slate-500-rgb: 98, 108, 113;
+         --color-red-500-rgb: 192, 21, 47;
+         --color-red-400-rgb: 255, 84, 89;
+         --color-orange-500-rgb: 168, 75, 47;
+         --color-orange-400-rgb: 230, 129, 97;
+
+         /* Background color tokens (Light Mode) */
+         --color-bg-1: rgba(59, 130, 246, 0.08);
+         --color-bg-4: rgba(239, 68, 68, 0.08);
+
+         /* Semantic Color Tokens (Light Mode) */
+         --color-background: var(--color-cream-50);
+         --color-surface: var(--color-cream-100);
+         --color-text: var(--color-slate-900);
+         --color-text-secondary: var(--color-slate-500);
+         --color-primary: var(--color-teal-500);
+         --color-primary-hover: var(--color-teal-600);
+         --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+         --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+         --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+         --color-success: var(--color-teal-500);
+         --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+
+         /* Common style patterns */
+         --focus-ring: 0 0 0 3px var(--color-focus-ring);
+         --focus-outline: 2px solid var(--color-primary);
+         --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+         /* Typography */
+         --font-family-base: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         --font-size-base: 14px;
+         --font-size-md: 14px;
+         --font-size-lg: 16px;
+         --font-size-xl: 18px;
+         --font-size-2xl: 20px;
+         --font-size-3xl: 24px;
+         --font-weight-medium: 500;
+         --font-weight-semibold: 600;
+         --font-weight-bold: 700;
+         --line-height-tight: 1.2;
+         --line-height-normal: 1.5;
+         --letter-spacing-tight: -0.01em;
+
+         /* Spacing */
+         --space-8: 8px;
+         --space-12: 12px;
+         --space-16: 16px;
+         --space-24: 24px;
+         --space-32: 32px;
+
+         /* Border Radius */
+         --radius-sm: 6px;
+         --radius-base: 8px;
+         --radius-md: 10px;
+         --radius-lg: 12px;
+         --radius-full: 9999px;
+
+         /* Shadows */
+         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04),
+           0 4px 6px -2px rgba(0, 0, 0, 0.02);
+
+         /* Animation */
+         --duration-fast: 150ms;
+         --duration-normal: 250ms;
+         --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+         /* Layout */
+         --container-xl: 1280px;
+        }
+
+        /* Base styles */
+        html {
+         font-family: var(--font-family-base);
+         line-height: var(--line-height-normal);
+         color: var(--color-text);
+         background-color: var(--color-background);
+         -webkit-font-smoothing: antialiased;
+         box-sizing: border-box;
+        }
+
+        body {
+         margin: 0;
+         padding: 0;
+         display: flex;
+         flex-direction: column;
+         min-height: 100vh;
+         background: linear-gradient(to right, #cffafe, #93c5fd, #818cf8);
+         scroll-behavior: smooth;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        *,
+        *::before,
+        *::after {
+         box-sizing: inherit;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+         margin: 0;
+         font-weight: var(--font-weight-bold);
+         line-height: var(--line-height-tight);
+         color: var(--color-text);
+         letter-spacing: var(--letter-spacing-tight);
+        }
+
+        h1 { font-size: 3rem; font-weight: 800; }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+        p { margin: 0 0 var(--space-16) 0; }
+        a { color: var(--color-primary); text-decoration: none; transition: color var(--duration-fast) var(--ease-standard); }
+        a:hover { color: var(--color-primary-hover); }
+
+        /* Buttons */
+        .btn {
+         display: inline-flex;
+         align-items: center;
+         justify-content: center;
+         padding: var(--space-8) var(--space-16);
+         border-radius: var(--radius-full);
+         font-size: var(--font-size-base);
+         font-weight: var(--font-weight-bold);
+         line-height: 1.5;
+         cursor: pointer;
+         transition: all var(--duration-normal) var(--ease-standard);
+         border: none;
+         text-decoration: none;
+         position: relative;
+        }
+
+        .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+        .btn--primary { background: var(--color-teal-700); color: var(--color-white); }
+        .btn--primary:hover { background: var(--color-teal-600); }
+        .btn--lg { padding: var(--space-12) var(--space-24); font-size: var(--font-size-lg); }
+        .btn--full-width { width: 100%; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Form elements */
+        .form-control {
+         display: block;
+         width: 100%;
+         padding: var(--space-8) var(--space-12);
+         font-size: var(--font-size-md);
+         line-height: 1.5;
+         color: var(--color-text);
+         background-color: var(--color-surface);
+         border: 1px solid var(--color-border);
+         border-radius: var(--radius-base);
+         transition: border-color var(--duration-fast) var(--ease-standard),
+           box-shadow var(--duration-fast) var(--ease-standard);
+        }
+
+        select.form-control {
+         -webkit-appearance: none;
+         -moz-appearance: none;
+         appearance: none;
+         background-image: var(--select-caret-light);
+         background-repeat: no-repeat;
+         background-position: right var(--space-12) center;
+         background-size: 16px;
+         padding-right: var(--space-32);
+        }
+
+        .form-control:focus { border-color: var(--color-primary); outline: var(--focus-outline); }
+        .form-group { margin-bottom: var(--space-16); }
+
+        /* Container layout */
+        .container {
+         width: 100%;
+         margin-right: auto;
+         margin-left: auto;
+         padding-right: var(--space-16);
+         padding-left: var(--space-16);
+         max-width: var(--container-xl);
+        }
+
+        /* Header and Navigation */
+        .header {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: var(--space-24); max-width: var(--container-xl); margin: 0 auto; }
+        .nav__left { display: flex; align-items: center; gap: var(--space-24); }
+        .nav__right { display: flex; align-items: center; gap: var(--space-24); margin-left: 20px; }
+        .hamburger { display: none; background: transparent; border: none; color: var(--color-white); font-size: 1.5rem; cursor: pointer; }
+        .mobile-menu { display: flex; align-items: center; gap: var(--space-24); }
+        .mobile-menu.open { display: flex; }
+        .nav__brand h2 {
+            margin: 0;
+            color: var(--color-white);
+            font-size: 1.875rem;
+            font-weight: 800;
+        }
+        .nav__left a, .nav__right button, .nav__left .language-dropdown-toggle {
+            background: transparent;
+            border: none;
+            color: var(--color-white);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            padding: var(--space-8);
+            text-decoration: none;
+        }
+        .nav__left .btn:hover, .nav__right .btn:hover, .nav__left a:hover {
+             opacity: 0.8;
+        }
+        .nav__right #registerBtn {
+             background: #10B981;
+             border-radius: var(--radius-md);
+             padding: var(--space-8) var(--space-16);
+        }
+        .nav__right #registerBtn:hover {
+            background: #059669;
+            opacity: 1;
+        }
+
+        /* Language Dropdown */
+        .language-dropdown { position: relative; display: inline-block; }
+        .language-dropdown-toggle {
+            cursor: pointer;
+            gap: 8px;
+            background: transparent;
+            border: none;
+            color: var(--color-white);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            padding: var(--space-8);
+            display: flex;
+            align-items: center;
+        }
+        .language-dropdown-toggle svg { stroke: var(--color-white); transition: transform var(--duration-normal) ease; }
+        .language-dropdown.open .language-dropdown-toggle svg { transform: rotate(180deg); }
+        .language-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            min-width: 150px;
+            border-radius: var(--radius-md);
+            padding: var(--space-8);
+            background: rgba(10, 10, 10, 0.4);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            max-height: 150px;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+        }
+        .language-dropdown.open .language-dropdown-menu { display: block; opacity: 1; transform: translateY(0); }
+        .language-option {
+            display: block;
+            padding: var(--space-8) var(--space-12);
+            color: var(--color-white);
+            font-size: var(--font-size-md);
+            border-radius: var(--radius-sm);
+            transition: background-color var(--duration-fast) ease;
+            cursor: pointer;
+        }
+        .language-option:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .language-dropdown-menu::-webkit-scrollbar { width: 6px; }
+        .language-dropdown-menu::-webkit-scrollbar-track { background: transparent; }
+        .language-dropdown-menu::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+
+        /* Main Layout */
+        .main { flex: 1; }
+        .screen { display: none; padding: 120px var(--space-32) var(--space-32); animation: fadeIn 0.5s ease-in-out; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Generic Modal Styles */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-32); max-width: 400px; width: 90%; text-align: center; animation: scaleUp 0.3s; }
+        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0;} to { transform: scale(1); opacity: 1;} }
+        .modal-content h3 { color: var(--color-success); margin-bottom: var(--space-16); }
+        .student-id-display { background-color: var(--color-secondary); padding: var(--space-12); border-radius: var(--radius-base); font-weight: var(--font-weight-bold); font-size: var(--font-size-lg); margin: var(--space-16) 0; color: var(--color-primary); }
+
+
+        /* Landing Page Styles */
+        .hero-section {
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            position: relative;
+            background-image: url('https://i.ibb.co/zW18gfpW/Gemini-Generated-Image-shhc0shhc0shhc0s.png');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+        .hero-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1; }
+        .hero-section .container {
+            position: relative;
+            z-index: 2;
+            padding-bottom: 3rem;
+        }
+        .hero-section .welcome-title { background: linear-gradient(to bottom, #ffffff, #EAEAEA); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 4rem; }
+        .hero-section .welcome-subtitle { color: rgba(255,255,255,0.9); max-width: 600px; font-size: 1.5rem; }
+        .hero-section .container { max-width: 1400px; padding-left: var(--space-8); }
+        .nav__right button { font-size: var(--font-size-xl); padding: var(--space-12) var(--space-32); }
+        #landingView { padding-top: 0; }
+        .section { padding: 80px var(--space-16); }
+        .section--grey { background-color: rgba(240, 244, 248, 0.8); backdrop-filter: blur(10px); }
+        .section-title { text-align: center; margin-bottom: var(--space-32); font-size: var(--font-size-3xl); }
+        .section-subtitle { text-align: center; max-width: 700px; margin: 0 auto var(--space-32); color: var(--color-text-secondary); font-size: var(--font-size-lg); }
+
+        /* Testimonials Section */
+        .testimonials-viewport { position: relative; width: 100%; padding: 20px 0; margin: 0 auto; overflow: hidden; }
+        .testimonials-grid { position: relative; display: flex; align-items: center; gap: var(--space-24); transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .testimonial-card { background-color: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-24); border: 1px solid var(--color-card-border); width: 320px; flex-shrink: 0; transform: scale(0.9); opacity: 0.7; transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out, opacity 0.5s ease-in-out; }
+        .testimonial-card.active { border-color: var(--color-primary); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); transform: scale(1.05); opacity: 1; }
+        .testimonial-nav { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.8); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 28px; z-index: 10; }
+        .testimonial-nav.prev { left: 10px; }
+        .testimonial-nav.next { right: 10px; }
+        .testimonial-author-desc { display: block; margin-top: 8px; font-style: italic; } /* For testimonial author and description */
+
+
+        /* CTA Section */
+        .cta-section { text-align: center; background: linear-gradient(135deg, var(--color-primary), var(--color-teal-700)); color: var(--color-white); border-radius: var(--radius-lg); padding: var(--space-32); }
+        .cta-section h2, .cta-section p { color: var(--color-white); }
+
+        /* Features Section */
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-24); }
+        .feature-card { background: var(--color-surface); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); padding: var(--space-24); text-align: left; transition: all var(--duration-normal) var(--ease-standard); }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--color-primary); }
+        .feature-icon { height: 48px; width: 48px; margin-bottom: var(--space-16); background-color: var(--color-secondary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; }
+
+        /* Fade-in Animation */
+        .fade-in-element { opacity: 0; transform: translateY(25px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in-element.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* Footer */
+        .footer { background-color: var(--color-charcoal-800); color: var(--color-gray-300); padding: var(--space-24) var(--space-16); }
+        .footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-24); text-align: left; max-width: var(--container-xl); margin: 0 auto; }
+        .footer-section h4 { color: var(--color-white); margin-bottom: var(--space-16); font-size: var(--font-size-lg); }
+        .footer-section p, .footer-section ul { margin: 0; padding: 0; list-style: none; font-size: var(--font-size-base); }
+        .footer-section ul li { margin-bottom: var(--space-8); }
+        .footer-section a { color: var(--color-gray-300); }
+        .footer-section a:hover { color: var(--color-white); }
+        .footer #feedbackText { background-color: var(--color-charcoal-700); color: var(--color-gray-200); border-color: var(--color-slate-500); resize: vertical; }
+        .footer-copyright { text-align: center; padding-bottom: var(--space-16); margin-bottom: var(--space-16); border-bottom: 1px solid var(--color-slate-500); }
+        .footer-copyright p { margin: 0; }
+
+        /* Auth Modal */
+        .card {
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center;
+            justify-content: center; z-index: 2000; backdrop-filter: blur(5px);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .auth-modal.active { opacity: 1; visibility: visible; }
+        .auth-container { width: 100%; max-width: 450px; padding: 1rem; }
+        .auth-modal .card { position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 2rem; color: var(--color-text); cursor: pointer; z-index: 1001; }
+        .auth-modal .card { padding: 2rem; max-height: 90vh; overflow-y: auto; }
+        .auth-modal .card::-webkit-scrollbar { width: 12px; }
+        .auth-modal .card::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: var(--radius-base); }
+        .auth-modal .card::-webkit-scrollbar-thumb { background-color: var(--color-slate-500); border-radius: var(--radius-full); border: 3px solid transparent; background-clip: content-box; }
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .auth-header h1 { font-size: 2rem; color: var(--color-primary); }
+        .auth-header p { color: var(--color-text-secondary); }
+        .auth-modal .form-group { margin-bottom: 1.25rem; }
+        .auth-modal .form-control:focus { border-color: var(--color-primary); box-shadow: var(--focus-ring); outline: none; }
+        .auth-switch { text-align: center; margin-top: 1.5rem; }
+        .auth-switch a { color: var(--color-primary); font-weight: 600; cursor: pointer; text-decoration: none; }
+        .auth-switch a:hover { text-decoration: underline; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .nav {
+                padding: var(--space-12) var(--space-16);
+            }
+            .hamburger {
+                display: block;
+            }
+            .mobile-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                align-items: flex-start;
+                padding: var(--space-16);
+                gap: var(--space-12);
+                z-index: 1000;
+                border-radius: var(--radius-lg);
+            }
+            .mobile-menu.open {
+                display: flex;
+            }
+            .mobile-menu .language-dropdown {
+                position: relative;
+            }
+            .mobile-menu .language-dropdown-menu {
+                left: 0;
+                right: auto;
+            }
+            .language-dropdown-menu::-webkit-scrollbar,
+            ::-webkit-scrollbar {
+                display: none;
+            }
+            .nav__brand h2 {
+                font-size: 1.25rem;
+            }
+            .nav__right button {
+                font-size: var(--font-size-sm);
+                padding: var(--space-6) var(--space-10);
+            }
+            .language-dropdown-toggle {
+                padding: var(--space-6);
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+            .hero-section .welcome-subtitle {
+                font-size: var(--font-size-base);
+                max-width: none;
+            }
+            .hero-section .container {
+                padding-bottom: 2rem;
+            }
+            .section {
+                padding: 60px var(--space-16);
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .testimonial-card {
+                width: 280px;
+            }
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+            .cta-section {
+                padding: var(--space-24);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__left">
+                <button class="hamburger" id="hamburgerBtn">☰</button>
+                <div class="mobile-menu" id="mobileMenu">
+                    <div class="nav__brand" style="cursor: pointer;" onclick="document.getElementById('landingView').scrollIntoView();">
+                        <h2 data-key="sahara_logo">SAHARA SAATHI</h2>
+                    </div>
+                    <a href="#footer" id="contactBtn" class="btn" data-key="contact">Contact</a>
+                    <div class="language-dropdown">
+                        <button class="language-dropdown-toggle">
+                            <span id="selectedLanguage">English</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="language-dropdown-menu">
+                            <a class="language-option" data-lang="en">English</a>
+                            <a class="language-option" data-lang="hi">हिंदी</a>
+                            <a class="language-option" data-lang="pa">ਪੰਜਾਬੀ</a>
+                            <a class="language-option" data-lang="as">Assamese</a>
+                            <a class="language-option" data-lang="bn">Bengali</a>
+                            <a class="language-option" data-lang="gu">Gujarati</a>
+                            <a class="language-option" data-lang="kn">Kannada</a>
+                            <a class="language-option" data-lang="ml">Malayalam</a>
+                            <a class="language-option" data-lang="mr">Marathi</a>
+                            <a class="language-option" data-lang="or">Odia</a>
+                            <a class="language-option" data-lang="ta">Tamil</a>
+                            <a class="language-option" data-lang="te">Telugu</a>
+                        </div>
+                    </div>
+                    <button class="btn" id="installPwaBtnMobile" style="display: none;">Install App</button>
+                </div>
+            </div>
+            <div class="nav__right">
+                <button class="btn" id="loginBtn" data-key="login">Login</button>
+                <button class="btn" id="registerBtn" data-key="register">Register</button>
+  <button class="btn" id="installPwaBtn" style="display: none; background-color: #10B981;">Install App</button>         
+            </div>
+        </nav>
+    </header>
+
+    <main class="main">
+        <div id="landingView">
+            <section class="hero-section">
+                <div class="container">
+                    <h1 class="welcome-title" data-key="welcome_title">MAKING HEALTCARE ACCESSIBLE FOR ALL</h1>
+                    <p class="welcome-subtitle" data-key="welcome_subtitle">Understand your mental health, get support, and find resources tailored for you. Your journey to wellness starts here.</p>
+                    <div style="margin: 2rem 0; text-align: center;">
+                        <a href="read_me.html" target="_blank" style="display: inline-block; font-size: 1.5rem; font-weight: bold; color: #ffffff; background: rgba(255, 255, 255, 0.2); padding: 1rem 2rem; border-radius: 12px; text-decoration: none; border: 2px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease; backdrop-filter: blur(10px);">READ BEFORE USING</a>
+                    </div>
+                    <div class="hero-cta" style="margin-top: 2rem;">
+                        <button class="btn btn--primary btn--lg" id="getStartedBtn" data-key="get_started">Get Started Today</button>
+                    </div>
+                </div>
+            </section>
+
+         <section id="features" class="section">
+    <div class="container">
+        <h2 class="section-title fade-in-element" data-key="features_title">A Comprehensive Telemedical Health Ecosystem</h2>
+        <p class="section-subtitle fade-in-element" data-key="features_subtitle">Our platform connects patients, doctors, and pharmacies to deliver accessible and efficient healthcare to every corner of India, from cities to remote villages.</p>
+        <div class="feature-grid">
+            <div class="feature-card fade-in-element">
+                <div class="feature-icon" style="color: #60a5fa;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                </div>
+                <h3 data-key="feature1_title">For Patients & Families</h3>
+                <p data-key="feature1_text">Instantly book consultations, access your complete medical history via QR code, and find nearby pharmacies with available medicines.</p>
+            </div>
+            <div class="feature-card fade-in-element">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"></path><path d="M12 21.05c-1.5 0-2.75-1.06-4-1.06-3 0-6 8-6 12.22A4.91 4.91 0 0 1 7 17c2.22 0 4-1.44 5-2 1 .56 2.78 2 5 2a4.9 4.9 0 0 1 5-4.78C22 10 19 2 16 2c-1.25 0-2.5 1.06-4 1.06z"></path></svg>
+                </div>
+                <h3 data-key="feature2_title">For Doctors & Clinics</h3>
+                <p data-key="feature2_text">Receive AI-powered patient summaries before consultations, issue digital prescriptions, and manage your appointments from a single, secure dashboard.</p>
+            </div>
+            <div class="feature-card fade-in-element">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v15H6.5A2.5 2.5 0 0 1 4 14.5V4.5A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <h3 data-key="feature3_title">For the Community</h3>
+                <p data-key="feature3_text">Empowering local 'Sehat Saathis' to assist their communities and helping local pharmacies manage inventory and fulfill digital prescriptions.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section--grey">
+    <div class="container">
+        <h2 class="section-title fade-in-element" data-key="testimonials_title">Trusted by Communities Across India</h2>
+        <div class="testimonials-viewport fade-in-element">
+            <div class="testimonials-grid">
+                 <div class="testimonial-card">
+                    <p data-key="testimonial1_text">"My father in our village can now see a specialist in the city without traveling. The local Sehat Saathi helped us set it all up."</p>
+                    <div><strong data-key="testimonial1_author">Rakesh V.</strong><span class="testimonial-author-desc" data-key="testimonial1_desc">Son of a Patient</span></div>
+                 </div>
+                <div class="testimonial-card">
+                    <p data-key="testimonial2_text">"The AI summaries save me critical time before each consultation. This platform allows me to serve patients far beyond my clinic's physical reach effectively."</p>
+                    <div><strong data-key="testimonial2_author">Dr. Anjali Desai</strong><span class="testimonial-author-desc" data-key="testimonial2_desc">General Physician</span></div>
+                </div>
+                <div class="testimonial-card">
+                    <p data-key="testimonial3_text">"Being a Sehat Saathi is so rewarding. I'm helping my neighbours get medical attention and earning an income. The work feels truly important."</p>
+                    <div><strong data-key="testimonial3_author">Sunita K.</strong><span class="testimonial-author-desc" data-key="testimonial3_desc">Sehat Saathi</span></div>
+                </div>
+            </div>
+            <button id="testimonial-prev" class="testimonial-nav prev">&lt;</button>
+            <button id="testimonial-next" class="testimonial-nav next">&gt;</button>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+     <div class="container">
+           <div class="cta-section fade-in-element">
+                 <h2 data-key="cta_title">Ready to Join India's Health Revolution?</h2>
+                 <p data-key="cta_subtitle">Become part of a growing ecosystem of patients, doctors, and health workers building a healthier future for everyone, everywhere. It's simple and secure.</p>
+                 <button class="btn btn--primary btn--lg" id="finalCtaBtn" data-key="cta_button">Get Started</button>
+           </div>
+     </div>
+</section>
+</div>
+
+
+        <footer class="footer" id="footer">
+            <div class="container">
+                <div class="footer-copyright">
+                     <p data-key="footer_copyright">&copy; 2024 SAHARA. A concept for Smart India Hackathon. All Rights Reserved.</p>
+                </div>
+                <div class="footer-container">
+                    <div class="footer-section">
+                        <h4 data-key="footer_about_title">About SAHARA</h4>
+                        <p data-key="footer_about_text">Our mission is to provide accessible and anonymous mental wellness support for students across India. We believe in creating a safe space for everyone to start their journey towards a healthier mind.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4 data-key="footer_links_title">Quick Links</h4>
+                        <ul>
+                            <li><a href="#" data-key="footer_link_about">About Us</a></li>
+                            <li><a href="#" data-key="footer_link_privacy">Privacy Policy</a></li>
+                            <li><a href="#" data-key="footer_link_terms">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4 data-key="footer_feedback_title">Feedback</h4>
+                        <form id="feedbackForm">
+                            <textarea id="feedbackText" class="form-control" placeholder="Your feedback..." rows="3" data-key-placeholder="footer_feedback_placeholder"></textarea>
+                            <button type="submit" class="btn btn--primary" style="margin-top: 8px;" data-key="footer_feedback_button">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-container">
+            <!-- Login Screen -->
+            <section id="loginScreen" class="screen">
+                <div class="card">
+                    <button class="close-btn" id="closeAuthModal">&times;</button>
+                    <div class="auth-header">
+                        <h1 data-key="login_welcome">Welcome Back!</h1>
+                        <p data-key="login_prompt">Login to your Sahara Saathi account.</p>
+                    </div>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginUsername" data-key="label_username">Username / Email / Patient ID</label>
+                            <input type="text" id="loginUsername" class="form-control" required autocomplete="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginRole" data-key="label_role">Role</label>
+                            <select id="loginRole" class="form-control" required>
+                                <option value="patient" data-key="role_patient">Patient</option>
+                                <option value="doctor" data-key="role_doctor">Doctor</option>
+                                <option value="admin" data-key="role_admin">Admin</option>
+                                <option value="saathi" data-key="role_saathi">Saathi</option>
+                                <option value="store" data-key="role_store">Store</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword" data-key="label_password">Password</label>
+                            <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn--primary" style="width: 100%;" data-key="login_button">Login</button>
+                    </form>
+                    <div class="auth-switch">
+                        <p><span data-key="login_switch_prompt">Don't have an account?</span> <a class="switch-link" data-screen="registerScreen" data-key="login_switch_link">Register here</a></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Registration Screen -->
+            <section id="registerScreen" class="screen">
+                <div class="card">
+                    <button class="close-btn" id="closeAuthModalRegister">&times;</button>
+                    <div class="auth-header">
+                        <h1 data-key="register_title">Create Account</h1>
+                        <p data-key="register_prompt">Join Sahara Saathi to manage your health.</p>
+                    </div>
+                    <form id="registrationForm">
+                        <div id="dynamic-form-fields"></div>
+                        <button type="submit" class="btn btn--primary" style="width: 100%;" data-key="register_button">Register</button>
+                    </form>
+                    <div class="auth-switch">
+                        <p><span data-key="register_switch_prompt">Already have an account?</span> <a class="switch-link" data-screen="loginScreen" data-key="register_switch_link">Login here</a></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <h3 id="successModalTitle" data-key="success_title">Registration Successful!</h3>
+            <p id="successModalMessage" data-key="success_message">Your account has been created.</p>
+            <div id="usernameDisplay" class="student-id-display" style="text-align: center; margin-bottom: 1rem;"></div>
+            <button id="proceedToLoginBtn" class="btn btn--primary btn--full-width" data-key="proceed_to_login">Proceed to Login</button>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const API_BASE_URL = 'https://sahara-sathi.onrender.com/v1';
+
+        // --- DOM Elements ---
+        const authModal = document.getElementById('authModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const finalCtaBtn = document.getElementById('finalCtaBtn');
+        const dynamicFormContainer = document.getElementById('dynamic-form-fields');
+        const loginForm = document.getElementById('loginForm');
+        const registrationForm = document.getElementById('registrationForm');
+        const successModal = document.getElementById('successModal');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const proceedToLoginBtn = document.getElementById('proceedToLoginBtn');
+        const successModalMessage = document.getElementById('successModalMessage');
+
+        // --- App State ---
+        let registrationData = {};
+        let currentLanguage = 'en';
+
+        // --- Helper Functions ---
+        const showAuthScreen = (screenId) => {
+            authModal.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const screen = document.getElementById(screenId);
+            if (screen) {
+                screen.classList.add('active');
+                if (screenId === 'registerScreen') {
+                    generateFormFields('patient');
+                }
+            }
+        };
+
+        const openModal = (screenId) => {
+            document.body.classList.add('modal-open');
+            authModal.classList.add('active');
+            showAuthScreen(screenId);
+        };
+
+        const closeModal = () => {
+            document.body.classList.remove('modal-open');
+            authModal.classList.remove('active');
+        };
+
+        const showApiError = (message) => {
+             alert(`Error: ${message || 'An unknown error occurred.'}`);
+        };
+
+  const translations = {
+    en: {
+        sahara_logo: "SAHARA SAATHI",
+        contact: "Contact",
+        login: "Login",
+        register: "Register",
+        welcome_title: "Bridging Distances with Telemedicine",
+        welcome_subtitle: "Connecting you to quality healthcare, wherever you are. Instant consultations, digital records, and AI-powered support for patients, doctors, and communities.",
+        get_started: "Get Started Today",
+        features_title: "A Comprehensive Telemedical Health Ecosystem",
+        features_subtitle: "Our platform connects patients, doctors, and pharmacies to deliver accessible and efficient healthcare to every corner of India, from cities to remote villages.",
+        feature1_title: "For Patients & Families",
+        feature1_text: "Instantly book consultations, access your complete medical history via QR code, and find nearby pharmacies with available medicines.",
+        feature2_title: "For Doctors & Clinics",
+        feature2_text: "Receive AI-powered patient summaries before consultations, issue digital prescriptions, and manage your appointments from a single, secure dashboard.",
+        feature3_title: "For the Community",
+        feature3_text: "Empowering local 'Sehat Saathis' to assist their communities and helping local pharmacies manage inventory and fulfill digital prescriptions.",
+        testimonials_title: "Trusted by Communities Across India",
+        testimonial1_text: "\"My father in our village can now see a specialist in the city without traveling. The local Sehat Saathi helped us set it all up.\"",
+        testimonial1_author: "Rakesh V.",
+        testimonial1_desc: "Son of a Patient",
+        testimonial2_text: "\"The AI summaries save me critical time before each consultation. This platform allows me to serve patients far beyond my clinic's physical reach effectively.\"",
+        testimonial2_author: "Dr. Anjali Desai",
+        testimonial2_desc: "General Physician",
+        testimonial3_text: "\"Being a Sehat Saathi is so rewarding. I'm helping my neighbours get medical attention and earning an income. The work feels truly important.\"",
+        testimonial3_author: "Sunita K.",
+        testimonial3_desc: "Sehat Saathi",
+        cta_title: "Ready to Join India's Health Revolution?",
+        cta_subtitle: "Become part of a growing ecosystem of patients, doctors, and health workers building a healthier future for everyone, everywhere. It's simple and secure.",
+        cta_button: "Get Started",
+        download_app: "Download App",
+        footer_copyright: "© 2024 SAHARA. A concept for Smart India Hackathon. All Rights Reserved.",
+        footer_about_title: "About SAHARA",
+        footer_about_text: "Our mission is to provide accessible and anonymous mental wellness support for students across India. We believe in creating a safe space for everyone to start their journey towards a healthier mind.",
+        footer_links_title: "Quick Links",
+        footer_link_about: "About Us",
+        footer_link_privacy: "Privacy Policy",
+        footer_link_terms: "Terms of Service",
+        footer_feedback_title: "Feedback",
+        footer_feedback_placeholder: "Your feedback...",
+        footer_feedback_button: "Submit",
+        login_welcome: "Welcome Back!",
+        login_prompt: "Login to your Sahara Saathi account.",
+        label_username: "Username / Email / Patient ID",
+        label_role: "Role",
+        label_password: "Password",
+        login_button: "Login",
+        role_patient: "Patient",
+        role_doctor: "Doctor",
+        role_admin: "Admin",
+        role_saathi: "Saathi",
+        role_store: "Store",
+        login_switch_prompt: "Don't have an account?",
+        login_switch_link: "Register here",
+        register_title: "Create Account",
+        register_prompt: "Join Sahara Saathi to manage your health.",
+        label_fullname: "Full Name",
+        label_email: "Email",
+        label_phone: "Phone Number",
+        label_password_min: "Password (min. 8 characters)",
+        label_village: "Village/Area",
+        label_district: "District",
+        register_button: "Register",
+        register_switch_prompt: "Already have an account?",
+        register_switch_link: "Login here",
+        success_title: "Registration Successful!",
+        success_message: "Your account has been created.",
+        login_info_message: "You can log in with your Full Name, Email, or the Patient ID below.",
+        patient_id_is: "Your Patient ID is:",
+        proceed_to_login: "Proceed to Login"
+    },
+    hi: {
+        sahara_logo: "सहारा साथी",
+        contact: "संपर्क",
+        login: "लॉग इन करें",
+        register: "पंजीकरण करें",
+        welcome_title: "टेलीमेडिसिन से दूरियों को कम करना",
+        welcome_subtitle: "आप जहां भी हों, आपको गुणवत्तापूर्ण स्वास्थ्य सेवा से जोड़ना। मरीजों, डॉक्टरों और समुदायों के लिए तत्काल परामर्श, डिजिटल रिकॉर्ड और एआई-संचालित सहायता।",
+        get_started: "आज ही शुरू करें",
+        features_title: "एक व्यापक टेलीमेडिकल स्वास्थ्य पारिस्थितिकी तंत्र",
+        features_subtitle: "हमारा मंच भारत के हर कोने, शहरों से लेकर दूरदराज के गांवों तक, सुलभ और कुशल स्वास्थ्य सेवा प्रदान करने के लिए रोगियों, डॉक्टरों और फार्मेसियों को जोड़ता है।",
+        feature1_title: "मरीजों और परिवारों के लिए",
+        feature1_text: "तुरंत परामर्श बुक करें, क्यूआर कोड के माध्यम से अपने संपूर्ण चिकित्सा इतिहास तक पहुंचें, और उपलब्ध दवाओं के साथ आस-पास की फार्मेसियों को खोजें।",
+        feature2_title: "डॉक्टरों और क्लीनिकों के लिए",
+        feature2_text: "परामर्श से पहले एआई-संचालित रोगी सारांश प्राप्त करें, डिजिटल नुस्खे जारी करें, और एक ही, सुरक्षित डैशबोर्ड से अपनी नियुक्तियों का प्रबंधन करें।",
+        feature3_title: "समुदाय के लिए",
+        feature3_text: "स्थानीय 'सेहत साथियों' को अपने समुदायों की सहायता करने के लिए सशक्त बनाना और स्थानीय फार्मेसियों को इन्वेंट्री का प्रबंधन करने और डिजिटल नुस्खों को पूरा करने में मदद करना।",
+        testimonials_title: "पूरे भारत के समुदायों द्वारा विश्वसनीय",
+        testimonial1_text: "\"अब हमारे गाँव में मेरे पिता बिना यात्रा किए शहर के किसी विशेषज्ञ को दिखा सकते हैं। स्थानीय सेहत साथी ने हमें यह सब स्थापित करने में मदद की।\"",
+        testimonial1_author: "राकेश वी.",
+        testimonial1_desc: "एक मरीज का बेटा",
+        testimonial2_text: "\"एआई सारांश प्रत्येक परामर्श से पहले मेरा महत्वपूर्ण समय बचाते हैं। यह मंच मुझे अपनी क्लिनिक की भौतिक पहुंच से कहीं दूर रोगियों की प्रभावी ढंग से सेवा करने की अनुमति देता है।\"",
+        testimonial2_author: "डॉ. अंजलि देसाई",
+        testimonial2_desc: "सामान्य चिकित्सक",
+        testimonial3_text: "\"एक सेहत साथी होना बहुत फायदेमंद है। मैं अपने पड़ोसियों को चिकित्सा सहायता प्राप्त करने में मदद कर रहा हूं और आय अर्जित कर रहा हूं। यह काम वास्तव में महत्वपूर्ण लगता है।\"",
+        testimonial3_author: "सुनीता के.",
+        testimonial3_desc: "सेहत साथी",
+        cta_title: "भारत की स्वास्थ्य क्रांति में शामिल होने के लिए तैयार हैं?",
+        cta_subtitle: "हर जगह, हर किसी के लिए एक स्वस्थ भविष्य बनाने वाले रोगियों, डॉक्टरों और स्वास्थ्य कार्यकर्ताओं के बढ़ते पारिस्थितिकी तंत्र का हिस्सा बनें। यह सरल और सुरक्षित है।",
+        cta_button: "शुरू करें",
+        download_app: "ऐप डाउनलोड करें",
+        footer_copyright: "© 2024 सहारा। स्मार्ट इंडिया हैकथॉन के लिए एक अवधारणा। सर्वाधिकार सुरक्षित।",
+        footer_about_title: "सहारा के बारे में",
+        footer_about_text: "हमारा मिशन पूरे भारत में छात्रों के लिए सुलभ और गुमनाम मानसिक स्वास्थ्य सहायता प्रदान करना है। हम हर किसी के लिए एक स्वस्थ दिमाग की ओर अपनी यात्रा शुरू करने के लिए एक सुरक्षित स्थान बनाने में विश्वास करते हैं।",
+        footer_links_title: "त्वरित लिंक",
+        footer_link_about: "हमारे बारे में",
+        footer_link_privacy: "गोपनीयता नीति",
+        footer_link_terms: "सेवा की शर्तें",
+        footer_feedback_title: "प्रतिक्रिया",
+        footer_feedback_placeholder: "आपकी प्रतिक्रिया...",
+        footer_feedback_button: "प्रस्तुत करें",
+        login_welcome: "वापसी पर स्वागत है!",
+        login_prompt: "अपने सहारा साथी खाते में लॉगिन करें।",
+        label_username: "उपयोगकर्ता नाम / ईमेल / रोगी आईडी",
+        label_role: "भूमिका",
+        label_password: "पासवर्ड",
+        login_button: "लॉग इन करें",
+        role_patient: "मरीज़",
+        role_doctor: "डॉक्टर",
+        role_admin: "एडमिन",
+        role_saathi: "साथी",
+        role_store: "स्टोर",
+        login_switch_prompt: "खाता नहीं है?",
+        login_switch_link: "यहां पंजीकरण करें",
+        register_title: "खाता बनाएं",
+        register_prompt: "अपने स्वास्थ्य का प्रबंधन करने के लिए सहारा साथी से जुड़ें।",
+        label_fullname: "पूरा नाम",
+        label_email: "ईमेल",
+        label_phone: "फोन नंबर",
+        label_password_min: "पासवर्ड (न्यूनतम 8 अक्षर)",
+        label_village: "गांव/क्षेत्र",
+        label_district: "जिला",
+        register_button: "पंजीकरण करें",
+        register_switch_prompt: "पहले से ही एक खाता है?",
+        register_switch_link: "यहां लॉगिन करें",
+        success_title: "पंजीकरण सफल!",
+        success_message: "आपका खाता बना दिया गया है।",
+        login_info_message: "आप अपने पूरे नाम, ईमेल, या नीचे दिए गए रोगी आईडी से लॉग इन कर सकते हैं।",
+        patient_id_is: "आपकी रोगी आईडी है:",
+        proceed_to_login: "लॉगिन करने के लिए आगे बढ़ें"
+    },
+    pa: {
+        sahara_logo: "ਸਹਾਰਾ ਸਾਥੀ",
+        contact: "ਸੰਪਰਕ",
+        login: "ਲਾਗਿਨ ਕਰੋ",
+        register: "ਰਜਿਸਟਰ ਕਰੋ",
+        welcome_title: "ਟੈਲੀਮੇਡੀਸਨ ਨਾਲ ਦੂਰੀਆਂ ਨੂੰ ਮਿਟਾਉਣਾ",
+        welcome_subtitle: "ਤੁਰੰਤ ਵੀਡੀਓ ਸਲਾਹ, ਏਆਈ ਸਹਾਇਤਾ, ਡਿਜੀਟਲ ਰਿਕਾਰਡ ਅਤੇ ਅਸਲ ਸਮੇਂ ਦੀ ਸਹਾਇਤਾ ਸਾਰਿਆਂ ਲਈ ਉਪਲਬਧ ਹੈ",
+        get_started: "ਅੱਜ ਹੀ ਸ਼ੁਰੂ ਕਰੋ",
+        features_title: "ਇੱਕ ਵਿਆਪਕ ਟੈਲੀਮੈਡੀਕਲ ਸਿਹਤ ਈਕੋਸਿਸਟਮ",
+        features_subtitle: "ਅਸੀਂ ਵਿਦਿਆਰਥੀਆਂ ਨੂੰ ਉਨ੍ਹਾਂ ਦੀ ਮਾਨਸਿਕ ਤੰਦਰੁਸਤੀ ਦੀ ਯਾਤਰਾ ਦੇ ਹਰ ਪੜਾਅ 'ਤੇ ਸਹਾਇਤਾ ਕਰਨ ਲਈ ਸੰਦਾਂ ਦਾ ਪੂਰਾ ਸੂਟ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਾਂ, ਇਹ ਸੁਨਿਸ਼ਚਿਤ ਕਰਦੇ ਹੋਏ ਕਿ ਕੋਈ ਵੀ ਇਕੱਲਾ ਮਹਿਸੂਸ ਨਾ ਕਰੇ।",
+        feature1_title: "ਗੁਪਤ ਮੁਲਾਂਕਣ",
+        feature1_text: "ਆਪਣੀ ਮਾਨਸਿਕ ਤੰਦਰੁਸਤੀ ਬਾਰੇ ਗੁਮਨਾਮ ਸਮਝ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ PHQ-9 ਅਤੇ GAD-7 ਵਰਗੇ ਡਾਕਟਰੀ ਤੌਰ 'ਤੇ ਪ੍ਰਮਾਣਿਤ ਸਕ੍ਰੀਨਰਾਂ ਦੀ ਵਰਤੋਂ ਕਰੋ।",
+        feature2_title: "24/7 AI ਸਹਾਇਤਾ ਚੈਟ",
+        feature2_text: "ਸਾਡਾ ਹਮਦਰਦ AI-ਸੰਚਾਲਿਤ ਸਹਾਇਕ ਹਮੇਸ਼ਾ ਮੁਕਾਬਲਾ ਕਰਨ ਦੀਆਂ ਰਣਨੀਤੀਆਂ, ਸੁਣਨ ਵਾਲੇ ਕੰਨ, ਅਤੇ ਅਸਲ-ਸਮੇਂ ਦੇ ਸੰਕਟ ਦੀ ਪਛਾਣ ਦੀ ਪੇਸ਼ਕਸ਼ ਕਰਨ ਲਈ ਉਪਲਬਧ ਹੈ।",
+        feature3_title: "ਚੁਣੀ ਹੋਈ ਸਰੋਤ ਲਾਇਬ੍ਰੇਰੀ",
+        feature3_text: "ਸਿਹਤਮੰਦ ਆਦਤਾਂ ਬਣਾਉਣ ਲਈ CBT ਮੌਡਿਊਲ, ਮਾਈਂਡਫੁਲਨੈੱਸ ਅਭਿਆਸਾਂ, ਅਤੇ ਵਿਦਿਅਕ ਸਮੱਗਰੀ ਦੀ ਇੱਕ ਅਮੀਰ ਲਾਇਬ੍ਰੇਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।",
+        testimonials_title: "ਪੂਰੇ ਭਾਰਤ ਦੇ ਵਿਦਿਆਰਥੀਆਂ ਦੁਆਰਾ ਭਰੋਸੇਯੋਗ",
+        testimonial1_text: "\"ਸਹਾਰਾ ਦੀ ਵਰਤੋਂ ਕਰਨਾ ਸੱਚਮੁੱਚ ਗੁਮਨਾਮ ਅਤੇ ਸੁਰੱਖਿਅਤ ਮਹਿਸੂਸ ਹੋਇਆ। ਏਆਈ ਚੈਟਬੋਟ ਨੇ ਬਿਨਾਂ ਕਿਸੇ ਨਿਰਣੇ ਦੇ ਇੱਕ ਔਖੇ ਇਮਤਿਹਾਨ ਹਫ਼ਤੇ ਵਿੱਚ ਮੇਰੀ ਮਦਦ ਕੀਤੀ। ਇਹ ਵਿਦਿਆਰਥੀ ਮਾਨਸਿਕ ਸਿਹਤ ਲਈ ਇੱਕ ਗੇਮ-ਚੇਂਜਰ ਹੈ।\"",
+        testimonial1_author: "ਪ੍ਰਿਆ ਐਸ.",
+        testimonial1_desc: "ਬੀ.ਟੈਕ ਵਿਦਿਆਰਥੀ, ਆਈਆਈਟੀ ਦਿੱਲੀ",
+        testimonial2_text: "\"ਮੈਂ ਪਹਿਲਾਂ ਸ਼ੱਕੀ ਸੀ, ਪਰ ਮੁਲਾਂਕਣ ਹੈਰਾਨੀਜਨਕ ਤੌਰ 'ਤੇ ਸਹੀ ਸੀ। ਸਿਫ਼ਾਰਸ਼ ਕੀਤੇ ਸਰੋਤ ਸੱਚਮੁੱਚ ਮਦਦਗਾਰ ਸਨ। ਮੈਂ ਆਖਰਕਾਰ ਮਹਿਸੂਸ ਕਰਦਾ ਹਾਂ ਕਿ ਮੇਰੇ ਕੋਲ ਆਪਣੀ ਚਿੰਤਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਲਈ ਸਾਧਨ ਹਨ।\"",
+        testimonial2_author: "ਅਰਜੁਨ ਕੇ.",
+        testimonial2_desc: "ਬੀ.ਕਾਮ ਵਿਦਿਆਰਥੀ, ਜਾਦਵਪੁਰ ਯੂਨੀਵਰਸਿਟੀ",
+        testimonial3_text: "\"ਪਲੇਟਫਾਰਮ ਤੋਂ ਸਿੱਧੇ ਸਲਾਹਕਾਰ ਨਾਲ ਸੈਸ਼ਨ ਬੁੱਕ ਕਰਨ ਦੀ ਯੋਗਤਾ ਨੇ ਮਦਦ ਮੰਗਣ ਨੂੰ ਬਹੁਤ ਘੱਟ ਡਰਾਉਣਾ ਬਣਾ ਦਿੱਤਾ। ਸਾਰੀ ਪ੍ਰਕਿਰਿਆ ਸਹਿਜ ਅਤੇ ਨਿਜੀ ਸੀ।\"",
+        testimonial3_author: "ਅਨੰਨਿਆ ਆਰ.",
+        testimonial3_desc: "MBBS ਵਿਦਿਆਰਥੀ, VIT",
+        cta_title: "ਕੀ ਤੁਸੀਂ ਆਪਣੀ ਮਾਨਸਿਕ ਤੰਦਰੁਸਤੀ ਨੂੰ ਤਰਜੀਹ ਦੇਣ ਲਈ ਤਿਆਰ ਹੋ?",
+        cta_subtitle: "ਇੱਕ ਸਿਹਤਮੰਦ ਦਿਮਾਗ ਵੱਲ ਪਹਿਲਾ ਕਦਮ ਚੁੱਕਣ ਵਾਲੇ ਹਜ਼ਾਰਾਂ ਵਿਦਿਆਰਥੀਆਂ ਨਾਲ ਸ਼ਾਮਲ ਹੋਵੋ। ਤੁਹਾਡੀ ਯਾਤਰਾ ਗੁਪਤ, ਸਹਾਇਕ ਅਤੇ ਸੁਰੱਖਿਅਤ ਹੈ।",
+        cta_button: "ਮੁਫ਼ਤ ਵਿੱਚ ਸ਼ੁਰੂ ਕਰੋ",
+        footer_copyright: "© 2024 ਸਹਾਰਾ। ਸਮਾਰਟ ਇੰਡੀਆ ਹੈਕਾਥਨ ਲਈ ਇੱਕ ਸੰਕਲਪ। ਸਾਰੇ ਹੱਕ ਰਾਖਵੇਂ ਹਨ।",
+        footer_about_title: "ਸਹਾਰਾ ਬਾਰੇ",
+        footer_about_text: "ਸਾਡਾ ਮਿਸ਼ਨ ਪੂਰੇ ਭਾਰਤ ਦੇ ਵਿਦਿਆਰਥੀਆਂ ਲਈ ਪਹੁੰਚਯੋਗ ਅਤੇ ਗੁਮਨਾਮ ਮਾਨਸਿਕ ਤੰਦਰੁਸਤੀ ਸਹਾਇਤਾ ਪ੍ਰਦਾਨ ਕਰਨਾ ਹੈ। ਅਸੀਂ ਹਰ ਕਿਸੇ ਲਈ ਇੱਕ ਸਿਹਤਮੰਦ ਦਿਮਾਗ ਵੱਲ ਆਪਣੀ ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਇੱਕ ਸੁਰੱਖਿਅਤ ਥਾਂ ਬਣਾਉਣ ਵਿੱਚ ਵਿਸ਼ਵਾਸ ਰੱਖਦੇ ਹਾਂ।",
+        footer_links_title: "ਤੇਜ਼ ਲਿੰਕ",
+        footer_link_about: "ਸਾਡੇ ਬਾਰੇ",
+        footer_link_privacy: "ਪਰਦੇਦਾਰੀ ਨੀਤੀ",
+        footer_link_terms: "ਸੇਵਾ ਦੀਆਂ ਸ਼ਰਤਾਂ",
+        footer_feedback_title: "ਸੁਝਾਅ",
+        footer_feedback_placeholder: "ਤੁਹਾਡਾ ਸੁਝਾਅ...",
+        footer_feedback_button: "ਜਮ੍ਹਾਂ ਕਰੋ",
+        login_welcome: "ਜੀ ਆਇਆਂ ਨੂੰ!",
+        login_prompt: "ਆਪਣੇ ਸਹਾਰਾ ਸਾਥੀ ਖਾਤੇ ਵਿੱਚ ਲਾਗਿਨ ਕਰੋ।",
+        label_username: "ਯੂਜ਼ਰਨਾਮ / ਈਮੇਲ / ਮਰੀਜ਼ ਆਈਡੀ",
+        label_role: "ਭੂਮਿਕਾ",
+        label_password: "ਪਾਸਵਰਡ",
+        login_button: "ਲਾਗਿਨ ਕਰੋ",
+        role_patient: "ਮਰੀਜ਼",
+        role_doctor: "ਡਾਕਟਰ",
+        role_admin: "ਐਡਮਿਨ",
+        role_saathi: "ਸਾਥੀ",
+        role_store: "ਸਟੋਰ",
+        login_switch_prompt: "ਕੋਈ ਖਾਤਾ ਨਹੀਂ ਹੈ?",
+        login_switch_link: "ਇੱਥੇ ਰਜਿਸਟਰ ਕਰੋ",
+        register_title: "ਖਾਤਾ ਬਣਾਓ",
+        register_prompt: "ਆਪਣੀ ਸਿਹਤ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਲਈ ਸਹਾਰਾ ਸਾਥੀ ਨਾਲ ਜੁੜੋ।",
+        label_fullname: "ਪੂਰਾ ਨਾਂਮ",
+        label_email: "ਈ - ਮੇਲ",
+        label_phone: "ਫੋਨ ਨੰਬਰ",
+        label_password_min: "ਪਾਸਵਰਡ (ਘੱਟੋ ਘੱਟ 8 ਅੱਖਰ)",
+        label_village: "ਪਿੰਡ/ਖੇਤਰ",
+        label_district: "ਜ਼ਿਲ੍ਹਾ",
+        register_button: "ਰਜਿਸਟਰ ਕਰੋ",
+        register_switch_prompt: "ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਖਾਤਾ ਹੈ?",
+        register_switch_link: "ਇੱਥੇ ਲਾਗਿਨ ਕਰੋ",
+        success_title: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਸਫਲ!",
+        success_message: "ਤੁਹਾਡਾ ਖਾਤਾ ਬਣ ਗਿਆ ਹੈ।",
+        login_info_message: "ਤੁਸੀਂ ਆਪਣੇ ਪੂਰੇ ਨਾਮ, ਈਮੇਲ, ਜਾਂ ਹੇਠਾਂ ਦਿੱਤੇ ਮਰੀਜ਼ ਆਈਡੀ ਨਾਲ ਲਾਗਇਨ ਕਰ ਸਕਦੇ ਹੋ।",
+        patient_id_is: "ਤੁਹਾਡਾ ਮਰੀਜ਼ ਆਈਡੀ ਹੈ:",
+        proceed_to_login: "ਲਾਗਿਨ ਕਰਨ ਲਈ ਅੱਗੇ ਵਧੋ"
+    }
+};
+
+
+
+
+
+        const generateFormFields = (role) => {
+            const t = translations[currentLanguage] || translations.en;
+            // --- FIX: Add autocomplete attributes to prevent browser warnings and improve UX ---
+            let fieldsHtml = `
+                <div class="form-group"><label for="fullName">${t.label_fullname}</label><input type="text" id="fullName" class="form-control" required autocomplete="name"></div>
+                <div class="form-group"><label for="email">${t.label_email}</label><input type="email" id="email" class="form-control" required autocomplete="email"></div>
+                <div class="form-group"><label for="phone">${t.label_phone}</label><input type="tel" id="phone" class="form-control" required autocomplete="tel"></div>
+                <div class="form-group"><label for="password">${t.label_password_min}</label><input type="password" id="password" class="form-control" required minlength="8" autocomplete="new-password"></div>
+            `;
+            if (role === 'patient') {
+                fieldsHtml += `
+                    <div class="form-group"><label for="village">${t.label_village}</label><input type="text" id="village" class="form-control" autocomplete="address-line1"></div>
+                    <div class="form-group"><label for="district">${t.label_district}</label><input type="text" id="district" class="form-control" autocomplete="address-level2"></div>
+                `;
+            }
+            dynamicFormContainer.innerHTML = fieldsHtml;
+        };
+
+        // Initial call for default language
+        generateFormFields('patient');
+
+        // --- Event Handlers for Buttons and Modals ---
+        getStartedBtn.addEventListener('click', () => openModal('registerScreen'));
+        finalCtaBtn.addEventListener('click', () => openModal('registerScreen'));
+        loginBtn.addEventListener('click', () => openModal('loginScreen'));
+        registerBtn.addEventListener('click', () => openModal('registerScreen'));
+
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) closeModal();
+            if (e.target.classList.contains('switch-link')) {
+                e.preventDefault();
+                showAuthScreen(e.target.dataset.screen);
+            }
+        });
+
+        document.getElementById('closeAuthModal').addEventListener('click', closeModal);
+        document.getElementById('closeAuthModalRegister').addEventListener('click', closeModal);
+
+        // --- API Logic for Login & Registration ---
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const button = e.target.querySelector('button');
+            button.disabled = true;
+            button.textContent = 'Logging in...';
+
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const role = document.getElementById('loginRole').value;
+
+            // Dummy logins for testing
+            if (role === 'admin' && username === 'admin' && password === 'admin123') {
+                localStorage.setItem('sehatSaharaUser', JSON.stringify({patientId: 'admin', username: 'Admin User', email: 'admin@example.com', role: 'admin'}));
+                window.location.href = 'admin.html';
+                return;
+            }
+            if (role === 'saathi' && username === 'saathi' && password === 'saathi123') {
+                localStorage.setItem('sehatSaharaUser', JSON.stringify({patientId: 'saathi', username: 'Saathi User', email: 'saathi@example.com', role: 'saathi'}));
+                window.location.href = 'saathi.html';
+                return;
+            }
+            if (role === 'store' && username === 'store' && password === 'store123') {
+                localStorage.setItem('sehatSaharaUser', JSON.stringify({patientId: 'store', username: 'Store User', email: 'store@example.com', role: 'store'}));
+                window.location.href = 'store.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ patientId: username, password, role })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('sehatSaharaUser', JSON.stringify(data.user));
+                    if (data.token) {
+                        localStorage.setItem('authToken', data.token);
+                    }
+
+                    // --- FIX: Use role from backend response for secure redirection ---
+                    switch(data.user.role) {
+                        case 'admin':
+                            window.location.href = 'admin.html';
+                            break;
+                        case 'doctor':
+                            window.location.href = 'doctor.html';
+                            break;
+                        case 'store':
+                            window.location.href = 'store.html';
+                            break;
+                        case 'saathi':
+                            window.location.href = 'saathi.html';
+                            break;
+                        default: // 'patient' and any other roles
+                            window.location.href = 'patient.html';
+                    }
+                } else {
+                    showApiError(data.message || 'Invalid credentials.');
+                }
+            } catch (error) {
+                console.error('Login Fetch Error:', error);
+                showApiError('Could not connect to the server.');
+            } finally {
+                button.disabled = false;
+                 // Re-translate button text if language was changed
+                 const t = translations[currentLanguage] || translations.en;
+                button.textContent = t.login_button;
+            }
+        });
+
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const button = e.target.querySelector('button');
+            button.disabled = true;
+            button.textContent = 'Registering...';
+
+            registrationData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phoneNumber: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                village: document.getElementById('village')?.value || '',
+                district: document.getElementById('district')?.value || '',
+                preferredLanguage: currentLanguage
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registrationData)
+                });
+                const data = await response.json();
+
+                if(response.ok && data.success) {
+                    const t = translations[currentLanguage] || translations.en;
+                    
+                    successModalMessage.textContent = t.login_info_message;
+                    usernameDisplay.innerHTML = `${t.patient_id_is} <strong>${data.patientId}</strong>`;
+                    registrationData.patientId = data.patientId; // Store the returned patient ID
+                    
+                    closeModal();
+                    successModal.classList.add('active');
+                } else {
+                    showApiError(data.message || 'Registration failed.');
+                }
+            } catch(error) {
+                console.error('Registration Fetch Error:', error);
+                showApiError('Could not connect to the server.');
+            } finally {
+                button.disabled = false;
+                // Re-translate button text if language was changed
+                const t = translations[currentLanguage] || translations.en;
+                button.textContent = t.register_button;
+            }
+        });
+
+        proceedToLoginBtn.addEventListener('click', () => {
+            successModal.classList.remove('active');
+            openModal('loginScreen');
+            const loginUsernameInput = document.getElementById('loginUsername');
+            
+            // --- FIX: Pre-fill login with Patient ID for convenience ---
+            if (loginUsernameInput && registrationData.patientId) {
+                loginUsernameInput.value = registrationData.patientId;
+            }
+        });
+
+        function updateUIText() {
+            const t = translations[currentLanguage] || translations.en;
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (t[key]) {
+                    element.textContent = t[key];
+                }
+            });
+            document.querySelectorAll('[data-key-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-key-placeholder');
+                 if (t[key]) {
+                    element.placeholder = t[key];
+                }
+            });
+            // Update select options
+            document.querySelectorAll('option[data-key]').forEach(option => {
+                const key = option.getAttribute('data-key');
+                if (t[key]) {
+                    option.textContent = t[key];
+                }
+            });
+            // Update dynamic form fields if visible
+            if (authModal.classList.contains('active') && document.getElementById('registerScreen').classList.contains('active')) {
+                generateFormFields('patient');
+            }
+        }
+
+        const languageDropdown = document.querySelector('.language-dropdown');
+        if (languageDropdown) {
+            const dropdownToggle = languageDropdown.querySelector('.language-dropdown-toggle');
+            const languageOptions = languageDropdown.querySelectorAll('.language-option');
+            const selectedLanguageSpan = document.getElementById('selectedLanguage');
+
+            dropdownToggle.addEventListener('click', () => languageDropdown.classList.toggle('open'));
+            document.addEventListener('click', (e) => { if (!languageDropdown.contains(e.target)) languageDropdown.classList.remove('open'); });
+            languageOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentLanguage = option.getAttribute('data-lang') || 'en';
+                    selectedLanguageSpan.textContent = option.textContent;
+                    updateUIText();
+                    languageDropdown.classList.remove('open');
+                });
+            });
+        }
+
+        // Hamburger menu for mobile
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (!hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+
+        const testimonialsViewport = document.querySelector('.testimonials-viewport');
+        if (testimonialsViewport) {
+            const testimonialsGrid = document.querySelector('.testimonials-grid');
+            const testimonials = document.querySelectorAll('.testimonial-card');
+            const prevBtn = document.getElementById('testimonial-prev');
+            const nextBtn = document.getElementById('testimonial-next');
+            if (testimonials.length > 0) {
+                let currentIndex = 1; let autoPlayTimer;
+                function updateCarousel() { if (!testimonials[currentIndex]) return; const activeCard = testimonials[currentIndex]; const viewportCenter = testimonialsViewport.offsetWidth / 2; const cardCenter = activeCard.offsetLeft + activeCard.offsetWidth / 2; const scrollAmount = cardCenter - viewportCenter; testimonialsGrid.style.transform = `translateX(-${scrollAmount}px)`; testimonials.forEach((card, index) => card.classList.toggle('active', index === currentIndex)); }
+                function setGridPadding() { if (testimonials.length > 0) { const padding = (testimonialsViewport.offsetWidth / 2) - (testimonials[0].offsetWidth / 2); testimonialsGrid.style.padding = `0 ${padding}px`; } }
+                function moveTo(newIndex) { currentIndex = (newIndex + testimonials.length) % testimonials.length; updateCarousel(); }
+                function startAutoPlay() { stopAutoPlay(); autoPlayTimer = setInterval(() => moveTo(currentIndex + 1), 5000); }
+                function stopAutoPlay() { clearInterval(autoPlayTimer); }
+                nextBtn.addEventListener('click', () => { stopAutoPlay(); moveTo(currentIndex + 1); startAutoPlay(); });
+                prevBtn.addEventListener('click', () => { stopAutoPlay(); moveTo(currentIndex - 1); startAutoPlay(); });
+                window.addEventListener('resize', () => { setGridPadding(); updateCarousel(); });
+                setGridPadding(); moveTo(currentIndex); startAutoPlay();
+            }
+        }
+
+        const feedbackForm = document.getElementById('feedbackForm');
+        feedbackForm.addEventListener('submit', function(e) { e.preventDefault(); const feedbackText = document.getElementById('feedbackText').value; if (feedbackText.trim()) { alert('Thank you for your feedback!'); document.getElementById('feedbackText').value = ''; } else { alert('Please enter your feedback before submitting.'); } });
+
+        const fadeInElements = document.querySelectorAll('.fade-in-element');
+        const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.1 });
+        fadeInElements.forEach(el => observer.observe(el));
+
+        updateUIText();
+
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed', err));
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtnMobile = document.getElementById('installPwaBtnMobile');
+            if (installBtnMobile) installBtnMobile.style.display = 'inline-block';
+        });
+        document.getElementById('installPwaBtnMobile').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        document.getElementById('installPwaBtnMobile').style.display = 'none';
+                    } else {
+                        console.log('User dismissed the install prompt');
+                        // Keep the button visible for retry
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('Install prompt not available. Try refreshing the page.');
+            }
+        });
+    });
+</script>
+</body>
+</html>

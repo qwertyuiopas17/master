@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sehat Sahara - Saathi Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: rgba(245, 245, 245, 0.6);
+            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --text-color: #0f172a;
+            --text-color-secondary: #475569;
+            --primary-color: #3b82f6; /* Changed to a friendly blue */
+            --primary-color-light: #60a5fa;
+            --primary-color-dark: #2563eb;
+            --sos-color: #ef4444;
+            --border-color: rgba(0, 0, 0, 0.07);
+            --shadow-color: rgba(100, 116, 139, 0.1);
+            --font-family: 'Poppins', sans-serif;
+            --color-secondary: #f1f5f9;
+            --radius-lg: 16px;
+            --color-onboarding: #f97316;
+            --color-appointment: #16a34a;
+            --color-pharmacy: #8b5cf6;
+            --color-pending: #f59e0b;
+            --color-paid: #22c55e;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: rgba(20, 20, 30, 0.75);
+            --card-bg-color: rgba(30, 41, 59, 0.6);
+            --text-color: #e2e8f0;
+            --text-color-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.12);
+            --primary-color: var(--primary-color-dark);
+            --color-secondary: #334155;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: var(--font-family); 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            line-height: 1.6; 
+            padding-bottom: 80px; /* Space for bottom nav */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .main-container { position: relative; min-height: 100vh; width: 100vw; }
+        .background-image { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-image: url('https://i.ibb.co/84XpXLXW/hero-pic.png'); 
+            background-size: cover; background-position: center; 
+            filter: blur(14px) brightness(0.9); 
+            transform: scale(1.15); z-index: -1; 
+            transition: filter 0.3s;
+        }
+        [data-theme="dark"] .background-image { filter: blur(14px) brightness(0.6); }
+
+        .page-content { flex-grow: 1; padding: 1rem; max-width: 1200px; margin: 0 auto; width: 100%; padding-top: 80px; }
+        
+        /* Header */
+        .header {
+            position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 2rem); max-width: 1200px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1.25rem; z-index: 1000;
+            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
+            border-radius: 999px;
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+        }
+        .header .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .header .actions { display: flex; align-items: center; gap: 0.75rem; }
+        
+        .top-nav { display: none; align-items: center; gap: 0.25rem; }
+        .top-nav a { text-decoration: none; color: var(--text-color-secondary); font-weight: 500; padding: 0.5rem 1.25rem; border-radius: 999px; transition: all 0.25s ease; position: relative; }
+        .top-nav a:hover { color: var(--text-color); background-color: rgba(128, 128, 128, 0.1); }
+        .top-nav a.active { color: var(--text-color); background-color: rgba(128, 128, 128, 0.15); }
+
+        .btn { padding: 0.6rem 1.2rem; border-radius: 9999px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.25s ease; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+        .btn-primary { background-color: var(--primary-color); color: white; border: 2px solid var(--primary-color); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 12px; }
+        .btn-neutral { background-color: white; color: var(--text-color-secondary); border: 1px solid var(--border-color); }
+        .btn-neutral:hover { background-color: #f8fafc; }
+
+        [data-theme="dark"] .btn-neutral {
+            background-color: var(--color-secondary);
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .btn-neutral:hover {
+            background-color: #475569;
+        }
+
+        .card { 
+            background-color: var(--card-bg-color); border-radius: var(--radius-lg); 
+            padding: 1.5rem; border: 1px solid var(--border-color); 
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); 
+            box-shadow: 0 8px 32px 0 var(--shadow-color); transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 var(--shadow-color); }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Dashboard Screen */
+        .welcome-card { 
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-color-light)); 
+            color: white; 
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+        }
+        .welcome-card h1 { font-size: 2.25rem; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .info-card { cursor: pointer; transition: all 0.2s ease-in-out; }
+        .info-card:hover { transform: scale(1.03); box-shadow: 0 10px 30px 0 var(--shadow-color); }
+        .info-card h3 { font-size: 1rem; }
+        .info-card .highlight { font-size: 1.25rem; font-weight: 600; }
+        
+        /* Task List */
+        .task-list { display: flex; flex-direction: column; gap: 1rem; }
+        .task-card { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; }
+        .task-card-details h4 { font-size: 1.1rem; }
+        .task-card-details p { font-size: 0.9rem; color: var(--text-color-secondary); }
+        .task-type-indicator { width: 10px; height: 40px; border-radius: 5px; margin-right: 1rem; }
+        .type-onboarding { background-color: var(--color-onboarding); }
+        .type-appointment { background-color: var(--color-appointment); }
+        .type-pharmacy { background-color: var(--color-pharmacy); }
+        .task-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+        
+        /* Page Headers */
+        .page-header { text-align: center; margin-bottom: 2rem; margin-top: 2rem; }
+        .page-header h1 { font-size: 2rem; }
+        .page-header p { color: var(--text-color-secondary); }
+
+        /* Training Center */
+        .training-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .training-card { text-align: center; }
+        .training-card .icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary-color); }
+        .training-card h4 { margin-bottom: 0.5rem; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-control { width: 100%; padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--color-secondary); color: var(--text-color); }
+        .upload-area { border: 2px dashed var(--border-color); border-radius: var(--radius-lg); padding: 2rem; text-align: center; cursor: pointer; }
+        .upload-area:hover { border-color: var(--primary-color); }
+        
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; background-color: var(--card-bg-color); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 -4px 20px var(--shadow-color); border-top: 1px solid var(--border-color); padding: 0.5rem 0; z-index: 1000; }
+        .nav-button { background: none; border: none; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-color-secondary); padding: 0.5rem 0; transition: color 0.2s ease; }
+        .nav-button.active { color: var(--primary-color); font-weight: 600; }
+        .nav-button svg { width: 24px; height: 24px; }
+        .nav-button span { font-size: 12px; }
+        
+        /* Language & Theme */
+        .language-dropdown { position: relative; }
+        .language-dropdown-toggle { cursor: pointer; background: transparent; border: none; color: var(--text-color-secondary); font-size: 1rem; padding: 8px; display: flex; align-items: center; border-radius: 999px; }
+        .language-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 150px; border-radius: var(--radius-lg); padding: 8px; background: var(--card-bg-color); border: 1px solid var(--border-color); z-index: 1001; }
+        .language-dropdown.open .language-dropdown-menu { display: block; }
+        .language-option { display: block; padding: 8px 12px; color: var(--text-color-secondary); border-radius: 8px; cursor: pointer; }
+        .theme-toggle { cursor: pointer; background-color: transparent; border: none; padding: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-color-secondary); }
+        
+        /* Earnings */
+        .earnings-list .history-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+        .earnings-list .history-item:last-child { border-bottom: none; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: white; text-transform: capitalize; }
+        .status-paid { background-color: var(--color-paid); }
+        .status-pending { background-color: var(--color-pending); }
+
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card-bg-color); border-radius: var(--radius-lg); padding: 2rem; max-width: 500px; width: calc(100% - 2rem); text-align: center; }
+        .modal-content h3 { margin-bottom: 1rem; }
+
+        /* Responsive */
+        @media (min-width: 768px) { .bottom-nav { display: none; } .top-nav { display: flex; } .header .actions { gap: 1rem; } .header { border-radius: 999px; } }
+        @media (max-width: 767px) { 
+            .header { position: static; transform: none; width: 100%; border-radius: 0; padding: 1rem; } 
+            .page-content { padding-top: 1rem; } 
+            .info-grid { grid-template-columns: 1fr; } 
+            .task-card { flex-direction: column; align-items: flex-start; gap: 1rem; } 
+            .task-actions { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="main-container">
+        <div class="background-image"></div>
+        <header class="header">
+            <div class="logo">Sehat Sahara</div>
+            <nav class="top-nav">
+                <a href="#" class="active" data-key="dashboard_nav" data-screen="dashboardScreen">Dashboard</a>
+                <a href="#" data-key="log_activity_nav" data-screen="logActivityScreen">Log Activity</a>
+                <a href="#" data-key="training_nav" data-screen="trainingCenterScreen">Training</a>
+                <a href="#" data-key="earnings_nav" data-screen="earningsScreen">Earnings</a>
+            </nav>
+            <div class="actions">
+                <div class="language-dropdown">
+                    <button class="language-dropdown-toggle"><span id="selectedLanguage">English</span></button>
+                    <div class="language-dropdown-menu"></div>
+                </div>
+                <button class="theme-toggle" id="themeToggle">
+                    <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                 <button class="btn" id="logoutBtn" style="background-color: var(--text-color-secondary); color: white;" data-key="logout">Logout</button>
+            </div>
+        </header>
+        <div class="page-content">
+            <main class="main">
+                <section id="dashboardScreen" class="screen active">
+                     <div class="welcome-card card">
+                        <h1 id="welcomeMessage" data-key="welcome_message">Welcome, Saathi</h1>
+                        <p data-key="welcome_subtitle">Ready to help your community today?</p>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-card card" data-screen="dashboardScreen"><h3 data-key="pending_tasks">Pending Tasks</h3><p class="highlight">4</p><p data-key="in_your_area">in your area</p></div>
+                        <div class="info-card card" data-screen="earningsScreen"><h3 data-key="earnings_this_week">Earnings This Week</h3><p class="highlight">₹250</p><p data-key="based_on_activity">based on activity</p></div>
+                    </div>
+                    <div class="page-header" style="margin-top: 3rem;"><h1 data-key="task_dashboard_title">Task Dashboard</h1></div>
+                    <div class="task-list" id="taskList"></div>
+                </section>
+                
+                <section id="logActivityScreen" class="screen">
+                    <div class="page-header"><h1 data-key="log_activity_title">Log Your Activity</h1><p data-key="log_activity_subtitle">Submit proof of your completed task.</p></div>
+                     <form class="card" id="logActivityForm">
+                        <div class="form-group">
+                            <label for="member-select" data-key="select_member">Select Community Member</label>
+                            <select id="member-select" class="form-control"><option>Bidhannagar, Block A</option><option>Salt Lake, Sector V</option><option>New Town, Action Area 1</option></select>
+                        </div>
+                        <div class="form-group">
+                             <label data-key="upload_photo">Upload Verification Photo</label>
+                            <div class="upload-area">
+                                <p data-key="drag_drop">Click to upload a photo</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="activity-notes" data-key="add_notes">Add a Short Note</label>
+                            <textarea id="activity-notes" class="form-control" rows="3" placeholder="e.g., Helped Mrs. Devi book a doctor's appointment."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%" data-key="submit_log">Submit Log</button>
+                    </form>
+                </section>
+
+                <section id="trainingCenterScreen" class="screen">
+                    <div class="page-header"><h1 data-key="training_center_title">Training Center</h1><p data-key="training_center_subtitle">Learn how to use the platform effectively.</p></div>
+                    <div class="training-grid" id="trainingGrid"></div>
+                </section>
+
+                <section id="earningsScreen" class="screen">
+                    <div class="page-header"><h1 data-key="earnings_title">Earnings Tracker</h1></div>
+                    <div class="card">
+                        <div class="earnings-list" id="earningsList"></div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+    
+    <nav class="bottom-nav">
+        <button class="nav-button active" data-screen="dashboardScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span data-key="dashboard_nav">Dashboard</span></button>
+        <button class="nav-button" data-screen="logActivityScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2.8-3.3-4.9-6.3-4.9h-1.2c-.3-1.4-1-2.7-2.1-3.6-1.5-1.2-3.5-1.4-5.2-.6S3 4.9 3 6.8v.2c0 2.4 1.7 4.5 4 5.1"/><path d="M8 12h8"/><path d="M12 16v-8"/></svg><span data-key="log_activity_nav">Log Activity</span></button>
+        <button class="nav-button" data-screen="trainingCenterScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg><span data-key="training_nav">Training</span></button>
+        <button class="nav-button" data-screen="earningsScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span data-key="earnings_nav">Earnings</span></button>
+    </nav>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal"><div class="modal-content"><h3 id="modalTitle"></h3><p id="modalMessage"></p><button class="btn btn-primary" id="closeModal">OK</button></div></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let saathi = null;
+            let currentLanguage = 'en';
+
+            const translations = {
+                en: { welcome_message: "Welcome, {name}", welcome_subtitle: "Ready to help your community today?", pending_tasks: "Pending Tasks", in_your_area: "in your area", earnings_this_week: "Earnings This Week", based_on_activity: "based on activity", dashboard_nav: "Dashboard", log_activity_nav: "Log Activity", training_nav: "Training", earnings_nav: "Earnings", task_dashboard_title: "Task Dashboard", mark_as_done: "Mark as Done", log_activity_title: "Log Your Activity", log_activity_subtitle: "Submit proof of your completed task.", select_member: "Select Locality/Block", upload_photo: "Upload Verification Photo", drag_drop: "Click to upload a photo", add_notes: "Add a Short Note", submit_log: "Submit Log", training_center_title: "Training Center", training_center_subtitle: "Learn how to use the platform effectively.", earnings_title: "Earnings Tracker", logout: "Logout" },
+                hi: { welcome_message: "नमस्ते, {name}", welcome_subtitle: "आज अपने समुदाय की मदद करने के लिए तैयार हैं?", pending_tasks: "लंबित कार्य", in_your_area: "आपके क्षेत्र में", earnings_this_week: "इस सप्ताह की कमाई", based_on_activity: "गतिविधि के आधार पर", dashboard_nav: "डैशबोर्ड", log_activity_nav: "लॉग गतिविधि", training_nav: "प्रशिक्षण", earnings_nav: "कमाई", task_dashboard_title: "कार्य डैशबोर्ड", mark_as_done: "पूर्ण के रूप में चिह्नित करें", log_activity_title: "अपनी गतिविधि लॉग करें", log_activity_subtitle: "अपने पूर्ण कार्य का प्रमाण प्रस्तुत करें।", select_member: "इलाका/ब्लॉक चुनें", upload_photo: "सत्यापन फोटो अपलोड करें", drag_drop: "फोटो अपलोड करने के लिए क्लिक करें", add_notes: "एक संक्षिप्त नोट जोड़ें", submit_log: "लॉग सबमिट करें", training_center_title: "प्रशिक्षण केंद्र", training_center_subtitle: "मंच का प्रभावी ढंग से उपयोग करना सीखें।", earnings_title: "कमाई ट्रैकर", logout: "लॉग आउट" }
+            };
+
+            const appData = {
+                tasks: [
+                    { id: 1, locality: "Bidhannagar, Block A", task: "Onboard new community member", type: "onboarding" },
+                    { id: 2, locality: "Salt Lake, Sector V", task: "Help book a doctor's appointment", type: "appointment" },
+                    { id: 3, locality: "New Town, Action Area 1", task: "Assist with ordering medicines", type: "pharmacy" },
+                    { id: 4, locality: "Dum Dum Park", task: "Onboard new community member", type: "onboarding" },
+                ],
+                training: [
+                    { title: "App Onboarding Guide", description: "A step-by-step video on how to register new users.", icon: '📱' },
+                    { title: "Booking Appointments", description: "Learn how to find doctors and book slots for members.", icon: '📅' },
+                    { title: "Using Simplified Tools", description: "A guide on managing health records on behalf of others.", icon: '🛠️' },
+                    { title: "Understanding Earnings", description: "Learn how your incentives are calculated and paid.", icon: '💰' },
+                ],
+                earnings: [
+                    { date: "2025-09-27", task: "Onboarding: Amit P.", incentive: 50, status: "Paid" },
+                    { date: "2025-09-27", task: "Pharmacy Help: Sunita D.", incentive: 50, status: "Paid" },
+                    { date: "2025-09-28", task: "Appointment Help: Ramesh K.", incentive: 50, status: "Pending" }
+                ]
+            };
+            
+            function checkAuth() {
+                saathi = { fullName: "Rohan Sharma" };
+                return true;
+            }
+
+            function updateUIText() {
+                const langPack = translations[currentLanguage] || translations.en;
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    let text = langPack[key];
+                    if (key === 'welcome_message' && saathi) {
+                        text = text.replace('{name}', saathi.fullName);
+                    }
+                    if (text) el.textContent = text;
+                });
+            }
+
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId)?.classList.add('active');
+                
+                document.querySelectorAll('.nav-button, .top-nav a').forEach(link => {
+                    link.classList.toggle('active', link.dataset.screen === screenId);
+                });
+            }
+            
+            function setupNavigation() {
+                document.querySelectorAll('[data-screen]').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showScreen(el.dataset.screen);
+                    });
+                });
+            }
+
+            function setupThemeAndLanguage() {
+                const themeToggle = document.getElementById('themeToggle');
+                const themeIcon = document.getElementById('themeIcon');
+                const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+                const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+                themeToggle.addEventListener('click', () => {
+                    const currentTheme = document.body.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.body.setAttribute('data-theme', newTheme);
+                    themeIcon.innerHTML = newTheme === 'dark' ? sunIcon : moonIcon;
+                });
+                
+                const langDropdown = document.querySelector('.language-dropdown');
+                const langMenu = langDropdown.querySelector('.language-dropdown-menu');
+                Object.keys(translations).forEach(lang => {
+                    const option = document.createElement('a');
+                    option.href = "#"; option.className = 'language-option'; option.dataset.lang = lang;
+                    option.textContent = new Intl.DisplayNames([lang], { type: 'language' }).of(lang);
+                    langMenu.appendChild(option);
+                });
+
+                langDropdown.querySelector('.language-dropdown-toggle').addEventListener('click', () => langDropdown.classList.toggle('open'));
+                document.addEventListener('click', e => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('open'); });
+                langMenu.addEventListener('click', e => {
+                    if (e.target.classList.contains('language-option')) {
+                        currentLanguage = e.target.dataset.lang;
+                        document.getElementById('selectedLanguage').textContent = e.target.textContent;
+                        updateUIText();
+                        langDropdown.classList.remove('open');
+                    }
+                });
+            }
+
+            function generateTasks() {
+                const container = document.getElementById('taskList');
+                container.innerHTML = appData.tasks.map(task => `
+                    <div class="card task-card">
+                        <div style="display: flex; align-items: center;">
+                           <div class="task-type-indicator type-${task.type}"></div>
+                           <div class="task-card-details">
+                                <h4>${task.locality}</h4>
+                                <p>${task.task}</p>
+                           </div>
+                        </div>
+                        <div class="task-actions">
+                             <button class="btn btn-sm btn-primary" data-key="mark_as_done" data-screen="logActivityScreen">Log Activity</button>
+                        </div>
+                    </div>`).join('');
+                setupNavigation(); // Re-run to attach listeners to new buttons
+                updateUIText();
+            }
+            
+            function generateTrainingModules() {
+                const container = document.getElementById('trainingGrid');
+                container.innerHTML = appData.training.map(module => `
+                    <div class="card training-card">
+                        <div class="icon">${module.icon}</div>
+                        <h4>${module.title}</h4>
+                        <p>${module.description}</p>
+                    </div>
+                `).join('');
+            }
+
+            function generateEarningsHistory() {
+                 const container = document.getElementById('earningsList');
+                 container.innerHTML = appData.earnings.map(item => `
+                    <div class="history-item">
+                        <div>
+                            <h4>${item.task}</h4>
+                            <p>${new Date(item.date).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                            <h4>₹${item.incentive}</h4>
+                            <span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span>
+                        </div>
+                    </div>`).join('');
+            }
+
+            function setupFormsAndModals() {
+                document.getElementById('closeModal').addEventListener('click', () => document.getElementById('confirmationModal').classList.remove('active'));
+
+                document.getElementById('logActivityForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    showConfirmationModal('Log Submitted', 'Your activity has been logged for verification.');
+                    showScreen('dashboardScreen');
+                });
+            }
+
+            function showConfirmationModal(title, message) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalMessage').textContent = message;
+                document.getElementById('confirmationModal').classList.add('active');
+            }
+
+            function initializeApp() {
+                if(checkAuth()){
+                    setupNavigation();
+                    setupThemeAndLanguage();
+                    generateTasks();
+                    generateTrainingModules();
+                    generateEarningsHistory();
+                    setupFormsAndModals();
+                    
+                    document.getElementById('logoutBtn').addEventListener('click', () => {
+                        showConfirmationModal("Logged Out", "You have been successfully logged out.");
+                    });
+    
+                    updateUIText();
+                }
+            }
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
+
