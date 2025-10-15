@@ -1801,40 +1801,7 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
                     }
                 }
 
-                async handleButtonClick(button) {
-                    console.log('Button clicked:', button.action, button.text);
-
-                    // NEW: Handle conversational booking actions
-                    const conversationalActions = ['SELECT_SPECIALTY', 'SELECT_DOCTOR', 'SELECT_DATETIME'];
-                    if (conversationalActions.includes(button.action)) {
-                        // Silently send the button's text as the next message to continue the flow
-                        const chatForm = document.getElementById('chatForm');
-                        const chatInput = document.getElementById('chatInput');
-                        chatInput.value = button.text;
-                        chatForm.dispatchEvent(new Event('submit'));
-                        this.clearButtons();
-                        return; // Stop further processing
-                    }
-
-                    // --- Existing Navigation Logic ---
-                    if (button.action === 'START_MEDICINE_SCANNER') {
-                        showScreen('scanMedicineScreen');
-                    } else if (button.action === 'UPLOAD_PRESCRIPTION') {
-                        document.getElementById('uploadPrescriptionModal').classList.add('active');
-                    }
-                    // ... (add other navigation actions like SHOW_PRESCRIPTION_SUMMARY if needed)
-
-                    // Log the click in the background
-                    try {
-                        await fetch(`${API_BASE_URL}/v1/button-action`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: user.patientId, buttonAction: button.action })
-                        });
-                    } catch (error) { console.error('Button action API error:', error); }
-
-                    this.clearButtons();
-                }
+                
 
                 clearButtons() {
                     const existingButtons = document.querySelector('.interactive-buttons-container');
