@@ -823,6 +823,25 @@
                     }
                 }
             }
+            // In patient.html, add this new function
+
+            async function loadBookingData() {
+                try {
+                    // Fetch all categories and doctors from the backend endpoint
+                    const response = await fetch(`${API_BASE_URL}/v1/booking-data`);
+                    const data = await response.json();
+
+                    if (data.success && data.booking_data) {
+                        // Update the global appData object with live data from the database
+                        appData.booking = data.booking_data;
+                        console.log('Successfully loaded booking data from backend.');
+                    } else {
+                        console.warn('Could not load booking data from backend, using mock data.');
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch booking data:', error);
+                }
+            }
 
             function checkAuth() {
                 // Check if user is logged in via localStorage (consistent with index.html)
@@ -3410,6 +3429,7 @@ Possible solutions:
                 await generateAllPrescriptions();
                 await loadDashboard();
                 await loadChatHistory(); // Add this line
+                await loadBookingData(); // <<< ADD THIS LINE
                 generateOrdersList();
                 renderBookingStep(1);
                 setupModalsAndActions();
