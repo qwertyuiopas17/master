@@ -1674,25 +1674,32 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
 
 
 
-                showInteractiveButtons(buttons) {
-                    this.clearButtons();
-                    const buttonsContainer = document.createElement('div');
-                    buttonsContainer.className = 'interactive-buttons-container';
+                // In patient.html, inside the SmartSehatSaharaChatbot class
 
-                    buttons.forEach(button => {
-                        const buttonElement = this.createButton(button);
-                        buttonsContainer.appendChild(buttonElement);
-                    });
+showInteractiveButtons(buttons) {
+    this.clearButtons();
+    
+    // <<< FIX: Add this check to prevent rendering empty buttons >>>
+    if (!buttons || buttons.length === 0) {
+        return; // Do nothing if there are no buttons
+    }
 
-                    if (this.chatWindow) {
-                        this.chatWindow.appendChild(buttonsContainer);
-                        // *** THIS IS THE FIX: Use a short timeout to scroll after the DOM updates ***
-                        setTimeout(() => {
-                            this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
-                        }, 50);
-                    }
-                    this.currentButtons = buttons;
-                }
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'interactive-buttons-container';
+
+    buttons.forEach(button => {
+        const buttonElement = this.createButton(button);
+        buttonsContainer.appendChild(buttonElement);
+    });
+
+    if (this.chatWindow) {
+        this.chatWindow.appendChild(buttonsContainer);
+        setTimeout(() => {
+            this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
+        }, 50);
+    }
+    this.currentButtons = buttons;
+}
 
                 createButton(button) {
                     const buttonElement = document.createElement('button');
