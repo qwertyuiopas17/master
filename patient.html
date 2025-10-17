@@ -1969,15 +1969,17 @@ function showTrackingModal(orderId) {
 }
 
 function setupBookMedicine() {
+    // --- Element Selectors ---
     const pharmacySelectionContainer = document.getElementById('pharmacySelectionContainer');
     const medicineOrderingContainer = document.getElementById('medicineOrderingContainer');
     const pharmacyGrid = document.getElementById('pharmacyGrid');
     const searchInput = document.getElementById('medicineSearch');
-    const medicineListEl = document.getElementById('medicineList');
-    const checkoutBtn = document.getElementById('checkoutBtn');
     const selectedPharmacyNameEl = document.getElementById('selectedPharmacyName');
     const changePharmacyBtn = document.getElementById('changePharmacyBtn');
-    
+
+    // --- Core View & Data Functions ---
+
+    // Renders the initial list of pharmacies for the user to select
     const renderPharmacies = () => {
         pharmacyGrid.innerHTML = appData.pharmacy.map(p => `
             <div class="card pharmacy-card" data-pharmacy-id="${p.id}">
@@ -1987,52 +1989,36 @@ function setupBookMedicine() {
                </div>
                <div class="actions">
                     <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.5 5.5a.5.5 0 0 0-1 0v3.5h3a.5.5 0 0 0 0-1h-2.5V5.5z"/><path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1H7a.5.5 0 0 1-.5-.5zM8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg> ${p.delivery}</span>
-                    <a href="tel:${p.contact}" class="btn btn-sm">Contact</a>
+                    <a href="tel:${p.contact}" class="btn">Contact</a>
                </div>
             </div>
         `).join('');
         pharmacyGrid.querySelectorAll('.pharmacy-card').forEach(card => card.addEventListener('click', handlePharmacySelection));
     };
 
+    // Handles switching to the medicine ordering view after a pharmacy is chosen
     const handlePharmacySelection = (e) => {
-        if(e.target.tagName === 'A') return; // Don't select if user clicks contact button
+        if (e.target.tagName === 'A') return; // Ignore clicks on the "Contact" button
         const pharmacyId = parseInt(e.currentTarget.dataset.pharmacyId);
         selectedPharmacy = appData.pharmacy.find(p => p.id === pharmacyId);
         
         pharmacySelectionContainer.style.display = 'none';
         medicineOrderingContainer.style.display = 'block';
         selectedPharmacyNameEl.textContent = `Ordering from: ${selectedPharmacy.name}`;
-        renderMedicines();
-    };
-
-    const addToCart = (medicine, quantity) => {
-        const existingItem = medicineCart.find(item => item.id === medicine.id);
-        if (existingItem) {
-            existingItem.quantity += quantity;
-        } else {
-            medicineCart.push({ ...medicine, quantity });
+        
+        const firstCategoryCard = document.querySelector('.category-card');
+        if (firstCategoryCard) {
+            firstCategoryCard.classList.add('selected');
+            renderMedicines(firstCategoryCard.dataset.category);
         }
     };
 
-    const updateCartIcon = () => {
-        const cartIcon = document.querySelector('.cart-icon');
-        const cartBadge = cartIcon.querySelector('.cart-badge');
-        const totalItems = medicineCart.reduce((sum, item) => sum + item.quantity, 0);
-
-        if (totalItems > 0) {
-            cartBadge.textContent = totalItems;
-            cartBadge.style.display = 'flex';
-        } else {
-            cartBadge.style.display = 'none';
-        }
-    };
-
-    const renderMedicines = (filter = '', category = 'all') => {
-        const medicinesToShow = appData.medicines[category] || appData.medicines.all;
-        const filteredMedicines = medicinesToShow.filter(med => med.name.toLowerCase().includes(filter.toLowerCase()));
-
+    // Renders medicine cards based on category or search results
+    const renderMedicines = (source, isSearchResult = false) => {
         const medicineGrid = document.getElementById('medicineGrid');
-        medicineGrid.innerHTML = filteredMedicines.map(med => `
+        let medicinesToShow = isSearchResult ? source : (appData.medicines[source] || []);
+        
+        medicineGrid.innerHTML = medicinesToShow.map(med => `
             <div class="medicine-card card">
                 <div class="medicine-name">${med.name}</div>
                 <div class="medicine-price">₹${med.price.toFixed(2)}</div>
@@ -2045,56 +2031,65 @@ function setupBookMedicine() {
                 <button class="btn btn-primary add-to-cart-btn" data-med-id="${med.id}">Add to Cart</button>
             </div>
         `).join('');
+        
+        attachMedicineCardListeners(medicinesToShow);
+    };
 
-        // Add event listeners for quantity buttons
+    // Attaches event listeners to the quantity and "Add to Cart" buttons on medicine cards
+    const attachMedicineCardListeners = (medicineSource) => {
+        const medicineGrid = document.getElementById('medicineGrid');
         medicineGrid.querySelectorAll('.quantity-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const medId = parseInt(e.target.dataset.medId);
                 const action = e.target.dataset.action;
                 const input = medicineGrid.querySelector(`.quantity-input[data-med-id="${medId}"]`);
+                if (!input) return;
                 let currentValue = parseInt(input.value);
-
-                if (action === 'increase' && currentValue < 99) {
-                    input.value = currentValue + 1;
-                } else if (action === 'decrease' && currentValue > 1) {
-                    input.value = currentValue - 1;
-                }
+                if (action === 'increase' && currentValue < 99) input.value = currentValue + 1;
+                else if (action === 'decrease' && currentValue > 1) input.value = currentValue - 1;
             });
         });
 
-        // Add event listeners for add to cart buttons
         medicineGrid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const medId = parseInt(e.target.dataset.medId);
-                const quantity = parseInt(medicineGrid.querySelector(`.quantity-input[data-med-id="${medId}"]`).value);
-                const medicine = medicinesToShow.find(m => m.id === medId);
-
+                const input = medicineGrid.querySelector(`.quantity-input[data-med-id="${medId}"]`);
+                if (!input) return;
+                const quantity = parseInt(input.value);
+                const medicine = medicineSource.find(m => m.id === medId);
                 if (medicine) {
                     addToCart(medicine, quantity);
                     updateCartIcon();
-                    showConfirmationModal('Added to Cart', `${medicine.name} (${quantity}) added to your cart.`);
+                    showConfirmationModal('Added to Cart', `${medicine.name} (${quantity}) has been added.`);
                 }
             });
         });
     };
-    
-    const resetAndShowPharmacies = () => {
-        pharmacySelectionContainer.style.display = 'block';
-        medicineOrderingContainer.style.display = 'none';
-        selectedPharmacy = null;
-        medicineCart = [];
-        updateCheckoutButton();
-        searchInput.value = '';
+
+    // --- Cart & Checkout Management ---
+
+    const addToCart = (medicine, quantity) => {
+        const existingItem = medicineCart.find(item => item.id === medicine.id);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            medicineCart.push({ ...medicine, quantity });
+        }
     };
-    
-    changePharmacyBtn.addEventListener('click', resetAndShowPharmacies);
 
-    const updateCheckoutButton = () => { const count = medicineCart.length; checkoutBtn.textContent = `Checkout (${count} item${count === 1 ? '' : 's'})`; checkoutBtn.disabled = count === 0; };
+    const updateCartIcon = () => {
+        const cartBadge = document.querySelector('.cart-badge');
+        if (!cartBadge) return;
+        const totalItems = medicineCart.reduce((sum, item) => sum + item.quantity, 0);
+        cartBadge.textContent = totalItems;
+        cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    };
 
-    // Cart functionality
+    // Updates the content of the shopping cart modal
     const updateCartModal = () => {
         const cartItemsContainer = document.getElementById('cartItemsContainer');
         const cartTotalEl = document.getElementById('cartTotal');
+        if (!cartItemsContainer || !cartTotalEl) return;
 
         if (medicineCart.length === 0) {
             cartItemsContainer.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">Your cart is empty</p>';
@@ -2124,146 +2119,101 @@ function setupBookMedicine() {
         cartTotalEl.textContent = `₹${total.toFixed(2)}`;
     };
 
-    // Make functions globally available
+    // Make cart modification functions globally accessible for the onclick attributes
     window.updateCartItemQuantity = (medicineId, newQuantity) => {
-        if (newQuantity <= 0) {
-            removeCartItem(medicineId);
-            return;
-        }
-
-        const item = medicineCart.find(item => item.id === medicineId);
+        const item = medicineCart.find(i => i.id === medicineId);
         if (item) {
-            item.quantity = newQuantity;
-            updateCartIcon();
-            updateCartModal();
+            if (newQuantity <= 0) {
+                removeCartItem(medicineId);
+            } else {
+                item.quantity = newQuantity;
+                updateCartIcon();
+                updateCartModal();
+            }
         }
     };
 
     window.removeCartItem = (medicineId) => {
-        const index = medicineCart.findIndex(item => item.id === medicineId);
+        const index = medicineCart.findIndex(i => i.id === medicineId);
         if (index > -1) {
             medicineCart.splice(index, 1);
             updateCartIcon();
             updateCartModal();
-            showConfirmationModal('Removed', 'Item removed from cart');
         }
     };
 
-    // Checkout functionality
+    // --- Checkout Flow Logic ---
     let checkoutStep = 1;
     const showCheckoutStep = (step) => {
         checkoutStep = step;
         document.querySelectorAll('#checkoutModal .checkout-step').forEach(s => s.classList.remove('active'));
-        document.getElementById(`checkoutStep${step}`).classList.add('active');
+        const stepEl = document.getElementById(`checkoutStep${step}`);
+        if (stepEl) stepEl.classList.add('active');
     };
 
     window.nextCheckoutStep = () => {
-        if (checkoutStep < 4) {
-            if (checkoutStep === 1) {
-                const address = document.getElementById('deliveryAddress').value.trim();
-                if (!address) {
-                    showConfirmationModal('Address Required', 'Please enter your delivery address');
-                    return;
-                }
-                // Populate order summary
-                document.getElementById('checkoutAddress').textContent = address;
-
-                // Populate items
-                const checkoutItems = document.getElementById('checkoutItems');
-                checkoutItems.innerHTML = medicineCart.map(item => `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
-                        <div>
-                            <strong>${item.name}</strong><br>
-                            <small>Quantity: ${item.quantity}</small>
-                        </div>
-                        <div style="text-align: right;">
-                            <div>₹${item.price.toFixed(2)} each</div>
-                            <div style="font-weight: 600;">₹${(item.price * item.quantity).toFixed(2)}</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Update total
-                const total = medicineCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                document.getElementById('checkoutTotal').textContent = `₹${total.toFixed(2)}`;
+        if (checkoutStep === 1) {
+            if (!document.getElementById('deliveryAddress').value.trim()) {
+                showConfirmationModal('Address Required', 'Please enter your delivery address.');
+                return;
             }
-            showCheckoutStep(checkoutStep + 1);
+            document.getElementById('checkoutAddress').textContent = document.getElementById('deliveryAddress').value;
+            const checkoutItems = document.getElementById('checkoutItems');
+            checkoutItems.innerHTML = medicineCart.map(item => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                    <div><strong>${item.name}</strong><br><small>Quantity: ${item.quantity}</small></div>
+                    <div style="font-weight: 600;">₹${(item.price * item.quantity).toFixed(2)}</div>
+                </div>`).join('');
+            const total = medicineCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('checkoutTotal').textContent = `₹${total.toFixed(2)}`;
         }
+        if (checkoutStep < 4) showCheckoutStep(checkoutStep + 1);
     };
 
     window.prevCheckoutStep = () => {
-        if (checkoutStep > 1) {
-            showCheckoutStep(checkoutStep - 1);
-        }
+        if (checkoutStep > 1) showCheckoutStep(checkoutStep - 1);
     };
 
-    document.getElementById('checkoutModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('checkoutModal')) {
-            document.getElementById('checkoutModal').classList.remove('active');
-            showCheckoutStep(1);
-        }
-    });
-
-    // Payment form handling
-    function showPaymentForm(paymentMethod) {
+    // --- Payment Form Logic ---
+    const showPaymentForm = (method) => {
         document.getElementById('cardPaymentForm').style.display = 'none';
         document.getElementById('upiPaymentForm').style.display = 'none';
         document.getElementById('netbankingForm').style.display = 'none';
-
-        if (paymentMethod === 'card') {
-            document.getElementById('cardPaymentForm').style.display = 'block';
-        } else if (paymentMethod === 'upi') {
-            document.getElementById('upiPaymentForm').style.display = 'block';
-        } else if (paymentMethod === 'netbanking') {
-            document.getElementById('netbankingForm').style.display = 'block';
-        }
-    }
+        const form = document.getElementById(`${method}PaymentForm`);
+        if (form) form.style.display = 'block';
+    };
 
     window.formatCardNumber = (input) => {
-        let value = input.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-        let formattedValue = '';
-
-        for (let i = 0; i < value.length && i < 16; i++) {
-            if (i > 0 && i % 4 === 0) {
-                formattedValue += ' ';
-            }
-            formattedValue += value[i];
-        }
-
-        input.value = formattedValue;
-        updateCardPreview();
+        input.value = input.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+        document.getElementById('previewCardNumber').textContent = input.value || '•••• •••• •••• ••••';
     };
 
     window.formatExpiryDate = (input) => {
-        let value = input.value.replace(/\D/g, '');
-
-        if (value.length >= 2) {
-            value = value.substring(0, 2) + '/' + value.substring(2, 4);
-        }
-
-        input.value = value;
-        updateCardPreview();
+        input.value = input.value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2').slice(0, 5);
+        document.getElementById('previewExpiryDate').textContent = input.value || '••/••';
     };
-
-    function updateCardPreview() {
-        const cardNumber = document.getElementById('cardNumber').value;
-        const expiryDate = document.getElementById('expiryDate').value;
-        document.getElementById('previewCardNumber').textContent = cardNumber || '•••• •••• •••• ••••';
-        document.getElementById('previewExpiryDate').textContent = expiryDate || '••/••';
-    }
 
     window.setUpiId = (app) => {
-        const upiInput = document.getElementById('upiId');
-        const phoneNumber = '9876543210';
-        switch(app) {
-            case 'paytm': upiInput.value = `${phoneNumber}@paytm`; break;
-            case 'gpay': upiInput.value = `${phoneNumber}@oksbi`; break;
-            case 'phonepe': upiInput.value = `${phoneNumber}@ybl`; break;
-        }
+        const phone = '9876543210'; // Example phone number
+        const suffix = { paytm: '@paytm', gpay: '@oksbi', phonepe: '@ybl' }[app];
+        document.getElementById('upiId').value = phone + suffix;
     };
 
-    function validatePaymentForm(paymentMethod) { /* Validation logic here */ return true; }
+    // A simple validation placeholder
+    const validatePaymentForm = (method) => {
+        // In a real app, you'd have robust validation here
+        if (method === 'card' && document.getElementById('cardNumber').value.length < 19) {
+            showConfirmationModal('Invalid Card', 'Please enter a valid 16-digit card number.');
+            return false;
+        }
+        if (method === 'upi' && !document.getElementById('upiId').value.includes('@')) {
+            showConfirmationModal('Invalid UPI', 'Please enter a valid UPI ID.');
+            return false;
+        }
+        return true;
+    };
 
+    // --- Order Placement ---
     window.processPayment = async () => {
         const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
         if (!validatePaymentForm(paymentMethod)) return;
@@ -2272,22 +2222,18 @@ function setupBookMedicine() {
         processBtn.textContent = 'Processing...';
         processBtn.disabled = true;
 
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment
-            await placeOrder();
-        } catch (error) {
-            showConfirmationModal('Payment Failed', 'Please try again.');
-        } finally {
-            processBtn.textContent = 'Proceed to Pay';
-            processBtn.disabled = false;
-        }
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+
+        placeOrder(); // Place order on successful payment simulation
+
+        processBtn.textContent = 'Proceed to Pay';
+        processBtn.disabled = false;
     };
-    
-    window.placeOrder = async () => {
+
+    const placeOrder = () => {
         const total = medicineCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const orderId = `MED-${Date.now()}`;
-        
-        const order = {
+        const newOrder = {
             id: orderId,
             items: [...medicineCart],
             total: total,
@@ -2295,35 +2241,63 @@ function setupBookMedicine() {
             date: new Date().toISOString(),
             pharmacyName: selectedPharmacy.name
         };
-        appData.orders.unshift(order);
+        appData.orders.unshift(newOrder);
 
-        const record = {
-            date: order.date.split('T')[0],
+        // Add to health record timeline
+        appData.records.unshift({
+            date: newOrder.date.split('T')[0],
             title: `Medicine Order - ${selectedPharmacy.name}`,
-            description: `Ordered ${order.items.length} items for ₹${total.toFixed(2)}. Order ID: ${orderId}`
-        };
-        appData.records.unshift(record);
-        
-        medicineCart = [];
-        updateCartIcon();
-        
+            description: `Ordered ${newOrder.items.length} items for ₹${total.toFixed(2)}. Order ID: ${orderId}`
+        });
+
+        // Show confirmation screen
         document.getElementById('orderIdDisplay').textContent = orderId;
         document.getElementById('deliveryTimeDisplay').textContent = selectedPharmacy.delivery;
         showCheckoutStep(4);
-        
+
+        // Reset and update UI
+        medicineCart = [];
+        updateCartIcon();
         generateTimeline();
         generateOrdersList();
     };
     
     window.trackOrder = () => {
         document.getElementById('checkoutModal').classList.remove('active');
-        showCheckoutStep(1);
+        showCheckoutStep(1); // Reset modal for next time
         showScreen('trackOrdersScreen');
     };
-
-    searchInput.addEventListener('input', (e) => renderMedicines(e.target.value));
     
-    renderPharmacies();
+    // --- Initial Setup & Event Listeners ---
+    
+    // Event listener for category card clicks
+    document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            searchInput.value = '';
+            renderMedicines(card.dataset.category);
+        });
+    });
+    
+    // Event listener for the search input
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        if (searchTerm.length > 0) {
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+            const allMedicines = Object.values(appData.medicines).flat();
+            const filteredMedicines = allMedicines.filter(med => med.name.toLowerCase().includes(searchTerm));
+            renderMedicines(filteredMedicines, true);
+        } else {
+            const firstCategoryCard = document.querySelector('.category-card');
+            if(firstCategoryCard) {
+                firstCategoryCard.classList.add('selected');
+                renderMedicines(firstCategoryCard.dataset.category);
+            }
+        }
+    });
+
+    changePharmacyBtn.addEventListener('click', resetAndShowPharmacies);
 
     document.querySelector('.cart-icon').addEventListener('click', () => {
         updateCartModal();
@@ -2331,29 +2305,34 @@ function setupBookMedicine() {
     });
 
     document.getElementById('cartModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('cartModal')) {
-            document.getElementById('cartModal').classList.remove('active');
+        if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+    });
+    
+    document.getElementById('checkoutModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            e.currentTarget.classList.remove('active');
+            showCheckoutStep(1);
         }
     });
 
     document.getElementById('proceedToCheckoutBtn').addEventListener('click', () => {
         if (medicineCart.length === 0) {
-            showConfirmationModal('Cart Empty', 'Please add items to your cart');
+            showConfirmationModal('Cart Empty', 'Please add items to your cart.');
             return;
         }
         document.getElementById('cartModal').classList.remove('active');
         document.getElementById('checkoutModal').classList.add('active');
         showCheckoutStep(1);
     });
-
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            showPaymentForm(e.target.value);
-        });
-    });
     
-    // Initialize with card form visible
-    showPaymentForm('card');
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+        radio.addEventListener('change', (e) => showPaymentForm(e.target.value));
+    });
+
+    // Initial function calls
+    renderPharmacies();
+    updateCartIcon();
+    showPaymentForm('card'); // Default to showing the card form
 }
 
             function setupModalsAndActions() {
