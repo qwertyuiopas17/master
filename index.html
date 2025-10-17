@@ -685,7 +685,7 @@
                                 <option value="doctor" data-key="role_doctor">Doctor</option>
                                 <option value="admin" data-key="role_admin">Admin</option>
                                 <option value="saathi" data-key="role_saathi">Saathi</option>
-                                <option value="store" data-key="role_store">Store</option>
+                                <option value="pharmacy" data-key="role_store">Store</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -1055,11 +1055,7 @@
                 window.location.href = 'saathi.html';
                 return;
             }
-            if (role === 'store' && username === 'store' && password === 'store123') {
-                localStorage.setItem('sehatSaharaUser', JSON.stringify({patientId: 'store', username: 'Store User', email: 'store@example.com', role: 'store'}));
-                window.location.href = 'store.html';
-                return;
-            }
+            
 
             try {
                 const response = await fetch(`${API_BASE_URL}/login`, {
@@ -1084,7 +1080,7 @@
                         case 'doctor':
                             window.location.href = 'doctor.html';
                             break;
-                        case 'store':
+                        case 'pharmacy':
                             window.location.href = 'store.html';
                             break;
                         case 'saathi':
@@ -1288,3 +1284,4 @@
 </script>
 </body>
 </html>
+
