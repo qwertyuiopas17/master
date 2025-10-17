@@ -2012,6 +2012,17 @@ function setupBookMedicine() {
             renderMedicines(firstCategoryCard.dataset.category);
         }
     };
+    // **THIS IS THE FUNCTION THAT WAS NOT DEFINED IN TIME**
+    // It resets the view to the pharmacy selection screen.
+    const resetAndShowPharmacies = () => {
+        pharmacySelectionContainer.style.display = 'block';
+        medicineOrderingContainer.style.display = 'none';
+        selectedPharmacy = null;
+        medicineCart = [];
+        updateCartIcon();
+        updateCheckoutButton();
+        searchInput.value = '';
+    };
 
     // Renders medicine cards based on category or search results
     const renderMedicines = (source, isSearchResult = false) => {
