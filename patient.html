@@ -2005,6 +2005,14 @@ function showTrackingModal(orderId) {
     const searchInput = document.getElementById('medicineSearch');
     const selectedPharmacyNameEl = document.getElementById('selectedPharmacyName');
     const changePharmacyBtn = document.getElementById('changePharmacyBtn');
+                // --- Event Handling & State Management ---
+
+            // Resets the view to show the pharmacy list again
+            const resetAndShowPharmacies = () => {
+                pharmacySelectionContainer.style.display = 'block';
+                medicineOrderingContainer.style.display = 'none';
+                selectedPharmacy = null; // Clear the selected pharmacy state
+            };
 
     // --- Core View & Data Functions ---
 
