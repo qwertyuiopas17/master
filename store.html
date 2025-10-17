@@ -674,7 +674,7 @@
                      }
                      return `
                         <div class="list-item">
-                            <div><strong>Order #${order.id.slice(-6).toUpperCase()}</strong> - ${order.customer}</div>
+                            <div><strong>Order #${String(order.id).slice(-6).toUpperCase()}</strong>- ${order.customer}</div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                  <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
                                  ${buttonHtml}
@@ -685,7 +685,7 @@
 
             async function checkAuth() {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/v1/pharmacy/dashboard`);
+                    const response = await fetch(`${API_BASE_URL}/v1/pharmacy/dashboard`, { credentials: 'include' });
                     if (response.ok) {
                         document.getElementById('logoutBtn').style.display = 'inline-block';
                         document.getElementById('loginBtn').style.display = 'none';
