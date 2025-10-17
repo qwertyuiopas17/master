@@ -493,13 +493,7 @@
                         <button class="btn btn-primary btn-sm" data-screen="inventoryScreen">Check Stock</button>
                     </div>`).join('');
 
-                const recentOrdersContainer = document.getElementById('recentOrdersList');
-                recentOrdersContainer.innerHTML = appData.recentOrders.map(order => `
-                    <div class="list-item">
-                        <div><strong>Order #${order.id}</strong> - ${order.customer}</div>
-                        <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
-                    </div>`).join('');
-            }
+                
 
             function renderInventory() {
                 const container = document.getElementById('inventoryList');
@@ -516,23 +510,7 @@
                     </div>`).join('');
             }
 
-            function renderOrders() {
-                const container = document.getElementById('ordersList');
-                 container.innerHTML = appData.orders.map(order => {
-                     let buttonHtml = `<button class="btn btn-primary btn-sm accept-order-btn" data-id="${order.id}">Accept</button>`;
-                     if (order.status !== 'New') {
-                         buttonHtml = `<button class="btn btn-sm" disabled>Accepted</button>`;
-                     }
-                     return `
-                        <div class="list-item">
-                            <div><strong>Order #${order.id}</strong> - ${order.customer}<br><small>${order.address}</small></div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                 <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
-                                 ${buttonHtml}
-                            </div>
-                        </div>`;
-                 }).join('');
-            }
+            
 
             function renderPrescriptions() {
                 const container = document.getElementById('prescriptionsList');
@@ -623,38 +601,86 @@
                 });
             }
 
+            // This function fetches REAL data from the backend
             function loadDashboardData() {
-                // Load real dashboard data from backend
-                fetch('/v1/pharmacy/dashboard', {
+                // Ensure you are using the full API_BASE_URL
+                fetch(`${API_BASE_URL}/v1/pharmacy/dashboard`, {
                     method: 'GET',
-                    credentials: 'include'
+                    credentials: 'include' // This tells the browser to send the login cookie
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        // If the response is 401 or another error, handle it here
+                        throw new Error(`Authentication failed: Status ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        // Update dashboard with real data
-                        document.querySelector('.info-card[data-screen="ordersScreen"] h3').textContent = `New Orders`;
-                        document.querySelector('.info-card[data-screen="ordersScreen"] p').textContent = data.newOrdersCount;
-                        document.querySelector('.info-card[data-screen="prescriptionsScreen"] h3').textContent = `Prescriptions`;
-                        document.querySelector('.info-card[data-screen="prescriptionsScreen"] p').textContent = data.pendingDeliveriesCount;
-                        document.querySelector('.info-card[data-screen="inventoryScreen"] h3').textContent = `Low Stock Alerts`;
-                        document.querySelector('.info-card[data-screen="inventoryScreen"] p').textContent = data.lowStockAlerts;
-
-                        // Update pharmacy name
+                        // --- This block now processes REAL data from your backend ---
+                        
+                        // Update pharmacy name in the header
                         document.querySelector('.header .logo').textContent = data.pharmacyName;
+                        
+                        // Update dashboard stats
+                        document.getElementById('newOrdersCount').textContent = data.newOrdersCount;
+                        document.getElementById('pendingDeliveriesCount').textContent = data.pendingDeliveriesCount;
+                        // For now, these are static as the backend doesn't provide them yet
+                        document.getElementById('prescriptionsCount').textContent = '5'; 
+                        document.getElementById('lowStockAlertsCount').textContent = data.lowStockAlerts || 3;
 
-                        // Update recent orders
+                        // Update recent orders list with real data
                         const recentOrdersContainer = document.getElementById('recentOrdersList');
-                        recentOrdersContainer.innerHTML = data.orders.slice(0, 3).map(order => `
-                            <div class="list-item">
-                                <div><strong>Order #${order.id}</strong> - ${order.customer}</div>
-                                <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
-                            </div>`).join('');
+                        if (data.orders && data.orders.length > 0) {
+                            recentOrdersContainer.innerHTML = data.orders.slice(0, 3).map(order => `
+                                <div class="list-item">
+                                    <div><strong>Order #${order.id.slice(-6).toUpperCase()}</strong> - ${order.customer}</div>
+                                    <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                                </div>`).join('');
+                        } else {
+                            recentOrdersContainer.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">No new orders found.</p>';
+                        }
+
+                        // **CRITICAL:** Pass the real order data to the function that renders the "Orders" screen
+                        renderOrders(data.orders); 
+                    } else {
+                        // Handle cases where the API returns success: false
+                        throw new Error(data.message || 'Failed to load dashboard data.');
                     }
                 })
                 .catch(error => {
                     console.error('Failed to load dashboard data:', error);
+                    // If fetching fails, show an error and ensure the user can log in again.
+                    document.getElementById('dashboardSubtitle').textContent = 'Could not load data. Please try logging in again.';
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('loginBtn').style.display = 'inline-block';
+                    // Render empty state instead of mock data
+                    document.getElementById('recentOrdersList').innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">Failed to load recent orders.</p>';
+                    s([]); // Render the orders list as empty
                 });
+            }
+
+            // **MODIFY** the renderOrders function to accept data as a parameter
+            function renderOrders(orders = appData.orders) { // Use mock data as a fallback only
+                const container = document.getElementById('ordersList');
+                if (orders.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">There are no incoming orders at this time.</p>';
+                    return;
+                }
+                 container.innerHTML = orders.map(order => {
+                     let buttonHtml = `<button class="btn btn-primary btn-sm accept-order-btn" data-id="${order.id}">Accept</button>`;
+                     if (order.status.toLowerCase() !== 'placed') {
+                         buttonHtml = `<button class="btn btn-sm" disabled>${order.status}</button>`;
+                     }
+                     return `
+                        <div class="list-item">
+                            <div><strong>Order #${order.id.slice(-6).toUpperCase()}</strong> - ${order.customer}</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                 <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                                 ${buttonHtml}
+                            </div>
+                        </div>`;
+                 }).join('');
             }
 
             async function checkAuth() {
@@ -698,6 +724,7 @@
     </script>
 </body>
 </html>
+
 
 
 
