@@ -492,8 +492,8 @@
                         <div style="display: flex; align-items: center;"><span class="alert-indicator"></span> ${item}</div>
                         <button class="btn btn-primary btn-sm" data-screen="inventoryScreen">Check Stock</button>
                     </div>`).join('');
-
                 
+            }
 
             function renderInventory() {
                 const container = document.getElementById('inventoryList');
@@ -514,7 +514,7 @@
 
             function renderPrescriptions() {
                 const container = document.getElementById('prescriptionsList');
-                 container.innerHTML = appData.prescriptions.map(p => `
+                    container.innerHTML = appData.prescriptions.map(p => `
                     <div class="list-item">
                         <div><strong>Patient: ${p.patient}</strong><br><small>From: ${p.doctor}</small></div>
                         <button class="btn btn-primary btn-sm view-prescription-btn" data-id="${p.id}">View & Process</button>
@@ -656,7 +656,7 @@
                     document.getElementById('loginBtn').style.display = 'inline-block';
                     // Render empty state instead of mock data
                     document.getElementById('recentOrdersList').innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">Failed to load recent orders.</p>';
-                    s([]); // Render the orders list as empty
+                    renderOrders([]); // Render the orders list as empty
                 });
             }
 
@@ -724,7 +724,3 @@
     </script>
 </body>
 </html>
-
-
-
-
