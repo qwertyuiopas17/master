@@ -1415,7 +1415,8 @@
         // const API_BASE_URL = 'http://localhost:5000';
 
         // For Render deployment, uncomment if needed:
-         const API_BASE_URL = 'https://sahara-sathi.onrender.com';
+         //const API_BASE_URL = 'https://sahara-sathi.onrender.com';
+        const API_BASE_URL = '/api';
 
         console.log('Using API base URL:', API_BASE_URL);
         let medicineCart = [], selectedPharmacy = null;
@@ -4357,56 +4358,7 @@ Possible solutions:
 
             
 
-            async function saveMedicineReminder(isEdit = false) {
-                const medicineName = document.getElementById('medicineName').value.trim();
-                const dosage = document.getElementById('medicineDosage').value.trim();
-                const times = document.getElementById('medicineTimes').value.trim();
-                const duration = document.getElementById('medicineDuration').value;
-                const instructions = document.getElementById('medicineInstructions').value.trim();
-
-                if (!medicineName || !dosage || !times) {
-                    alert('Please fill in all required fields');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: user.patientId,
-                            action: 'add',
-                            medicine_name: medicineName,
-                            dosage: dosage,
-                            times: times.split(',').map(t => t.trim()),
-                            duration_days: parseInt(duration),
-                            instructions: instructions
-                        })
-                    });
-
-                    if (response.ok) {
-                        document.getElementById('medicineReminderModal').classList.remove('active');
-                        // Clear form
-                        document.getElementById('medicineName').value = '';
-                        document.getElementById('medicineDosage').value = '';
-                        document.getElementById('medicineTimes').value = '';
-                        document.getElementById('medicineDuration').value = '30';
-                        document.getElementById('medicineInstructions').value = '';
-
-                        // Refresh reminders display
-                        await loadMedicineRemindersScreen();
-                        await checkMedicineReminders(); // Also refresh home screen counter
-
-                        const actionText = isEdit ? 'updated' : 'added';
-                        showConfirmationModal('Success', `Medicine reminder ${actionText} successfully!`);
-                    } else {
-                        throw new Error('Failed to save reminder');
-                    }
-                } catch (error) {
-                    console.error('Save reminder error:', error);
-                    alert('Failed to save medicine reminder. Please try again.');
-                }
-            }
+            
 
             // Enhanced SOS Detection in Chatbot
             async function checkForEmergency(message) {
@@ -4609,68 +4561,137 @@ Possible solutions:
             }
             
             // ENHANCED saveMedicineReminder function
-            async function saveMedicineReminder() {
-                const isEdit = currentlyEditing !== null;
-                const action = isEdit ? 'update' : 'add';
+            // --- YOUR OTHER EXISTING JAVASCRIPT FUNCTIONS ---
+        
+        // This is your correct, fully functional saveMedicineReminder
+        async function saveMedicineReminder() {
+            const isEdit = currentlyEditing !== null;
+            const action = isEdit ? 'update' : 'add';
+            const medicineName = document.getElementById('medicineName').value.trim();
+            const dosage = document.getElementById('medicineDosage').value.trim();
+            const times = document.getElementById('medicineTimes').value.trim();
+            const duration = document.getElementById('medicineDuration').value;
+            const instructions = document.getElementById('medicineInstructions').value.trim();
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-                const medicineName = document.getElementById('medicineName').value.trim();
-                // ... (rest of the data fetching from form)
-                const dosage = document.getElementById('medicineDosage').value.trim();
-                const times = document.getElementById('medicineTimes').value.trim();
-                const duration = document.getElementById('medicineDuration').value;
-                const instructions = document.getElementById('medicineInstructions').value.trim();
-
-
-                if (!medicineName || !dosage || !times) {
-                    alert('Please fill in all required fields');
-                    return;
-                }
-                
-                let payload = {
-                    userId: user.patientId,
-                    action: action,
-                    medicine_data: {
-                        name: medicineName,
-                        dosage: dosage,
-                        times: times.split(',').map(t => t.trim()),
-                        duration_days: parseInt(duration),
-                        instructions: instructions
-                    }
-                };
-
-                // If editing, add the original name to identify which reminder to update
-                if (isEdit) {
-                    payload.original_medicine_name = currentlyEditing;
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        document.getElementById('medicineReminderModal').classList.remove('active');
-                        document.getElementById('medicineReminderForm').reset();
-
-                        // --- NEW: Reset editing state ---
-                        currentlyEditing = null;
-                        document.getElementById('saveReminderBtn').textContent = 'Save Reminder';
-                        
-                        await loadMedicineRemindersScreen();
-                        await checkMedicineReminders(); 
-
-                        const actionText = isEdit ? 'updated' : 'added';
-                        showConfirmationModal('Success', `Medicine reminder ${actionText} successfully!`);
-                    } else {
-                        throw new Error('Failed to save reminder');
-                    }
-                } catch (error) {
-                    console.error('Save reminder error:', error);
-                    alert('Failed to save medicine reminder. Please try again.');
-                }
+            if (!medicineName || !dosage || !times) {
+                alert('Please fill in all required fields');
+                return;
             }
+
+            let payload = {
+                userId: user.patientId,
+                action: action,
+                medicine_data: {
+                    name: medicineName,
+                    dosage: dosage,
+                    times: times.split(',').map(t => t.trim()),
+                    duration_days: parseInt(duration),
+                    instructions: instructions,
+                    timezone: userTimezone
+                }
+            };
+
+            if (isEdit) {
+                payload.original_medicine_name = currentlyEditing;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error('Failed to save reminder');
+
+                document.getElementById('medicineReminderModal').classList.remove('active');
+                document.getElementById('medicineReminderForm').reset();
+                currentlyEditing = null;
+                document.getElementById('saveReminderBtn').textContent = 'Save Reminder';
+                await loadMedicineRemindersScreen();
+                showConfirmationModal('Success', `Medicine reminder ${isEdit ? 'updated' : 'added'}!`);
+
+            } catch (error) {
+                console.error('Save reminder error:', error);
+                alert('Failed to save medicine reminder. Please try again.');
+            }
+        }
+            // Add these functions inside your <script> tag in patient.html
+            // --- PUSH NOTIFICATION HELPERS ---
+
+        // Converts the VAPID key for the browser
+        function urlB64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        async function subscribeUser() {
+            // 1. Check if the user is already subscribed
+            const existingSub = await navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription());
+            if (existingSub) {
+                console.log('User is already subscribed.');
+                return;
+            }
+
+            // 2. Ask for permission
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                alert('Push notifications are required for reminders to work on mobile. Please enable them in your browser settings.');
+                return;
+            }
+
+            try {
+                // 3. Get VAPID public key from server
+                const response = await fetch(`${API_BASE_URL}/v1/vapid-public-key`);
+                const data = await response.json();
+                const applicationServerKey = urlB64ToUint8Array(data.publicKey);
+
+                // 4. Subscribe the user
+                const subscription = await navigator.serviceWorker.ready.then(reg => 
+                    reg.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: applicationServerKey
+                    })
+                );
+
+                // 5. Send subscription to backend
+                await fetch(`${API_BASE_URL}/v1/subscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.patientId, subscription: subscription })
+                });
+
+                console.log('User subscribed successfully.');
+                document.getElementById('notification-banner').style.display = 'none';
+
+            } catch (error) {
+                console.error('Failed to subscribe user:', error);
+            }
+        }
+        
+        function setupNotificationBanner() {
+            const banner = document.getElementById('notification-banner');
+            const enableBtn = document.getElementById('enable-notifications-btn');
+            const dismissBtn = document.getElementById('dismiss-banner-btn');
+
+            if (Notification.permission === 'granted') {
+                banner.style.display = 'none';
+                subscribeUser(); // --- ADD THIS LINE ---
+                return;
+            }
+            
+            banner.style.display = 'block';
+            enableBtn.onclick = subscribeUser;
+            dismissBtn.onclick = () => banner.style.display = 'none';
+        }
+
+
             
             // --- END: FULLY FUNCTIONAL REMINDER BLOCK ---
             // New function to handle page load
@@ -4692,6 +4713,24 @@ Possible solutions:
             
 
             async function initializeApp() {
+             if (!checkAuth()) return;
+
+                // --- NEW CODE TO ADD ---
+                // Register Service Worker and set up banner
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    try {
+                        await navigator.serviceWorker.register('/sw.js'); // Assuming your file is sw2.js
+                        console.log('Service Worker registered successfully');
+                        setupNotificationBanner(); // Show the banner if needed
+                    } catch (error) {
+                        console.error('Service Worker registration failed:', error);
+                    }
+                } else {
+                     console.warn('Push notifications are not supported in this browser.');
+                }
+                // --- END NEW CODE ---
+            // ... the rest of your initializeApp function
+        
                 if (!checkAuth()) return;
                 await loadDoctors();
                 updateUIText();
@@ -4713,7 +4752,7 @@ Possible solutions:
                 setupUploadPrescription();
                 setupChatbot();
                 setupWebRTC();
-
+                
                 // Check for post-appointment follow-up
                 await checkPostAppointmentFollowup();
 
@@ -4751,5 +4790,13 @@ Possible solutions:
             initializeApp();
         });
     </script>
+    <!-- Notification Banner for Push Reminders -->
+<div id="notification-banner" class="card" style="display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 1001; width: 90%; max-width: 500px; background-color: var(--card-bg-color); backdrop-filter: blur(10px); padding: 1rem; text-align: center;">
+    <p style="margin-bottom: 1rem;">Enable notifications to get medicine reminders even when the app is in the background.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button id="enable-notifications-btn" class="btn btn-primary">Enable Notifications</button>
+        <button id="dismiss-banner-btn" class="btn">Dismiss</button>
+    </div>
+</div>
 </body>
 </html>
