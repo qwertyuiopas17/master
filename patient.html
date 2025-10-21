@@ -4435,31 +4435,7 @@ Possible solutions:
                         `;
                     }
 
-                    // Show pending alerts if any
-                    if (data.pending_alerts && data.pending_alerts.length > 0) {
-                        const alertsHtml = data.pending_alerts.map(alert => `
-                            <div class="medicine-reminder-card card" style="border-left: 4px solid var(--sos-color);">
-                                <div class="reminder-item">
-                                    <div class="reminder-info">
-                                        <h4>⏰ Pending Reminder</h4>
-                                        <p><strong>${alert.medicine_name}</strong> - ${alert.dosage}</p>
-                                        <p>Scheduled for: ${alert.time}</p>
-                                    </div>
-                                    <div class="reminder-actions">
-                                        <button class="btn-taken" onclick="markMedicineTaken('${alert.medicine_name}')">Mark Taken</button>
-                                        <button class="btn-skip" onclick="skipMedicine('${alert.medicine_name}')">Skip</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('');
-
-                        container.insertAdjacentHTML('afterbegin', `
-                            <div style="margin-bottom: 1.5rem;">
-                                <h3 style="color: var(--sos-color);">⚠️ Pending Alerts</h3>
-                                ${alertsHtml}
-                            </div>
-                        `);
-                    }
+                    
                 } catch (error) {
                     console.error('Load medicine reminders screen error:', error);
                     const container = document.getElementById('remindersContainer');
