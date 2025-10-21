@@ -37,34 +37,51 @@ self.addEventListener('push', event => {
 });
 
 // Your existing notification click listener (no changes needed)
+// In sw.js, inside the 'notificationclick' listener:
+
 self.addEventListener('notificationclick', event => {
+    // 1. Close the notification that was clicked
     event.notification.close();
 
     const medicineName = event.notification.data.medicineName;
     const userId = event.notification.data.userId;
 
     if (event.action === 'mark-taken') {
-        console.log(`'Mark as Taken' clicked for ${medicineName}`);
-
+        
+        // This handles the async operations and ensures the browser doesn't kill the service worker
         event.waitUntil(
-            fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: userId,
-                    action: 'update_adherence',
-                    medicine_name: medicineName,
-                    taken_time: new Date().toTimeString().slice(0, 5)
+            // Find and close any other lingering notifications for this same medicine
+            self.registration.getNotifications({ tag: `medicine-reminder-${medicineName}` })
+                .then(notifications => {
+                    notifications.forEach(notification => notification.close());
                 })
-            }).then(response => {
-                if (!response.ok) {
-                    console.error('Failed to mark as taken from notification.');
-                } else {
-                    console.log('Successfully marked as taken from notification.');
-                }
-            }).catch(error => {
-                console.error('Fetch error in Service Worker:', error);
-            })
+                .then(() => {
+                    // 2. Execute the fetch command after ensuring all related notifications are closed
+                    return fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: userId,
+                            action: 'update_adherence',
+                            medicine_name: medicineName,
+                            taken_time: new Date().toTimeString().slice(0, 5)
+                        })
+                    }).then(response => {
+                        // --- ERROR HANDLER IS BACK HERE ---
+                        if (!response.ok) {
+                            console.error('Failed to mark as taken from notification. Status:', response.status);
+                            // Optionally show a failure notification here
+                        } else {
+                            console.log('Successfully marked as taken and rescheduled.');
+                        }
+                    }).catch(error => {
+                        console.error('Fetch error in Service Worker:', error);
+                        // Optionally show a failure notification for network errors
+                    });
+                })
         );
+        // --- END OF CORRECTED BLOCK ---
     }
+    // Note: The 'close' action requires no network activity, as closing the notification is its only purpose.
 });
+
