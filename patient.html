@@ -4697,7 +4697,10 @@ Possible solutions:
                     try {
                         await navigator.serviceWorker.register('/sw.js'); // Assuming your file is sw2.js
                         console.log('Service Worker registered successfully');
-                        setupNotificationBanner(); // Show the banner if needed
+                        setupNotificationBanner();
+                        // Show the banner if needed
+                        subscribeUser(); // <--- THIS LINE MUST BE PRESENT HERE
+}
                     } catch (error) {
                         console.error('Service Worker registration failed:', error);
                     }
