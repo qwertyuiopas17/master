@@ -4608,48 +4608,56 @@ Possible solutions:
         }
 
         async function subscribeUser() {
-            // 1. Check if the user is already subscribed
-            const existingSub = await navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription());
-            if (existingSub) {
-                console.log('User is already subscribed.');
-                return;
-            }
+    try {
+        // 1. Get the VAPID key from the server
+        const response = await fetch(`${API_BASE_URL}/v1/vapid-public-key`);
+        const data = await response.json();
+        const applicationServerKey = urlB64ToUint8Array(data.publicKey);
 
-            // 2. Ask for permission
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                alert('Push notifications are required for reminders to work on mobile. Please enable them in your browser settings.');
-                return;
-            }
+        // 2. Check for *any* existing subscription in the browser
+        let subscription = await navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription());
 
-            try {
-                // 3. Get VAPID public key from server
-                const response = await fetch(`${API_BASE_URL}/v1/vapid-public-key`);
-                const data = await response.json();
-                const applicationServerKey = urlB64ToUint8Array(data.publicKey);
-
-                // 4. Subscribe the user
-                const subscription = await navigator.serviceWorker.ready.then(reg => 
-                    reg.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: applicationServerKey
-                    })
-                );
-
-                // 5. Send subscription to backend
-                await fetch(`${API_BASE_URL}/v1/subscribe`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.patientId, subscription: subscription })
-                });
-
-                console.log('User subscribed successfully.');
-                document.getElementById('notification-banner').style.display = 'none';
-
-            } catch (error) {
-                console.error('Failed to subscribe user:', error);
-            }
+        // --- CRITICAL FIX: Delete any existing subscription to ensure we get a clean one ---
+        if (subscription !== null) {
+            console.log('Existing subscription found. Unsubscribing to ensure clean re-registration...');
+            // This is the key line to clear the expired "address" from the browser
+            await subscription.unsubscribe(); 
+            subscription = null; 
         }
+        
+        // At this point, 'subscription' is guaranteed to be null (or was never granted permission)
+
+        // 3. Ask for permission (only if it was never granted or was denied)
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            alert('Push notifications are required for reminders. Please enable them in your browser settings.');
+            return;
+        }
+        
+        // 4. Create the new, guaranteed-valid subscription
+        subscription = await navigator.serviceWorker.ready.then(reg =>
+            reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
+            })
+        );
+        console.log('New, clean subscription created successfully.');
+
+
+        // 5. Send the new subscription to the backend
+        await fetch(`${API_BASE_URL}/v1/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.patientId, subscription: subscription })
+        });
+
+        console.log('User subscribed successfully and synced with backend.');
+        document.getElementById('notification-banner').style.display = 'none';
+
+    } catch (error) {
+        console.error('Failed to subscribe or sync user:', error);
+    }
+}
         
         function setupNotificationBanner() {
             const banner = document.getElementById('notification-banner');
