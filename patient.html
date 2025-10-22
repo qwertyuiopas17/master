@@ -2561,51 +2561,58 @@ function showTrackingModal(orderId) {
 
                 // In patient.html, inside the SmartSehatSaharaChatbot class
 
-                async handleChatbotResponse(response) {
-                    this.displayMessage(response.response, 'bot');
-                    this.clearButtons(); // Always clear old buttons first
-                    // If booking was successful, refresh the appointments list on the page
-                    if (response.action === 'BOOKING_SUCCESS') {
-                     await generateAppointments();
-                     }
+                // In patient.html, inside the SmartSehatSaharaChatbot class
 
-                    // Priority 1: If the AI provides buttons from the backend, show them.
-                    // This is essential for the multi-step booking flow.
-                    if (response.interactive_buttons && response.interactive_buttons.length > 0) {
-                        this.showInteractiveButtons(response.interactive_buttons);
-                        return;
-                    }
+async handleChatbotResponse(response) {
+    this.displayMessage(response.response, 'bot');
+    this.clearButtons(); // Always clear old buttons first
 
-                    const intent = response.intent;
+    if (response.action === 'BOOKING_SUCCESS') {
+        await generateAppointments();
+    }
 
-                    // Priority 2: If the intent is a general greeting or inquiry, show the clean help buttons.
-                    // This calls the CORRECT function inside the class.
-                    if (intent === 'general_inquiry') {
-                        this.showGeneralHelpButtons(); // This now correctly calls the class method.
-                        return;
-                    }
+    // Priority 1: The ideal case where the AI correctly provides the buttons.
+    if (response.interactive_buttons && response.interactive_buttons.length > 0) {
+        this.showInteractiveButtons(response.interactive_buttons);
+        return; // Buttons are shown, our job is done.
+    }
 
-                    // Priority 3: Show specific, contextual buttons for Scan/Upload intents.
-                    const contextualButtons = [];
-                    if (intent === 'medicine_scan' || intent === 'how_to_medicine_scan') {
-                        contextualButtons.push({
-                            text: '📷 Scan Medicine',
-                            action: 'START_MEDICINE_SCANNER',
-                            style: 'secondary'
-                        });
-                    }
-                    if (intent === 'prescription_upload' || intent === 'how_to_prescription_upload') {
-                        contextualButtons.push({
-                            text: '📤 Upload Prescription',
-                            action: 'UPLOAD_PRESCRIPTION',
-                            style: 'primary'
-                        });
-                    }
-                    
-                    if (contextualButtons.length > 0) {
-                        this.showInteractiveButtons(contextualButtons);
-                    }
-                }
+    // --- NEW FALLBACK LOGIC ---
+    // Priority 2: If the AI failed to create buttons but the backend INTENDED for it to,
+    // we will create them manually here. We know the intent because the action is 'SHOW_GUIDANCE'.
+    if (response.action === 'SHOW_GUIDANCE') {
+        const contextualButtons = [];
+        // The backend also sends the original intent, which we can use here.
+        const intent = response.intent;
+
+        if (intent === 'medicine_scan' || intent === 'how_to_medicine_scan') {
+            contextualButtons.push({
+                text: '📷 Open Scanner',
+                action: 'START_MEDICINE_SCANNER',
+                parameters: {},
+                style: 'primary'
+            });
+        } else if (intent === 'prescription_upload' || intent === 'how_to_prescription_upload' || intent === 'prescription_inquiry') {
+            contextualButtons.push({
+                text: '📤 Upload Prescription',
+                action: 'UPLOAD_PRESCRIPTION',
+                parameters: {},
+                style: 'primary'
+            });
+        }
+
+        if (contextualButtons.length > 0) {
+            this.showInteractiveButtons(contextualButtons);
+            return; // Fallback buttons are shown, our job is done.
+        }
+    }
+    // --- END OF NEW FALLBACK LOGIC ---
+
+    // Priority 3 (Final Fallback): If it's just a general inquiry, show the main help buttons.
+    if (response.intent === 'general_inquiry') {
+        this.showGeneralHelpButtons();
+    }
+}
 
 
                 // In patient.html, inside the SmartSehatSaharaChatbot class
