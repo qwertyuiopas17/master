@@ -1518,6 +1518,27 @@ async function loadChatHistory() {
     }
 }
             // In patient.html, add this new function
+            async function loadDoctors() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/v1/doctors`);
+                    const data = await response.json();
+                    doctors = (data.doctors || []).filter(d => d && d.id);
+                    if (doctors.length === 0) {
+                        // Use mock data flattened
+                        doctors = [];
+                        for (let cat in appData.booking.doctors) {
+                            doctors = doctors.concat(appData.booking.doctors[cat]);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to load doctors:', e);
+                    // Use mock data flattened
+                    doctors = [];
+                    for (let cat in appData.booking.doctors) {
+                        doctors = doctors.concat(appData.booking.doctors[cat]);
+                    }
+                }
+            }
 
             async function loadBookingData() {
                 try {
