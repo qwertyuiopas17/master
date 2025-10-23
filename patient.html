@@ -2594,6 +2594,29 @@ function showTrackingModal(orderId) {
 async handleChatbotResponse(response) {
     this.displayMessage(response.response, 'bot');
     this.clearButtons(); // Always clear old buttons first
+    // --- FIX: ADD THIS BLOCK TO HANDLE THE NEW ACTION ---
+                    if (response.action === 'EXECUTE_BOOKING') {
+                        try {
+                            const bookingResponse = await fetch(`${API_BASE_URL}/v1/book-doctor`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    userId: user.patientId, // Add userId for authentication
+                                    ...response.parameters
+                                })
+                            });
+                            const bookingResult = await bookingResponse.json();
+                            if (bookingResult.success) {
+                                this.displayMessage("✅ Your appointment is confirmed!", 'bot');
+                                await generateAppointments(); // This refreshes the UI
+                            } else {
+                                this.displayMessage(`Booking failed: ${bookingResult.message}`, 'bot');
+                            }
+                        } catch (e) {
+                            this.displayMessage("Sorry, there was a network error while confirming the booking.", 'bot');
+                        }
+                    }
+                    // --- END OF FIX ---
 
     if (response.action === 'BOOKING_SUCCESS') {
         await generateAppointments();
