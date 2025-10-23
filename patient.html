@@ -669,6 +669,11 @@
         .chat-message { padding: 0.75rem 1rem; border-radius: 12px; max-width: 75%; }
         .user-message { background-color: var(--primary-color); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .bot-message { background-color: white; color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; }
+        /* --- FIX: ADD THIS RULE FOR DARK MODE --- */
+        [data-theme="dark"] .bot-message {
+            color: #0f172a; /* A dark slate color for high contrast */
+        }
+        /* --- END OF FIX --- */
         .chat-input { display: flex; gap: 0.5rem; }
         #chatInput { flex-grow: 1; }
 
@@ -1466,52 +1471,52 @@
             };
             // In patient.html, add this new function inside the main script area
 
-    async function loadChatHistory() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/v1/history`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.patientId, limit: 50 })
-            });
-            const data = await response.json();
-            if (data.success && data.history) {
-                const chatWindow = document.getElementById('chatWindow');
-                chatWindow.innerHTML = ''; // Clear the welcome message
-                data.history.forEach(turn => {
-                    let content = turn.content;
-                    if (turn.role === 'assistant') {
-                        try {
-                            content = JSON.parse(turn.content).response;
-                        } catch (e) { /* It's just a string, use as is */ }
-                    }
-                    enhancedChatbot.displayMessage(content, turn.role);
-                });
-            }
-        } catch (error) {
-            console.error('Failed to load chat history:', error);
-        }
-    }
-            async function loadDoctors() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/v1/doctors`);
-                    const data = await response.json();
-                    doctors = (data.doctors || []).filter(d => d && d.id);
-                    if (doctors.length === 0) {
-                        // Use mock data flattened
-                        doctors = [];
-                        for (let cat in appData.booking.doctors) {
-                            doctors = doctors.concat(appData.booking.doctors[cat]);
-                        }
-                    }
-                } catch (e) {
-                    console.error('Failed to load doctors:', e);
-                    // Use mock data flattened
-                    doctors = [];
-                    for (let cat in appData.booking.doctors) {
-                        doctors = doctors.concat(appData.booking.doctors[cat]);
+    // Inside your <script> tag...
+
+async function loadChatHistory() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/v1/history`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.patientId, limit: 50 })
+        });
+        const data = await response.json();
+        if (data.success && data.history) {
+            const chatWindow = document.getElementById('chatWindow');
+            // Do not clear the chat window here, append after the welcome message
+            // chatWindow.innerHTML = ''; 
+
+            data.history.forEach(turn => {
+                // Ignore turns where the user message was an empty system message
+                if (turn.role === 'user' && !turn.content.trim()) {
+                    return;
+                }
+
+                let content = turn.content;
+                if (turn.role === 'assistant') {
+                    try {
+                        // This correctly extracts the text from the JSON response
+                        const parsedContent = JSON.parse(turn.content);
+                        content = parsedContent.response;
+                    } catch (e) { 
+                        // It's just a string, use as is (fallback)
+                        content = turn.content;
                     }
                 }
-            }
+                
+                // --- FIX: Map 'assistant' role to 'bot' for CSS styling ---
+                const senderRole = turn.role === 'assistant' ? 'bot' : 'user';
+
+                // Only display the message if there's content to show
+                if (content && content.trim()) {
+                    enhancedChatbot.displayMessage(content, senderRole);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load chat history:', error);
+    }
+}
             // In patient.html, add this new function
 
             async function loadBookingData() {
@@ -2533,6 +2538,8 @@ function showTrackingModal(orderId) {
                         // --- END NEW LOGIC ---
 
                         // Refresh the prescriptions list from backend
+                        // --- FIX: ADD THIS LINE TO REFRESH THE HOMEPAGE DATA ---
+                        await loadDashboard();
                         await generateAllPrescriptions();
                         showConfirmationModal("Prescription Added", "Your offline prescription has been added successfully.");
                     } catch (error) {
@@ -3158,9 +3165,7 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
 
                 checkMedicineReminders();
                 //loadPrescriptionReminders();
-                setTimeout(() => {
-                    showAllPrescriptionSources();
-                }, 2000);
+                
                 testPrescriptionEndpoint();
             }
 
