@@ -2684,6 +2684,32 @@ function showTrackingModal(orderId) {
 async handleChatbotResponse(response) {
     this.displayMessage(response.response, 'bot');
     this.clearButtons(); // Always clear old buttons first
+    // --- START: ADD THIS NEW CODE BLOCK ---
+                if (response.action === 'EXECUTE_BOOKING') {
+                    // This action tells the frontend to make the final booking API call
+                    console.log('Received EXECUTE_BOOKING action. Calling /v1/book-doctor...');
+                    try {
+                        const bookingResponse = await fetch(`${API_BASE_URL}/v1/book-doctor`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: user.patientId, // Make sure user object is accessible
+                                ...response.parameters // Pass all parameters from the chatbot
+                            })
+                        });
+                        const bookingResult = await bookingResponse.json();
+                        if (bookingResult.success) {
+                            this.displayMessage('✅ Confirmed! Your appointment is booked.', 'bot');
+                            await generateAppointments(); // Refresh the appointment list
+                        } else {
+                            this.displayMessage(`😕 Sorry, there was an error: ${bookingResult.message}`, 'bot');
+                        }
+                    } catch (error) {
+                        console.error('Error during final booking:', error);
+                        this.displayMessage('A network error occurred while confirming your appointment. Please try again.', 'bot');
+                    }
+                    return; // Stop further processing
+                }
 
     if (response.action === 'BOOKING_SUCCESS') {
         await generateAppointments();
@@ -4772,6 +4798,7 @@ Possible solutions:
                 currentlyEditing = null;
                 document.getElementById('saveReminderBtn').textContent = 'Save Reminder';
                 await loadMedicineRemindersScreen();
+                await checkMedicineReminders();
                 showConfirmationModal('Success', `Medicine reminder ${isEdit ? 'updated' : 'added'}!`);
 
             } catch (error) {
