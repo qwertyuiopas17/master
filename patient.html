@@ -32,6 +32,33 @@
             --primary-color: var(--primary-color-dark);
             --color-secondary: #334155;
             --shadow-color: rgba(0, 0, 0, 0.2);
+            /* --- START: Add these Chat Message Dark Mode Fixes --- */
+            .chat-message.bot-message {
+                background-color: #475569; /* Lighter grey for bot messages */
+                color: #e2e8f0; /* Ensure text is light */
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* Optional: Slightly enhance shadow */
+            }
+
+            .chat-message.user-message {
+                background-color: #14b8a6; /* Keep primary color or adjust slightly if needed */
+                color: #ffffff; /* Ensure user message text is white */
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* Optional: Slightly enhance shadow */
+            }
+
+            .chat-window {
+                 background-color: #1e293b; /* Slightly darker chat window background */
+            }
+             /* Ensure input fields have good contrast */
+            .form-control, #chatInput {
+                 background-color: #334155;
+                 color: #e2e8f0;
+                 border: 1px solid #475569;
+            }
+            .form-control::placeholder, #chatInput::placeholder {
+                 color: #94a3b8;
+            }
+            /* --- END: Add these Chat Message Dark Mode Fixes --- */
+        }
         }
 
         html { scroll-behavior: smooth; }
@@ -3015,30 +3042,60 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
                 }
 
                 displayMessage(message, sender = 'bot') {
-                    if (!this.chatWindow) return;
+            // Ensure the chat window element exists
+            if (!this.chatWindow) return;
 
-                    const messageElement = document.createElement('div');
-                    messageElement.className = `chat-message ${sender}-message`;
+            // Create the message bubble element
+            const messageElement = document.createElement('div');
 
-                    // Enhanced message formatting for guidance messages
-                    if (sender === 'bot' && message.includes('💡')) {
-                        messageElement.style.background = 'linear-gradient(135deg, #e3f2fd, #f8f9fa)';
-                        messageElement.style.border = '1px solid #0d9488';
-                        messageElement.style.borderRadius = '12px';
-                        messageElement.style.padding = '16px';
-                        messageElement.style.margin = '12px 0';
-                    }
+            // Apply base and sender-specific CSS classes
+            // Using classList.add is slightly more robust than setting className directly
+            messageElement.classList.add('chat-message');
+            messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
 
-                    // Handle multi-line messages with better formatting
-                    if (message.includes('\n')) {
-                        messageElement.innerHTML = message.replace(/\n/g, '<br>');
-                    } else {
-                        messageElement.textContent = message;
-                    }
+            // Apply special styling for guidance messages (only if message is a string)
+            if (sender === 'bot' && typeof message === 'string' && message.includes('💡')) {
+                messageElement.style.background = 'linear-gradient(135deg, #e3f2fd, #f8f9fa)';
+                messageElement.style.border = '1px solid #0d9488';
+                messageElement.style.borderRadius = '12px';
+                messageElement.style.padding = '16px';
+                messageElement.style.margin = '12px 0';
+            }
 
-                    this.chatWindow.appendChild(messageElement);
-                    this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
+            // --- Type Checking and Content Setting ---
+            // Check if 'message' is actually a string before trying string operations
+            if (typeof message === 'string') {
+                // If it's a string and contains newlines, use innerHTML to render line breaks
+                if (message.includes('\n')) {
+                    messageElement.innerHTML = message.replace(/\n/g, '<br>');
+                } else {
+                    // Otherwise, use textContent for safety (prevents HTML injection)
+                    messageElement.textContent = message;
                 }
+            }
+            // --- Fallback for Non-String Types ---
+            else {
+                // If 'message' is not a string (e.g., an object due to an error), display it as JSON
+                messageElement.textContent = JSON.stringify(message);
+                // Log a warning to the console to help with debugging
+                console.warn("displayMessage received non-string content:", message);
+            }
+            // --- End Type Checking ---
+
+            // Add the new message bubble to the chat window
+            this.chatWindow.appendChild(messageElement);
+
+            // --- Improved Scrolling ---
+            // Use setTimeout to ensure scrolling happens *after* the browser has rendered the new message
+            setTimeout(() => {
+                // Check if chatWindow still exists before trying to scroll (prevents errors if element is removed)
+                if (this.chatWindow) {
+                   // Scroll to the bottom of the chat window
+                   this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
+                }
+            }, 50); // A small delay (e.g., 50ms) is usually sufficient
+            // --- End Improved Scrolling ---
+        }
 
                 async handleAction(action, parameters) {
                     switch (action) {
@@ -4200,14 +4257,6 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
                 }
             }
 
-            function displayMessage(message, sender) {
-                const messagesDiv = document.getElementById('messages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}`;
-                messageDiv.textContent = message;
-                messagesDiv.appendChild(messageDiv);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }
 
             function handleConnectionFailure() {
                 console.error('Patient: Connection failure detected');
