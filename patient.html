@@ -94,6 +94,16 @@
         .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
         .btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
         .btn-sos { background-color: var(--sos-color); color: white; }
+        /* And add the animation properties to it like this: */
+.btn-sos { 
+    background-color: var(--sos-color); 
+    color: white; 
+    animation: pulse 2s infinite; 
+}
+.btn-sos:hover { 
+    animation: pulse 1s infinite; 
+    transform: scale(1.05); 
+}
         .btn-primary { background-color: var(--primary-color); color: white; border: 2px solid var(--primary-color); }
         
         .card { 
@@ -669,11 +679,6 @@
         .chat-message { padding: 0.75rem 1rem; border-radius: 12px; max-width: 75%; }
         .user-message { background-color: var(--primary-color); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .bot-message { background-color: white; color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; }
-        /* --- FIX: ADD THIS RULE FOR DARK MODE --- */
-        [data-theme="dark"] .bot-message {
-            color: #0f172a; /* A dark slate color for high contrast */
-        }
-        /* --- END OF FIX --- */
         .chat-input { display: flex; gap: 0.5rem; }
         #chatInput { flex-grow: 1; }
 
@@ -1301,8 +1306,11 @@
                     <div class="page-header"><h1 data-key="health_chatbot_title">Health Assistant</h1></div>
                     <div class="card chatbot-container">
                         <div class="chat-window" id="chatWindow"></div>
-                        <form class="chat-input" id="chatForm">
+                            <form class="chat-input" id="chatForm">
                             <input type="text" id="chatInput" class="form-control" placeholder="Ask about symptoms, dosage...">
+                            
+                            <button type="button" class="btn" id="record-button" style="min-width: 50px;">🎤</button>
+                            
                             <button type="submit" class="btn btn-primary">Send</button>
                         </form>
                     </div>
@@ -1329,6 +1337,14 @@
             </div>
         </div>
     </div>
+    <div id="sosCountdownModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <h3>🚨 EMERGENCY ACTIVATION</h3>
+        <p id="countdownText">Activating emergency services in 5 seconds...</p>
+        <div id="countdownNumber" style="font-size: 3rem; font-weight: bold; color: var(--sos-color); margin: 1rem 0;">5</div>
+        <button class="btn" id="cancelCountdown" style="background: #ef4444; color: white;">Cancel Emergency</button>
+    </div>
+</div>
     <div id="sosModal" class="modal"><div class="modal-content"><h3>Emergency SOS</h3><p>This will call emergency services and send your location. Are you sure?</p><div class="modal-actions"><button class="btn" id="cancelSos">Cancel</button><button class="btn btn-sos" id="confirmSos">Confirm</button></div></div></div>
     <div id="prescriptionModal" class="modal"><div class="modal-content prescription-content" id="prescriptionModalContent"></div></div>
     <div id="callScreen" class="call-screen">
@@ -1422,6 +1438,85 @@
         // For Render deployment, uncomment if needed:
          //const API_BASE_URL = 'https://sahara-sathi.onrender.com';
         const API_BASE_URL = '/api';
+                    // SOS Countdown Function
+let sosCountdownInterval;
+function startSosCountdown(user) {
+    document.getElementById('sosCountdownModal').classList.add('active');
+    let countdown = 5;
+    const countdownElement = document.getElementById('countdownNumber');
+
+    sosCountdownInterval = setInterval(() => {
+        countdown--;
+        countdownElement.textContent = countdown;
+
+        if (countdown <= 0) {
+            clearInterval(sosCountdownInterval);
+            document.getElementById('sosCountdownModal').classList.remove('active');
+            triggerSos(user);
+        }
+    }, 1000);
+
+    // Cancel button
+    document.getElementById('cancelCountdown').onclick = () => {
+        clearInterval(sosCountdownInterval);
+        document.getElementById('sosCountdownModal').classList.remove('active');
+    };
+}
+
+// Trigger SOS after countdown
+async function triggerSos(user) {
+    try {
+        // Get location
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by this browser.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const location = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            };
+
+            // NOTE: This endpoint does not exist in your backend yet.
+            const response = await fetch(`${API_BASE_URL}/v1/sos-trigger`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.patientId,
+                    location: location,
+                    message: 'Emergency SOS activated by patient'
+                })
+            });
+
+            if (response.ok) {
+                showConfirmationModal('SOS Activated', 'Emergency services have been notified. Help is on the way.');
+            } else {
+                showConfirmationModal('SOS Failed', 'Failed to activate emergency services. Please call 108 directly.');
+            }
+        }, (error) => {
+            console.error('Geolocation error:', error);
+            // Fallback: trigger SOS without location
+            fetch(`${API_BASE_URL}/v1/sos-trigger`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.patientId,
+                    message: 'Emergency SOS activated by patient (location unavailable)'
+                })
+            }).then(response => {
+                if (response.ok) {
+                    showConfirmationModal('SOS Activated', 'Emergency services have been notified. Help is on the way.');
+                } else {
+                    showConfirmationModal('SOS Failed', 'Failed to activate emergency services. Please call 108 directly.');
+                }
+            });
+        });
+    } catch (error) {
+        console.error('SOS trigger error:', error);
+        showConfirmationModal('SOS Failed', 'Failed to activate emergency services. Please call 108 directly.');
+    }
+}
 
         console.log('Using API base URL:', API_BASE_URL);
         let medicineCart = [], selectedPharmacy = null;
@@ -1469,55 +1564,36 @@
     
                 
             };
+            // Add these two new functions
+
+
             // In patient.html, add this new function inside the main script area
 
-    // Inside your <script> tag...
-
-async function loadChatHistory() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/v1/history`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.patientId, limit: 50 })
-        });
-        const data = await response.json();
-        if (data.success && data.history) {
-            const chatWindow = document.getElementById('chatWindow');
-            // Do not clear the chat window here, append after the welcome message
-            // chatWindow.innerHTML = ''; 
-
-            data.history.forEach(turn => {
-                // Ignore turns where the user message was an empty system message
-                if (turn.role === 'user' && !turn.content.trim()) {
-                    return;
-                }
-
-                let content = turn.content;
-                if (turn.role === 'assistant') {
-                    try {
-                        // This correctly extracts the text from the JSON response
-                        const parsedContent = JSON.parse(turn.content);
-                        content = parsedContent.response;
-                    } catch (e) { 
-                        // It's just a string, use as is (fallback)
-                        content = turn.content;
-                    }
-                }
-                
-                // --- FIX: Map 'assistant' role to 'bot' for CSS styling ---
-                const senderRole = turn.role === 'assistant' ? 'bot' : 'user';
-
-                // Only display the message if there's content to show
-                if (content && content.trim()) {
-                    enhancedChatbot.displayMessage(content, senderRole);
-                }
+    async function loadChatHistory() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/v1/history`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.patientId, limit: 50 })
             });
+            const data = await response.json();
+            if (data.success && data.history) {
+                const chatWindow = document.getElementById('chatWindow');
+                chatWindow.innerHTML = ''; // Clear the welcome message
+                data.history.forEach(turn => {
+                    let content = turn.content;
+                    if (turn.role === 'assistant') {
+                        try {
+                            content = JSON.parse(turn.content).response;
+                        } catch (e) { /* It's just a string, use as is */ }
+                    }
+                    enhancedChatbot.displayMessage(content, turn.role);
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load chat history:', error);
         }
-    } catch (error) {
-        console.error('Failed to load chat history:', error);
     }
-}
-            // In patient.html, add this new function
             async function loadDoctors() {
                 try {
                     const response = await fetch(`${API_BASE_URL}/v1/doctors`);
@@ -1539,6 +1615,7 @@ async function loadChatHistory() {
                     }
                 }
             }
+            // In patient.html, add this new function
 
             async function loadBookingData() {
                 try {
@@ -2303,6 +2380,8 @@ function showTrackingModal(orderId) {
                 }
 
                 const orderData = {
+                    // --- FIX: ADD THE PATIENT'S ID TO THE REQUEST ---
+                    userId: user.patientId,
                     pharmacyId: selectedPharmacy.id, // The backend expects pharmacyId
                     items: medicineCart.map(item => ({ name: item.name, price: item.price, quantity: item.quantity })),
                     deliveryAddress: document.getElementById('deliveryAddress').value.trim(),
@@ -2546,32 +2625,43 @@ function showTrackingModal(orderId) {
                         }
 
                         const uploadResult = await response.json();
-                        const extracted = uploadResult.extractedData || {};
+                        
 
                         
                        
-                       // --- NEW LOGIC ---
-                        // Check if the upload response includes our summary text
-                        if (uploadResult.success && uploadResult.formatted_response) {
-                            // Directly display the summary we just received
-                            displaySummaryInChat(uploadResult.formatted_response);
-                        }
-                        // --- END NEW LOGIC ---
+                       // --- FIX: REPLACE THE LOGIC AFTER THE FETCH CALL WITH THIS ---
+            if (uploadResult.success && uploadResult.formatted_response) {
+                
+                // Step 1: Close the upload modal and stop the camera
+                const uploadModal = document.getElementById('uploadPrescriptionModal');
+                const feed = document.getElementById('uploadCameraFeed');
+                if (feed.srcObject) {
+                    feed.srcObject.getTracks().forEach(track => track.stop());
+                    feed.srcObject = null;
+                }
+                uploadModal.classList.remove('active');
+                
+                // Step 2: Navigate the user to the chatbot screen
+                showScreen('chatbotScreen');
+
+                // Step 3: Display the summary in the now-visible chat window
+                displaySummaryInChat(uploadResult.formatted_response);
+                
+                // Step 4: Show a less intrusive confirmation
+                // This is better than a modal that blocks the view
+                // (Assuming you have a function for this, otherwise a simple alert works)
+                showConfirmationModal("Success", "Your prescription has been added and a summary is shown below.");
+            }
+            // --- END OF FIX ---
 
                         // Refresh the prescriptions list from backend
-                        // --- FIX: ADD THIS LINE TO REFRESH THE HOMEPAGE DATA ---
-                        await loadDashboard();
                         await generateAllPrescriptions();
-                        showConfirmationModal("Prescription Added", "Your offline prescription has been added successfully.");
+                        
                     } catch (error) {
                         console.error('Upload error:', error);
                         showConfirmationModal("Upload Failed", "Failed to save prescription. Please try again.");
                     }
 
-                    // Stop stream
-                    stream.getTracks().forEach(track => track.stop());
-                    document.getElementById('uploadPrescriptionModal').classList.remove('active');
-                    document.getElementById('providerName').value = '';
                 });
             }
 
@@ -2594,29 +2684,6 @@ function showTrackingModal(orderId) {
 async handleChatbotResponse(response) {
     this.displayMessage(response.response, 'bot');
     this.clearButtons(); // Always clear old buttons first
-    // --- FIX: ADD THIS BLOCK TO HANDLE THE NEW ACTION ---
-                    if (response.action === 'EXECUTE_BOOKING') {
-                        try {
-                            const bookingResponse = await fetch(`${API_BASE_URL}/v1/book-doctor`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    userId: user.patientId, // Add userId for authentication
-                                    ...response.parameters
-                                })
-                            });
-                            const bookingResult = await bookingResponse.json();
-                            if (bookingResult.success) {
-                                this.displayMessage("✅ Your appointment is confirmed!", 'bot');
-                                await generateAppointments(); // This refreshes the UI
-                            } else {
-                                this.displayMessage(`Booking failed: ${bookingResult.message}`, 'bot');
-                            }
-                        } catch (e) {
-                            this.displayMessage("Sorry, there was a network error while confirming the booking.", 'bot');
-                        }
-                    }
-                    // --- END OF FIX ---
 
     if (response.action === 'BOOKING_SUCCESS') {
         await generateAppointments();
@@ -2851,6 +2918,7 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
 
                     return buttonElement;
                 }
+                
 
                 async handleConversationalBooking(button) {
                     try {
@@ -3125,9 +3193,73 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
             // --- FIX END ---
 
             function setupChatbot() {
+                
                 const chatForm = document.getElementById('chatForm');
                 const chatInput = document.getElementById('chatInput');
-                // The 'addMessage' function is NO LONGER defined here.
+                const chatWindow = document.getElementById('chatWindow'); // Make sure chatWindow is defined here
+                
+                // --- START: Speech-to-Text code ---
+                const recordButton = document.getElementById('record-button');
+
+                // Check if the browser supports the Web Speech API
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                if (SpeechRecognition) {
+                    const recognition = new SpeechRecognition();
+                    
+                    // Use the app's current language (from your 'translations' object)
+                    // 'currentLanguage' is already defined in your main script
+                    recognition.lang = currentLanguage || 'en-US'; 
+                    recognition.interimResults = false;
+                    recognition.continuous = false;
+
+                    recordButton.addEventListener('click', () => {
+                        console.log("Recording started...");
+                        recordButton.textContent = '...'; // Show a "listening" state
+                        recordButton.disabled = true;
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.error("Recognition already started.", e);
+                            recordButton.textContent = '🎤'; // Reset button
+                            recordButton.disabled = false;
+                        }
+                    });
+
+                    // This event fires when speech is recognized
+                    recognition.onresult = (event) => {
+                        const spokenText = event.results[0][0].transcript;
+                        console.log("User said:", spokenText);
+                        chatInput.value = spokenText; // Put the text in the chat box
+                        
+                        // --- Optional: Automatically send the message ---
+                        // You can uncomment the line below to send the message immediately
+                        // chatForm.dispatchEvent(new Event('submit')); 
+                    };
+
+                    // Handle end of speech
+                    recognition.onend = () => {
+                        recordButton.textContent = '🎤'; // Reset button icon
+                        recordButton.disabled = false;
+                    };
+
+                    // Handle errors
+                    recognition.onerror = (event) => {
+                        console.error("Speech recognition error:", event.error);
+                        recordButton.textContent = '🎤'; // Reset button on error
+                        recordButton.disabled = false;
+                        if (event.error === 'not-allowed') {
+                            alert("Please allow microphone access in your browser settings to use this feature.");
+                        }
+                    };
+
+                } else {
+                    // Browser doesn't support it
+                    console.log("Speech recognition not supported in this browser.");
+                    recordButton.style.display = 'none'; // Hide the button if not supported
+                }
+                // --- END: Speech-to-Text code ---
+
 
                 // This is your FULL original event listener, now it works correctly.
                 chatForm.addEventListener('submit', async (e) => {
@@ -3208,7 +3340,6 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
                 addMessage("Welcome to Enhanced Sehat Sahara! I can help with appointments, prescriptions, medicine reminders, and health guidance.", "bot");
 
                 checkMedicineReminders();
-                //loadPrescriptionReminders();
                 
                 testPrescriptionEndpoint();
             }
@@ -4750,6 +4881,7 @@ Possible solutions:
                 .catch(error => console.error('Error fetching summary on page load:', error));
             }
 
+
             
 
             async function initializeApp() {
@@ -4785,7 +4917,10 @@ Possible solutions:
                 await loadDashboard();
                 await loadChatHistory(); // Add this line
                 generateOrdersList();
-
+// ✅ ADD THIS EVENT LISTENER
+    document.getElementById('sosButton').addEventListener('click', () => {
+        startSosCountdown(user); // Pass the user object
+    });
                 loadAndDisplaySummary(); // <-- Use our new function
                 renderBookingStep(1);
                 setupModalsAndActions();

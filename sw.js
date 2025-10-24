@@ -36,27 +36,34 @@ self.addEventListener('push', event => {
     event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Your existing notification click listener (no changes needed)
-// In sw.js, inside the 'notificationclick' listener:
 
 self.addEventListener('notificationclick', event => {
-    // 1. Close the notification that was clicked
+    // Always close the notification that was clicked.
     event.notification.close();
 
-    const medicineName = event.notification.data.medicineName;
-    const userId = event.notification.data.userId;
+    const notificationData = event.notification.data;
 
-    if (event.action === 'mark-taken') {
-        
-        // This handles the async operations and ensures the browser doesn't kill the service worker
+    // --- LOGIC TO HANDLE DIFFERENT NOTIFICATION TYPES ---
+
+    // Case 1: It's an SOS alert, open the Saathi page.
+    if (notificationData && notificationData.type === 'sos') {
         event.waitUntil(
-            // Find and close any other lingering notifications for this same medicine
+            clients.openWindow(notificationData.url || '/saathi.html')
+        );
+    } 
+    // Case 2: It's a medicine reminder with the 'mark-taken' action.
+    else if (event.action === 'mark-taken') {
+        const medicineName = notificationData.medicineName;
+        const userId = notificationData.userId;
+        
+        event.waitUntil(
+            // First, find and close any other notifications for this same medicine.
             self.registration.getNotifications({ tag: `medicine-reminder-${medicineName}` })
                 .then(notifications => {
                     notifications.forEach(notification => notification.close());
                 })
                 .then(() => {
-                    // 2. Execute the fetch command after ensuring all related notifications are closed
+                    // Then, send the update to the backend.
                     return fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -66,22 +73,20 @@ self.addEventListener('notificationclick', event => {
                             medicine_name: medicineName,
                             taken_time: new Date().toTimeString().slice(0, 5)
                         })
-                    }).then(response => {
-                        // --- ERROR HANDLER IS BACK HERE ---
+                    })
+                    // *** IMPORTANT: ERROR HANDLING RESTORED ***
+                    .then(response => {
                         if (!response.ok) {
                             console.error('Failed to mark as taken from notification. Status:', response.status);
-                            // Optionally show a failure notification here
                         } else {
-                            console.log('Successfully marked as taken and rescheduled.');
+                            console.log('Successfully marked as taken and rescheduled via SW.');
                         }
-                    }).catch(error => {
+                    })
+                    .catch(error => {
                         console.error('Fetch error in Service Worker:', error);
-                        // Optionally show a failure notification for network errors
                     });
+                    // *** END OF RESTORED BLOCK ***
                 })
         );
-        // --- END OF CORRECTED BLOCK ---
     }
-    // Note: The 'close' action requires no network activity, as closing the notification is its only purpose.
 });
-

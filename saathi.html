@@ -139,6 +139,61 @@
         .page-header h1 { font-size: 2rem; }
         .page-header p { color: var(--text-color-secondary); }
 
+        /* --- ADD THIS ENTIRE BLOCK TO YOUR CSS --- */
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.notification-item {
+    background-color: var(--color-secondary);
+    border-radius: var(--radius-lg);
+    border-left: 5px solid var(--text-color-secondary);
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.notification-item.urgent {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-left-color: var(--sos-color);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.notification-header h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+}
+
+.notification-content p {
+    margin: 0.25rem 0;
+}
+
+.notification-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.status-resolved {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
         /* Training Center */
         .training-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .training-card { text-align: center; }
@@ -222,7 +277,7 @@
                     </div>
                     <div class="info-grid">
                         <div class="info-card card" data-screen="dashboardScreen"><h3 data-key="pending_tasks">Pending Tasks</h3><p class="highlight">4</p><p data-key="in_your_area">in your area</p></div>
-                        <div class="info-card card" data-screen="earningsScreen"><h3 data-key="earnings_this_week">Earnings This Week</h3><p class="highlight">₹250</p><p data-key="based_on_activity">based on activity</p></div>
+                        <div class="info-card card" data-screen="notificationsScreen"><h3 data-key="emergency_alerts">Emergency Alerts</h3><p class="highlight" id="emergencyCount">0</p><p data-key="requiring_attention">requiring attention</p></div>
                     </div>
                     <div class="page-header" style="margin-top: 3rem;"><h1 data-key="task_dashboard_title">Task Dashboard</h1></div>
                     <div class="task-list" id="taskList"></div>
@@ -260,6 +315,12 @@
                         <div class="earnings-list" id="earningsList"></div>
                     </div>
                 </section>
+                <section id="notificationsScreen" class="screen">
+    <div class="page-header"><h1 data-key="emergency_alerts">Emergency Alerts</h1><p data-key="alerts_subtitle">Urgent notifications requiring your attention</p></div>
+    <div class="card">
+        <div class="notifications-list" id="notificationsList"></div>
+    </div>
+</section>
 
             </main>
         </div>
@@ -270,19 +331,31 @@
         <button class="nav-button" data-screen="logActivityScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2.8-3.3-4.9-6.3-4.9h-1.2c-.3-1.4-1-2.7-2.1-3.6-1.5-1.2-3.5-1.4-5.2-.6S3 4.9 3 6.8v.2c0 2.4 1.7 4.5 4 5.1"/><path d="M8 12h8"/><path d="M12 16v-8"/></svg><span data-key="log_activity_nav">Log Activity</span></button>
         <button class="nav-button" data-screen="trainingCenterScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg><span data-key="training_nav">Training</span></button>
         <button class="nav-button" data-screen="earningsScreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span data-key="earnings_nav">Earnings</span></button>
+        <button class="nav-button" data-screen="notificationsScreen">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+    <span data-key="alerts_nav">Alerts</span>
+</button>
     </nav>
     
     <!-- Confirmation Modal -->
     <div id="confirmationModal" class="modal"><div class="modal-content"><h3 id="modalTitle"></h3><p id="modalMessage"></p><button class="btn btn-primary" id="closeModal">OK</button></div></div>
+    <div id="notification-banner" class="card" style="display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 1001; width: 90%; max-width: 500px; background-color: var(--card-bg-color); backdrop-filter: blur(10px); padding: 1rem; text-align: center;">
+    <p style="margin-bottom: 1rem;">Enable notifications to get emergency alerts even when the app is in the background.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button id="enable-notifications-btn" class="btn btn-primary">Enable Notifications</button>
+        <button id="dismiss-banner-btn" class="btn">Dismiss</button>
+    </div>
+</div>
 
     <script>
+        const API_BASE_URL = '/api';
         document.addEventListener('DOMContentLoaded', function() {
             let saathi = null;
             let currentLanguage = 'en';
 
             const translations = {
-                en: { welcome_message: "Welcome, {name}", welcome_subtitle: "Ready to help your community today?", pending_tasks: "Pending Tasks", in_your_area: "in your area", earnings_this_week: "Earnings This Week", based_on_activity: "based on activity", dashboard_nav: "Dashboard", log_activity_nav: "Log Activity", training_nav: "Training", earnings_nav: "Earnings", task_dashboard_title: "Task Dashboard", mark_as_done: "Mark as Done", log_activity_title: "Log Your Activity", log_activity_subtitle: "Submit proof of your completed task.", select_member: "Select Locality/Block", upload_photo: "Upload Verification Photo", drag_drop: "Click to upload a photo", add_notes: "Add a Short Note", submit_log: "Submit Log", training_center_title: "Training Center", training_center_subtitle: "Learn how to use the platform effectively.", earnings_title: "Earnings Tracker", logout: "Logout" },
-                hi: { welcome_message: "नमस्ते, {name}", welcome_subtitle: "आज अपने समुदाय की मदद करने के लिए तैयार हैं?", pending_tasks: "लंबित कार्य", in_your_area: "आपके क्षेत्र में", earnings_this_week: "इस सप्ताह की कमाई", based_on_activity: "गतिविधि के आधार पर", dashboard_nav: "डैशबोर्ड", log_activity_nav: "लॉग गतिविधि", training_nav: "प्रशिक्षण", earnings_nav: "कमाई", task_dashboard_title: "कार्य डैशबोर्ड", mark_as_done: "पूर्ण के रूप में चिह्नित करें", log_activity_title: "अपनी गतिविधि लॉग करें", log_activity_subtitle: "अपने पूर्ण कार्य का प्रमाण प्रस्तुत करें।", select_member: "इलाका/ब्लॉक चुनें", upload_photo: "सत्यापन फोटो अपलोड करें", drag_drop: "फोटो अपलोड करने के लिए क्लिक करें", add_notes: "एक संक्षिप्त नोट जोड़ें", submit_log: "लॉग सबमिट करें", training_center_title: "प्रशिक्षण केंद्र", training_center_subtitle: "मंच का प्रभावी ढंग से उपयोग करना सीखें।", earnings_title: "कमाई ट्रैकर", logout: "लॉग आउट" }
+                en: { welcome_message: "Welcome, {name}", welcome_subtitle: "Ready to help your community today?", pending_tasks: "Pending Tasks", in_your_area: "in your area", earnings_this_week: "Earnings This Week", based_on_activity: "based on activity", dashboard_nav: "Dashboard", log_activity_nav: "Log Activity", training_nav: "Training", earnings_nav: "Earnings", task_dashboard_title: "Task Dashboard", mark_as_done: "Mark as Done", log_activity_title: "Log Your Activity", log_activity_subtitle: "Submit proof of your completed task.", select_member: "Select Locality/Block", emergency_alerts: "Emergency Alerts", requiring_attention: "requiring attention", alerts_nav: "Alerts", alerts_subtitle: "Urgent notifications requiring your attention", upload_photo: "Upload Verification Photo", drag_drop: "Click to upload a photo", add_notes: "Add a Short Note", submit_log: "Submit Log", training_center_title: "Training Center", training_center_subtitle: "Learn how to use the platform effectively.", earnings_title: "Earnings Tracker", logout: "Logout" },
+                hi: { welcome_message: "नमस्ते, {name}", welcome_subtitle: "आज अपने समुदाय की मदद करने के लिए तैयार हैं?", pending_tasks: "लंबित कार्य", in_your_area: "आपके क्षेत्र में", earnings_this_week: "इस सप्ताह की कमाई", based_on_activity: "गतिविधि के आधार पर", dashboard_nav: "डैशबोर्ड", log_activity_nav: "लॉग गतिविधि", training_nav: "प्रशिक्षण", earnings_nav: "कमाई", task_dashboard_title: "कार्य डैशबोर्ड", mark_as_done: "पूर्ण के रूप में चिह्नित करें", log_activity_title: "अपनी गतिविधि लॉग करें", log_activity_subtitle: "अपने पूर्ण कार्य का प्रमाण प्रस्तुत करें।", select_member: "इलाका/ब्लॉक चुनें", upload_photo: "सत्यापन फोटो अपलोड करें", emergency_alerts: "आपातकालीन अलर्ट", requiring_attention: "ध्यान देने की आवश्यकता", alerts_nav: "अलर्ट", alerts_subtitle: "आपके ध्यान की आवश्यकता वाले अत्यंत महत्वपूर्ण अधिसूचनाएं", drag_drop: "फोटो अपलोड करने के लिए क्लिक करें", add_notes: "एक संक्षिप्त नोट जोड़ें", submit_log: "लॉग सबमिट करें", training_center_title: "प्रशिक्षण केंद्र", training_center_subtitle: "मंच का प्रभावी ढंग से उपयोग करना सीखें।", earnings_title: "कमाई ट्रैकर", logout: "लॉग आउट" }
             };
 
             const appData = {
@@ -302,13 +375,34 @@
                     { date: "2025-09-27", task: "Onboarding: Amit P.", incentive: 50, status: "Paid" },
                     { date: "2025-09-27", task: "Pharmacy Help: Sunita D.", incentive: 50, status: "Paid" },
                     { date: "2025-09-28", task: "Appointment Help: Ramesh K.", incentive: 50, status: "Pending" }
-                ]
+                ],
+                notifications: [
+        // Emergency notifications will be loaded dynamically
+        ]
             };
             
-            function checkAuth() {
-                saathi = { fullName: "Rohan Sharma" };
-                return true;
-            }
+            async function checkAuth() {
+    // This function simply checks for the user data saved by index.html
+    const userData = localStorage.getItem('sehatSaharaUser');
+    
+    if (userData) {
+        saathi = JSON.parse(userData);
+
+        // For security, we can also check if the role is correct.
+        if (saathi.role !== 'saathi') {
+            alert('Access Denied. Please log in with a Saathi account.');
+            localStorage.removeItem('sehatSaharaUser'); // Clear wrong login
+            window.location.href = 'index.html';
+            return false;
+        }
+        
+        return true;
+    } else {
+        // If no user data is found, they must go back to the login page.
+        window.location.href = 'index.html';
+        return false;
+    }
+}
 
             function updateUIText() {
                 const langPack = translations[currentLanguage] || translations.en;
@@ -434,27 +528,220 @@
                 document.getElementById('modalMessage').textContent = message;
                 document.getElementById('confirmationModal').classList.add('active');
             }
-
-            function initializeApp() {
-                if(checkAuth()){
-                    setupNavigation();
-                    setupThemeAndLanguage();
-                    generateTasks();
-                    generateTrainingModules();
-                    generateEarningsHistory();
-                    setupFormsAndModals();
-                    
-                    document.getElementById('logoutBtn').addEventListener('click', () => {
-                        showConfirmationModal("Logged Out", "You have been successfully logged out.");
-                    });
-    
-                    updateUIText();
-                }
+            async function loadNotifications() {
+    try {
+        // NOTE: This endpoint does not exist in your backend yet.
+        const response = await fetch(`${API_BASE_URL}/v1/sos-events`, { 
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (data.success) {
+            appData.notifications = data.sos_events.map(event => ({
+                id: event.id,
+                event_id: event.event_id,
+                type: 'emergency',
+                patientName: event.patient_name,
+                patient_id: event.patient_id,
+                location: event.location,
+                message: event.message,
+                timestamp: event.timestamp,
+                status: event.status,
+                emergency_type: event.emergency_type
+            }));
+            updateEmergencyCount();
+            generateNotificationsList();
+        }
+    } catch (error) {
+    console.error('Failed to load SOS events:', error);
+    // Display an error message instead of mock data
+    const container = document.getElementById('notificationsList');
+    if (container) {
+        container.innerHTML = '<p style="text-align: center; color: var(--sos-color);">Could not load emergency alerts. Please check your connection and try again.</p>';
+    }
+}
             }
+
+function updateEmergencyCount() {
+    const emergencyCount = appData.notifications.filter(n => n.status === 'pending').length;
+    document.getElementById('emergencyCount').textContent = emergencyCount;
+}
+
+function generateNotificationsList() {
+    const container = document.getElementById('notificationsList');
+    if (appData.notifications.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">No emergency alerts at this time.</p>';
+        return;
+    }
+
+    container.innerHTML = appData.notifications.map(notification => `
+        <div class="notification-item ${notification.status === 'pending' ? 'urgent' : ''}" data-id="${notification.id}">
+            <div class="notification-header">
+                <h4>🚨 ${notification.patientName}</h4>
+                <span class="notification-time">${new Date(notification.timestamp).toLocaleString()}</span>
+            </div>
+            <div class="notification-content">
+                <p>${notification.message}</p>
+                ${notification.location ? `<p><small>📍 Location: ${notification.location.latitude.toFixed(4)}, ${notification.location.longitude.toFixed(4)}</small></p>` : ''}
+            </div>
+            <div class="notification-actions">
+                ${notification.status === 'pending' ?
+                    `<button class="btn btn-primary respond-btn" data-id="${notification.id}">Respond</button>
+                     <button class="btn dismiss-btn" data-id="${notification.id}">Dismiss</button>` :
+                    '<span class="status-resolved">Resolved</span>'
+                }
+            </div>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.respond-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => respondToNotification(e.target.dataset.id));
+    });
+    container.querySelectorAll('.dismiss-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => dismissNotification(e.target.dataset.id));
+    });
+}
+
+async function respondToNotification(notificationId) {
+    try {
+        const notification = appData.notifications.find(n => n.id == notificationId);
+        if (!notification || !notification.event_id) {
+            showConfirmationModal('Error', 'Invalid notification data.');
+            return;
+        }
+
+        // NOTE: This endpoint does not exist in your backend yet.
+        const response = await fetch(`${API_BASE_URL}/v1/sos-respond`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_id: notification.event_id,
+                saathi_user_id: saathi ? saathi.patientId : null,
+                response_notes: 'Saathi responded to emergency alert'
+            })
+        });
+
+        if (response.ok) {
+            notification.status = 'responded';
+            updateEmergencyCount();
+            generateNotificationsList();
+            showConfirmationModal('Response Sent', 'You have responded to this emergency alert. Contact the patient directly.');
+        } else {
+            const errorData = await response.json();
+            showConfirmationModal('Error', errorData.error || 'Failed to send response.');
+        }
+    } catch (error) {
+        console.error('Failed to respond to notification:', error);
+        showConfirmationModal('Error', 'Failed to send response. Please try again.');
+    }
+}
+
+async function dismissNotification(notificationId) {
+    // This is a placeholder as the backend endpoint is missing.
+    const notification = appData.notifications.find(n => n.id == notificationId);
+    if (notification) {
+        notification.status = 'dismissed';
+    }
+    updateEmergencyCount();
+    generateNotificationsList();
+}
+
+function urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+async function subscribeUser() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/v1/vapid-public-key`);
+        const data = await response.json();
+        const applicationServerKey = urlB64ToUint8Array(data.publicKey);
+        let subscription = await navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription());
+        if (subscription !== null) {
+            await subscription.unsubscribe();
+            subscription = null;
+        }
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            alert('Push notifications are required for emergency alerts. Please enable them in your browser settings.');
+            return;
+        }
+        subscription = await navigator.serviceWorker.ready.then(reg =>
+            reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
+            })
+        );
+        await fetch(`${API_BASE_URL}/v1/subscribe`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: saathi.patientId, subscription: subscription })
+        });
+        document.getElementById('notification-banner').style.display = 'none';
+    } catch (error) {
+        console.error('Failed to subscribe or sync user:', error);
+    }
+}
+
+function setupNotificationBanner() {
+    const banner = document.getElementById('notification-banner');
+    const enableBtn = document.getElementById('enable-notifications-btn');
+    const dismissBtn = document.getElementById('dismiss-banner-btn');
+    if (Notification.permission === 'granted') {
+        banner.style.display = 'none';
+        subscribeUser();
+        return;
+    }
+    banner.style.display = 'block';
+    enableBtn.onclick = subscribeUser;
+    dismissBtn.onclick = () => banner.style.display = 'none';
+}
+
+            // This function now waits for authentication before loading data
+
+async function initializeApp() {
+    const isAuthenticated = await checkAuth(); // Wait for the check to complete
+    if(isAuthenticated){
+        setupNavigation();
+        setupThemeAndLanguage();
+        generateTasks(); // This uses mock data, which is fine for now
+        generateTrainingModules();
+        generateEarningsHistory();
+        loadNotifications(); // This will now fetch REAL SOS data
+        setupFormsAndModals();
+
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                console.log('Service Worker registered successfully');
+                setupNotificationBanner();
+                // We call subscribeUser here to ensure it runs after registration
+                subscribeUser(); 
+            } catch (error) {
+                console.error('Service Worker registration failed:', error);
+            }
+        } else {
+            console.warn('Push notifications are not supported in this browser.');
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('sehatSaharaUser'); // Clear login state
+            showConfirmationModal("Logged Out", "You have been successfully logged out.");
+            setTimeout(() => window.location.href = 'index.html', 1500);
+        });
+
+        updateUIText();
+    }
+}
 
             initializeApp();
         });
     </script>
 </body>
 </html>
-
