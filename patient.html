@@ -59,7 +59,7 @@
             }
             /* --- END: Add these Chat Message Dark Mode Fixes --- */
         }
-        }
+        
 
         html { scroll-behavior: smooth; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -4413,39 +4413,71 @@ Possible solutions:
                 });
             }
 
-            // Medicine Reminder Functions
             async function checkMedicineReminders() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: user.patientId,
-                            action: 'get'
-                        })
-                    });
+        try {
+            console.log("checkMedicineReminders: Fetching reminders for user:", user.patientId); // Log start
+            const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.patientId,
+                    action: 'get'
+                })
+            });
 
-                    const data = await response.json();
-                    if (data.success) {
-                        updateRemindersDisplay(data.reminders, data.pending_alerts);
-                    }
-                } catch (error) {
-                    console.error('Medicine reminders check error:', error);
-                }
+            // --- START: Add Detailed Logging ---
+            if (!response.ok) {
+                console.error("checkMedicineReminders: Fetch failed with status:", response.status);
+                const errorText = await response.text();
+                console.error("checkMedicineReminders: Error response body:", errorText);
+                throw new Error(`HTTP ${response.status}`);
             }
+
+            const data = await response.json();
+            console.log("checkMedicineReminders: Received data:", data); // Log the full response
+
+            if (data.success) {
+                // Log the arrays directly before passing them
+                console.log("checkMedicineReminders: Reminders array:", data.reminders);
+                console.log("checkMedicineReminders: Alerts array:", data.pending_alerts);
+                updateRemindersDisplay(data.reminders || [], data.pending_alerts || []); // Ensure arrays are passed
+            } else {
+                console.error("checkMedicineReminders: Backend indicated failure:", data.message || "Unknown error");
+            }
+            // --- END: Add Detailed Logging ---
+
+        } catch (error) {
+            // Log the specific error
+            console.error('checkMedicineReminders: Caught error during fetch/processing:', error);
+        }
+    }
 
             function updateRemindersDisplay(reminders, alerts) {
-                // Update home screen counter
-                const pendingEl = document.getElementById('pendingReminders');
-                if (pendingEl) {
-                    pendingEl.textContent = `${alerts.length} Pending`;
-                }
+            // --- START: Add Detailed Logging ---
+            console.log("updateRemindersDisplay: Received reminders count:", reminders ? reminders.length : 'N/A'); // Log count received
+            console.log("updateRemindersDisplay: Received alerts count:", alerts ? alerts.length : 'N/A'); // Log count received
 
-                // Show alerts in chat if any
-                if (alerts.length > 0 && document.getElementById('chatbotScreen').classList.contains('active')) {
-                    showMedicineAlerts(alerts);
-                }
+            const pendingEl = document.getElementById('pendingReminders');
+            console.log("updateRemindersDisplay: Found pendingEl:", pendingEl); // Log if the element was found
+
+            if (pendingEl) {
+                const totalActiveReminders = reminders ? reminders.length : 0;
+                console.log("updateRemindersDisplay: Setting text content to:", `${totalActiveReminders} Total Active`); // Log the text being set
+                pendingEl.textContent = `${totalActiveReminders} Total Active`;
+                console.log("updateRemindersDisplay: Text content AFTER setting:", pendingEl.textContent); // Verify it was set
+            } else {
+                console.error("updateRemindersDisplay: Could not find element with ID 'pendingReminders'"); // Error if element is missing
             }
+            // --- END: Add Detailed Logging ---
+
+            // Show alerts in chat if any (This part remains the same)
+            if (alerts && alerts.length > 0 && document.getElementById('chatbotScreen').classList.contains('active')) {
+                 console.log("updateRemindersDisplay: Showing alerts in chat"); // Log chat alert trigger
+                showMedicineAlerts(alerts);
+            } else {
+                 console.log("updateRemindersDisplay: Not showing alerts in chat (alerts:", alerts ? alerts.length : 'N/A', ", chatbot active:", document.getElementById('chatbotScreen').classList.contains('active'), ")");
+            }
+        }
 
             function showMedicineAlerts(alerts) {
                 const chatWindow = document.getElementById('chatWindow');
@@ -4801,7 +4833,7 @@ Possible solutions:
             // ENHANCED saveMedicineReminder function
             // --- YOUR OTHER EXISTING JAVASCRIPT FUNCTIONS ---
         
-        // This is your correct, fully functional saveMedicineReminder
+        // In patient.html
         async function saveMedicineReminder() {
             const isEdit = currentlyEditing !== null;
             const action = isEdit ? 'update' : 'add';
@@ -4823,8 +4855,9 @@ Possible solutions:
                 medicine_data: {
                     name: medicineName,
                     dosage: dosage,
-                    times: times.split(',').map(t => t.trim()),
-                    duration_days: parseInt(duration),
+                    // Ensure times are correctly parsed into an array
+                    times: times.split(',').map(t => t.trim()).filter(t => t), // Filter empty strings
+                    duration_days: parseInt(duration) || 30, // Default duration if not provided
                     instructions: instructions,
                     timezone: userTimezone
                 }
@@ -4834,25 +4867,55 @@ Possible solutions:
                 payload.original_medicine_name = currentlyEditing;
             }
 
+            // --- Show loading state ---
+            const saveBtn = document.getElementById('saveReminderBtn');
+            const originalBtnText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
             try {
+                console.log("Sending reminder save request:", payload); // Log payload
                 const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok) throw new Error('Failed to save reminder');
 
+                console.log("Reminder save response status:", response.status); // Log status
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Failed to save reminder' }));
+                    throw new Error(errorData.message || `HTTP ${response.status}`);
+                }
+
+                // --- START: Reordered Refresh Logic ---
+                // 1. Close modal and reset form
                 document.getElementById('medicineReminderModal').classList.remove('active');
                 document.getElementById('medicineReminderForm').reset();
-                currentlyEditing = null;
-                document.getElementById('saveReminderBtn').textContent = 'Save Reminder';
-                await loadMedicineRemindersScreen();
-                await checkMedicineReminders();
+                currentlyEditing = null; // Reset edit state
+
+                // 2. Show confirmation to the user
                 showConfirmationModal('Success', `Medicine reminder ${isEdit ? 'updated' : 'added'}!`);
+
+                // 3. *After* showing confirmation, refresh the data and UI
+                console.log("Reminder saved, now refreshing UI...");
+                await loadMedicineRemindersScreen(); // Refresh the dedicated reminder screen
+                await checkMedicineReminders(); // Refresh homepage counter and chat alerts
+
+                // --- END: Reordered Refresh Logic ---
+
 
             } catch (error) {
                 console.error('Save reminder error:', error);
-                alert('Failed to save medicine reminder. Please try again.');
+                alert(`Failed to save medicine reminder: ${error.message}. Please try again.`);
+            } finally {
+                // --- Reset button state ---
+                saveBtn.textContent = originalBtnText; // Restore original text
+                saveBtn.disabled = false;
+                // Ensure the button text resets correctly if it was an edit
+                if (!isEdit) {
+                   document.getElementById('saveReminderBtn').textContent = 'Save Reminder';
+                }
             }
         }
             // Add these functions inside your <script> tag in patient.html
@@ -4961,58 +5024,69 @@ Possible solutions:
             
 
             async function initializeApp() {
-             if (!checkAuth()) return;
+                // 1. Check Authentication (Essential First Step)
+                if (!checkAuth()) return; // Stop if not logged in
 
-                // --- NEW CODE TO ADD ---
-                // Register Service Worker and set up banner
+                // 2. Setup Service Worker & Push Notifications (Can run early)
                 if ('serviceWorker' in navigator && 'PushManager' in window) {
                     try {
-                        await navigator.serviceWorker.register('/sw.js'); // Assuming your file is sw2.js
+                        await navigator.serviceWorker.register('/sw.js');
                         console.log('Service Worker registered successfully');
+                        // Setup the banner logic (doesn't block other tasks)
                         setupNotificationBanner();
-                        // Show the banner if needed
-                        subscribeUser(); // <--- THIS LINE MUST BE PRESENT HERE
+                        // Attempt to subscribe/resubscribe (runs in background)
+                        subscribeUser();
                     } catch (error) {
                         console.error('Service Worker registration failed:', error);
                     }
                 } else {
                      console.warn('Push notifications are not supported in this browser.');
                 }
-                // --- END NEW CODE ---
-            // ... the rest of your initializeApp function
-        
-                if (!checkAuth()) return;
-                await loadDoctors();
-                updateUIText();
-                setupNavigation();
-                setupThemeAndLanguage();
-                generateTimeline();
-                await loadBookingData(); // <<< ADD THIS LINE
-                await generateAppointments();
-                await generateAllPrescriptions();
-                await loadDashboard();
-                await loadChatHistory(); // Add this line
-                generateOrdersList();
-// ✅ ADD THIS EVENT LISTENER
-    document.getElementById('sosButton').addEventListener('click', () => {
-        startSosCountdown(user); // Pass the user object
-    });
-                loadAndDisplaySummary(); // <-- Use our new function
-                renderBookingStep(1);
-                setupModalsAndActions();
-                setupScanMedicine();
-                setupBookMedicine();
-                setupUploadPrescription();
-                setupChatbot();
-                setupWebRTC();
-                
-                // Check for post-appointment follow-up
-                await checkPostAppointmentFollowup();
 
-                // If medicine reminders screen is active, load reminders
+                // 3. Load Core Data (Necessary for many UI elements)
+                await loadDoctors();       // Fetch doctor list
+                await loadBookingData();   // Fetch booking categories, slots etc.
+
+                // 4. Setup Basic UI Elements (Theme, Language, Static Nav)
+                updateUIText();            // Apply initial language translations
+                setupNavigation();         // Make nav buttons clickable
+                setupThemeAndLanguage();   // Setup theme/language toggles
+
+                // 5. Render Initial Screen Content (Depends on Core Data)
+                generateTimeline();        // Render health records timeline
+                await generateAppointments(); // Fetch and render appointments list (also updates homepage 'Next Appt')
+                await generateAllPrescriptions(); // Fetch and render prescriptions list
+                await loadDashboard();     // Fetch specific dashboard stats (like prescription count)
+                await loadChatHistory();   // Fetch past chat messages
+                generateOrdersList();      // Render past medicine orders list
+                loadAndDisplaySummary();   // Fetch latest prescription summary for chat
+                renderBookingStep(1);      // Setup the first step of the booking screen
+
+                // 6. Setup Interactive Components & Modals
+                setupModalsAndActions();   // Add event listeners for modals, SOS, logout etc.
+                setupScanMedicine();       // Initialize camera logic for medicine scan
+                setupBookMedicine();       // Initialize UI logic for booking medicine
+                setupUploadPrescription(); // Initialize camera logic for prescription upload
+                setupChatbot();            // Initialize chatbot, loads initial message & checks reminders ONCE
+                setupWebRTC();             // Initialize WebRTC for video calls
+                document.getElementById('sosButton').addEventListener('click', () => { startSosCountdown(user); }); // Attach SOS listener
+
+                // 7. Perform Final Checks and UI Refreshes (Run AFTER main UI is rendered)
+                console.log("initializeApp: Performing final reminder check...");
+                await checkMedicineReminders(); // <<< Explicitly refresh reminder count AFTER dashboard etc.
+
+                await checkPostAppointmentFollowup(); // Check if follow-up message is needed in chat
+
+                // Optionally add interval here for periodic checks later if desired
+                // setInterval(checkMedicineReminders, 60 * 1000);
+                // console.log("Started periodic reminder check.");
+
+                // Load reminders screen content IF that screen is the active one on load
                 if (document.getElementById('medicineRemindersScreen').classList.contains('active')) {
                     await loadMedicineRemindersScreen();
                 }
+
+                console.log("initializeApp: Initialization complete.");
             }
 
             // Post-appointment follow-up check
