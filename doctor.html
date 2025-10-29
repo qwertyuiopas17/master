@@ -239,6 +239,7 @@
         }
     </style>
 </head>
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
 <body data-theme="light">
     <div class="main-container">
         <div class="background-image"></div>
@@ -455,36 +456,16 @@
             let isRecording = false;
             let currentStream = null;
             // WebRTC variables
-let localStream;
-let peerConnection;
-let dataChannel;
-let isAudioMuted = false; // Note: Mute buttons aren't in the doctor UI, but variables might be kept
-let isVideoMuted = false; // Note: Mute buttons aren't in the doctor UI, but variables might be kept
-let currentAppointmentId = null;
-let iceCandidateQueue = [];
-// Removed offerQueue as it wasn't used in the provided doctor(9).html
-let isCallActive = false;
-let isInitiator = false; // Role assignment for collision resolution
-let retryCount = 0;
-let maxRetries = 3;
-let retryDelay = 1000; // Start with 1 second
+// --- START: Agora Variables ---
+const AGORA_APP_ID = "5ce1cf67c1f142478e0f3ed61cb8958f"; // Use the SAME App ID
+let TEMP_TOKEN = "007eJxTYFhkZCBakLWg4+jmp0fLPyjYBUm/3Hgl8PnhlZ4FM7dd9ZRTYDBNTjVMTjMzTzZMMzQxMjG3SDVIM05NMTNMTrKwNLVIk7RhymwIZGRQdpJkYWSAQBCflyElNTdfNzkxJ0fX0MiYgQEAmr4hLQ=="; // Fetch or use the SAME temporary token for the channel
+let agoraClient = null
+let localAudioTrack = null;
+let localVideoTrack = null;
+let remoteUser = null; // To keep track of the remote participant
+let currentChannelName = null; // Will be set based on appointmentId
+// --- END: Agora Variables ---
 
-// Enhanced WebRTC configuration (Same as patient)
-const configuration = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
-    ],
-    iceCandidatePoolSize: 10,
-    bundlePolicy: 'max-bundle',
-    rtcpMuxPolicy: 'require'
-};
             const startRecordingBtn = document.getElementById('start-recording-btn');
             const recordIcon = document.getElementById('record-icon');
             const recordText = document.getElementById('record-text');
@@ -721,115 +702,48 @@ const configuration = {
 
             
             // In doctor.html, inside the <script> block
-function showCallScreen(patientName, appointmentId) {
+// In doctor.html
+function showCallScreen(patientName, appointmentId) { // <<< Use patientName here
     currentAppointmentId = appointmentId;
-    document.getElementById('consultationHeader').textContent = `Consultation with ${patientName}`;
-    showScreen('consultationScreen'); // Use your existing showScreen function
-    hideConnectionStatus(); // Hide previous status
-    initializeWebRTC();
-}
+    currentChannelName = appointmentId;
 
-async function initializeWebRTC() {
-    try {
-        console.log('Doctor: Initializing WebRTC...');
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            throw new Error('WebRTC is not supported in this browser');
-        }
-        showConnectionStatus('Requesting camera and microphone permissions...', 'info');
-        const constraints = {
-            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-        };
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        const localVideo = document.getElementById('localVideo');
-        if (localVideo) {
-            localVideo.srcObject = localStream;
-            await localVideo.play().catch(e => console.warn('Doctor: Local video play failed:', e));
-        }
-        await new Promise(resolve => setTimeout(resolve, 500)); // Short delay
-        createPeerConnection();
-        isCallActive = true;
-        showConnectionStatus('WebRTC ready. Click "Start Call" to begin.', 'success');
-    } catch (error) {
-        console.error('Doctor: Error accessing media devices:', error);
-        let msg = 'Could not access camera/microphone. Please check permissions.';
-        if (error.name === 'NotAllowedError') msg += ' Access was denied.';
-        else if (error.name === 'NotFoundError') msg += ' No camera/mic found.';
-        showConnectionStatus(msg, 'error');
-        // Optionally close call screen or disable call button here
+    const headerElement = document.getElementById('consultationHeader');
+    if (headerElement) headerElement.textContent = `Consultation with ${patientName}`; // <<< Use patientName here
+
+    showScreen('consultationScreen'); // Doctor uses showScreen
+
+    // Clear video elements and hide status
+    const localVideoPlayer = document.getElementById('localVideo');
+    const remoteVideoPlayer = document.getElementById('remoteVideo');
+    if (localVideoPlayer) localVideoPlayer.innerHTML = '';
+    if (remoteVideoPlayer) remoteVideoPlayer.innerHTML = '<p>Waiting to connect...</p>';
+    hideConnectionStatus();
+
+    // Initialize Agora Client if needed (or if disconnected)
+    // Using agoraClient = null in leaveCall makes this check reliable
+    if (!agoraClient || agoraClient.connectionState === 'DISCONNECTED') {
+        console.log("Initializing Agora Client for new call...");
+        initializeAgoraClient();
+    } else {
+        console.log("Agora Client already exists, state:", agoraClient.connectionState);
+        // Even if client exists but wasn't fully cleaned up, ensure button is ready
     }
-}
 
-function createPeerConnection() {
-    try {
-        console.log('Doctor: Creating peer connection...');
-        peerConnection = new RTCPeerConnection(configuration);
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        }
-
-        peerConnection.ontrack = event => {
-            console.log('Doctor: Received remote stream from patient', event.streams[0]);
-            const remoteVideo = document.getElementById('remoteVideo');
-            if (remoteVideo && event.streams[0]) {
-                if (remoteVideo.srcObject !== event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
-                    playRemoteVideo(remoteVideo); // Use helper to play
-                }
-            }
-        };
-
-        peerConnection.onconnectionstatechange = () => {
-             console.log('Doctor: Connection state:', peerConnection.connectionState);
-             switch(peerConnection.connectionState) {
-                case 'connected':
-                    showConnectionStatus('Connected successfully!', 'success');
-                    const startBtn = document.getElementById('startCallBtn');
-                    if(startBtn) { startBtn.textContent = 'Call Active'; /* Don't disable for doctor */ }
-                    break;
-                case 'failed':
-                    handleConnectionFailure();
-                    break;
-                case 'connecting':
-                    showConnectionStatus('Connecting to patient...', 'info');
-                    break;
-                case 'disconnected':
-                     showConnectionStatus('Reconnecting...', 'warning');
-                     handlePeerDisconnection();
-                     break;
-                case 'closed':
-                    hideConnectionStatus();
-                    break;
-             }
-        };
-
-         peerConnection.onsignalingstatechange = () => console.log('Doctor: Signaling state:', peerConnection.signalingState);
-         peerConnection.oniceconnectionstatechange = () => console.log('ICE connection state:', peerConnection.iceConnectionState);
-
-
-        peerConnection.onicecandidate = event => {
-            if (event.candidate) {
-                console.log('Doctor: Sending ICE candidate');
-                sendSignalingMessage('ice', event.candidate);
-            }
-        };
-
-        // Handle incoming data channels from patient
-        peerConnection.ondatachannel = event => {
-            console.log('Doctor: Received data channel:', event.channel.label);
-            if (event.channel.label === 'messages') {
-                dataChannel = event.channel;
-                setupDataChannelEvents(dataChannel);
-            }
-        };
-
-        console.log('Doctor: Peer connection created successfully');
-    } catch (error) {
-        console.error('Doctor: Error creating peer connection:', error);
-        alert('Failed to create video connection.');
+    // *** CRITICAL CHANGE: Ensure Start Button is ready ***
+    const startBtn = document.getElementById('startCallBtn');
+    if (startBtn) {
+        startBtn.textContent = 'Start Call'; // Set text correctly
+        startBtn.disabled = false;         // Ensure it's enabled
+    } else {
+        console.error("Start Call button not found!");
     }
+
+    // *** REMOVED THE AUTOMATIC CALL TO joinAndPublish ***
+    // console.log(`Attempting to join channel: ${appointmentId}`); // No longer joining here
+    // joinAndPublish(appointmentId, TEMP_TOKEN); // <--- REMOVED THIS LINE
 }
+
+
 
 // Helper to set up data channel event listeners
 function setupDataChannelEvents(channel) {
@@ -859,94 +773,7 @@ async function playRemoteVideo(videoElement, retryCount = 0) {
      }
 }
 
-async function startCall() {
-    if (!peerConnection || !localStream || peerConnection.signalingState !== 'stable') {
-        console.warn('Doctor: Cannot start call. PC State:', peerConnection?.signalingState, 'Stream:', !!localStream);
-        if (peerConnection?.signalingState === 'have-remote-offer') {
-            return await answerCall(); // Patient initiated
-        }
-        return;
-    }
-    console.log('Doctor: Starting call...');
-    isInitiator = true;
-    try {
-        const offer = await peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
-        await peerConnection.setLocalDescription(offer);
-        await sendSignalingMessageWithRetry('offer', offer);
-        const startBtn = document.getElementById('startCallBtn');
-        if(startBtn) { startBtn.disabled = true; startBtn.textContent = 'Connecting...'; }
-    } catch (error) {
-        console.error('Doctor: Error starting call:', error);
-        handleConnectionFailure(); // Treat offer/setDesc failure as connection failure
-    }
-}
 
-async function answerCall() {
-     if (!peerConnection || peerConnection.signalingState !== 'have-remote-offer') {
-         console.warn('Doctor: Cannot answer call in current state:', peerConnection?.signalingState);
-         return;
-     }
-     console.log('Doctor: Answering call...');
-    try {
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        await sendSignalingMessageWithRetry('answer', answer); // Use retry for answer too
-        const startBtn = document.getElementById('startCallBtn');
-        // Keep button enabled, maybe change text slightly if desired
-        if(startBtn) { startBtn.textContent = 'Call Active'; startBtn.disabled = false; }
-    } catch (error) {
-        console.error('Doctor: Error answering call:', error);
-        handleConnectionFailure(); // Treat answer/setDesc failure as connection failure
-    }
-}
-
-async function handleSignalingMessage(type, data) {
-    if (!peerConnection) {
-        console.warn('Doctor: Peer connection not ready for signaling message');
-        return;
-    }
-     console.log(`Doctor: Handling ${type}, PC State: ${peerConnection.signalingState}`);
-
-    try {
-        if (type === 'offer') {
-            if (peerConnection.signalingState !== 'stable') {
-                // Handle offer collision based on role (Doctor usually prioritizes if patient ID is higher, adjust logic if needed)
-                const shouldDoctorBeCaller = currentAppointmentId.localeCompare('demo') > 0; // Example logic
-                if (peerConnection.signalingState === 'have-local-offer' && !shouldDoctorBeCaller) {
-                    console.log("Collision: Doctor becomes callee, resetting.");
-                    await resetConnection(); // Reset and wait for the offer again
-                } else if (peerConnection.signalingState === 'have-local-offer' && shouldDoctorBeCaller) {
-                    console.log("Collision: Doctor is initiator, ignoring patient's offer.");
-                    return; // Ignore the incoming offer
-                } else {
-                    console.warn("Doctor: Received offer in unexpected state:", peerConnection.signalingState);
-                    return;
-                }
-            }
-             await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
-             await answerCall(); // Create and send answer
-
-        } else if (type === 'answer') {
-            if (peerConnection.signalingState === 'have-local-offer') {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
-                processQueuedIceCandidates(); // Process any queued candidates now
-            } else {
-                 console.warn('Doctor: Received answer in unexpected state:', peerConnection.signalingState);
-            }
-        } else if (type === 'ice') {
-            const candidate = new RTCIceCandidate(data);
-            if (peerConnection.remoteDescription) {
-                await peerConnection.addIceCandidate(candidate);
-            } else {
-                console.log('Doctor: Queueing ICE candidate');
-                iceCandidateQueue.push(candidate);
-            }
-        }
-    } catch (error) {
-        console.error(`Doctor: Error handling ${type} signaling:`, error);
-        // handleConnectionFailure(); // May be too aggressive
-    }
-}
 
 // Helper function to process queued ICE candidates
 async function processQueuedIceCandidates() {
@@ -962,59 +789,7 @@ async function processQueuedIceCandidates() {
 }
 
 
-// Function to send signaling messages via fetch, WITH RETRY
-async function sendSignalingMessageWithRetry(type, data) {
-    let attempt = 0;
-    while (attempt < maxRetries) {
-        try {
-            console.log(`Doctor: Sending ${type} (Attempt ${attempt + 1})`);
-            // *** IMPORTANT: Ensure the endpoint includes /v1/ ***
-            const response = await fetch(`${API_BASE_URL}/webrtc/${type}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ appointmentId: currentAppointmentId, data: data })
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            console.log(`Doctor: ${type} sent successfully.`);
-            return; // Success
-        } catch (error) {
-            attempt++;
-            console.error(`Doctor: Signaling error (Attempt ${attempt}):`, error);
-            if (attempt >= maxRetries) {
-                 console.error(`Doctor: Max retries reached for ${type}.`);
-                 throw error; // Re-throw after max retries
-            }
-            const delay = retryDelay * Math.pow(2, attempt -1); // Exponential backoff
-            console.log(`Doctor: Retrying ${type} in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-    }
-}
 
-// Keep the non-retry version if needed elsewhere, but prefer the retry one for offers/answers
-function sendSignalingMessage(type, data) {
-    // *** IMPORTANT: Ensure the endpoint includes /v1/ ***
-    fetch(`${API_BASE_URL}/webrtc/${type}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointmentId: currentAppointmentId, data: data })
-    }).catch(error => console.error('Doctor: Signaling error:', error));
-}
-
-
-function pollSignaling() {
-    if (!currentAppointmentId || !isCallActive) return; // Only poll if call is active
-
-    // *** IMPORTANT: Ensure the endpoint includes /v1/ ***
-    fetch(`${API_BASE_URL}/webrtc/poll?appointmentId=${currentAppointmentId}`)
-        .then(response => response.ok ? response.json() : Promise.reject(`HTTP ${response.status}`))
-        .then(messages => {
-            if (messages && messages.length > 0) {
-                 messages.forEach(msg => handleSignalingMessage(msg.type, msg.data));
-            }
-        })
-        .catch(error => console.error('Doctor: Polling error:', error));
-}
 
 // UI Status Functions (showConnectionStatus, hideConnectionStatus, etc.) - Keep these
 function showConnectionStatus(message, type = 'info') {
@@ -1042,68 +817,182 @@ function hideConnectionStatus() {
 // function toggleAudio() { ... }
 // function toggleVideo() { ... }
 
-function endCall() {
-    console.log('Doctor: Ending call...');
-    isCallActive = false; // Stop polling and prevent retries
 
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
+
+// --- START: Agora Functions ---
+
+// Initialize Agora Client
+function initializeAgoraClient() {
+    agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+    // Event listener for when a remote user publishes tracks
+    agoraClient.on("user-published", async (user, mediaType) => {
+        await agoraClient.subscribe(user, mediaType);
+        console.log("Subscribed to remote user:", user.uid, "MediaType:", mediaType);
+        remoteUser = user; // Store the remote user
+
+        if (mediaType === "video") {
+            const remoteVideoTrack = user.videoTrack;
+            const remoteVideoPlayer = document.getElementById("remoteVideo");
+            remoteVideoPlayer.textContent = ""; // Clear any previous placeholder
+            remoteVideoTrack.play("remoteVideo");
+            showConnectionStatus('Patient connected!', 'success');
+        }
+
+        if (mediaType === "audio") {
+            const remoteAudioTrack = user.audioTrack;
+            remoteAudioTrack.play();
+        }
+    });
+
+    // Event listener for when a remote user unpublishes tracks
+    agoraClient.on("user-unpublished", (user, mediaType) => {
+        console.log("Remote user unpublished:", user.uid, "MediaType:", mediaType);
+        if (mediaType === "video") {
+            // Optionally clear the video element or show a placeholder
+            const remoteVideoPlayer = document.getElementById("remoteVideo");
+            remoteVideoPlayer.innerHTML = '<p>Patient video stopped</p>';
+        }
+    });
+
+    // Event listener for when a remote user leaves
+    agoraClient.on("user-left", (user) => {
+        console.log("Remote user left:", user.uid);
+        remoteUser = null;
+        const remoteVideoPlayer = document.getElementById("remoteVideo");
+        remoteVideoPlayer.innerHTML = '<p>Patient has left the call</p>';
+        showConnectionStatus('Patient left', 'warning');
+        // Optionally end the call for the doctor too, or wait
+    });
+
+    // Handle network quality reports (optional)
+    agoraClient.on("network-quality", (stats) => {
+         console.log("Downlink network quality:", stats.downlinkNetworkQuality);
+         console.log("Uplink network quality:", stats.uplinkNetworkQuality);
+    });
+
+     // Handle connection state changes
+    agoraClient.on("connection-state-change", (curState, prevState, reason) => {
+        console.log(`Agora Connection State Change: ${prevState} -> ${curState}, Reason: ${reason}`);
+        if (curState === "DISCONNECTED" && reason !== "UID_BANNED" && reason !== "CHANNEL_BANNED") {
+             // Handle temporary disconnections (e.g., network issues)
+             showConnectionStatus('Connection lost, attempting to reconnect...', 'warning');
+        } else if (curState === "CONNECTED") {
+             showConnectionStatus('Connected to Agora channel', 'success');
+             document.getElementById('startCallBtn').textContent = 'Call Active';
+             document.getElementById('startCallBtn').disabled = true; // Disable after joining
+        } else if (curState === "FAILED") {
+             showConnectionStatus('Failed to connect to Agora. Check network/App ID.', 'error');
+             leaveCall(); // Clean up on failure
+        }
+    });
+
+}
+
+// Join Agora Channel and Publish Tracks
+async function joinAndPublish(channelName, token) {
+    if (!agoraClient) {
+        console.error("Agora client not initialized.");
+        return;
     }
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
+    currentChannelName = channelName;
+
+    try {
+        showConnectionStatus('Joining channel...', 'info');
+        // Join the channel - Using UID 0 allows Agora to assign one automatically
+        const uid = await agoraClient.join(AGORA_APP_ID, channelName, token, null);
+        console.log("Successfully joined channel:", channelName, "with UID:", uid);
+
+        // Create microphone and camera tracks
+        // Create microphone and camera tracks explicitly
+showConnectionStatus('Accessing microphone...', 'info');
+localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+
+showConnectionStatus('Accessing front camera...', 'info');
+try {
+    localVideoTrack = await AgoraRTC.createCameraVideoTrack({
+        // encoderConfig: "480p_1", // Optional: Specify resolution like 480p, 720p etc.
+        facingMode: "user" // Request the front camera
+    });
+} catch (cameraError) {
+    console.error("Failed to get front camera:", cameraError);
+    showConnectionStatus('Could not access front camera. Trying default.', 'warning');
+    // Fallback to default camera if front camera fails
+    try {
+        localVideoTrack = await AgoraRTC.createCameraVideoTrack({ /* encoderConfig: "480p_1" */ });
+    } catch (fallbackError) {
+         console.error("Failed to get any camera:", fallbackError);
+         showConnectionStatus('Error accessing camera.', 'error');
+         // Handle the case where no camera is available (e.g., disable video features)
+         // You might want to call leaveCall() or show an error message.
+         leaveCall(); // Example: End call attempt if camera fails critically
+         return; // Stop further execution in joinAndPublish
     }
-     if (dataChannel) {
-        dataChannel.close();
-        dataChannel = null;
+}
+
+        // Play local video
+        const localVideoPlayer = document.getElementById("localVideo");
+        localVideoPlayer.textContent = ""; // Clear placeholder
+        localVideoTrack.play("localVideo");
+        console.log("Local video playing.");
+
+        // Publish local tracks
+        showConnectionStatus('Publishing your stream...', 'info');
+        await agoraClient.publish([localAudioTrack, localVideoTrack]);
+        console.log("Local tracks published successfully.");
+        showConnectionStatus('Waiting for patient...', 'success');
+
+
+    } catch (error) {
+        console.error("Failed to join/publish:", error);
+        showConnectionStatus(`Error: ${error.message}`, 'error');
+        leaveCall(); // Clean up on error
+    }
+}
+
+// Leave Agora Channel and Clean Up
+async function leaveCall() {
+    console.log("Leaving call...");
+    showConnectionStatus('Ending call...', 'info');
+    currentChannelName = null;
+    remoteUser = null;
+
+    // Stop and close local tracks
+    if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+        localAudioTrack = null;
+    }
+    if (localVideoTrack) {
+        localVideoTrack.stop();
+        localVideoTrack.close();
+        localVideoTrack = null;
     }
 
-    // Reset UI specific to doctor
-    showScreen('dashboardScreen'); // Go back to dashboard
-    const remoteVideo = document.getElementById('remoteVideo');
-    const localVideo = document.getElementById('localVideo');
-    if (remoteVideo) remoteVideo.srcObject = null;
-    if (localVideo) localVideo.srcObject = null;
-    const startBtn = document.getElementById('startCallBtn');
-     if(startBtn) { startBtn.disabled = false; startBtn.textContent = 'Start Call'; }
-    // Reset mute buttons if they exist
+    // Leave the Agora channel
+    if (agoraClient) {
+        try {
+            await agoraClient.leave();
+            console.log("Left Agora channel successfully.");
+        } catch (error) {
+             console.error("Error leaving Agora channel:", error);
+        }
+        // Optional: Destroy the client instance if completely done
+        agoraClient = null;
+    }
 
-    // Reset state variables
-    currentAppointmentId = null;
-    iceCandidateQueue = [];
-    isInitiator = false;
-    retryCount = 0;
-    retryDelay = 1000;
+    // Reset UI
+    document.getElementById('localVideo').innerHTML = ''; // Clear local video
+    document.getElementById('remoteVideo').innerHTML = '<p>Call ended</p>'; // Clear remote video
+    document.getElementById('startCallBtn').textContent = 'Start Call';
+    document.getElementById('startCallBtn').disabled = false;
     hideConnectionStatus();
+    showScreen('dashboardScreen'); // Go back to dashboard after ending call
 }
 
-// --- Connection Failure Handling ---
-function handleConnectionFailure() {
-    console.error('Doctor: Connection failure detected.');
-    showConnectionStatus('Connection failed. Please check internet and permissions.', 'error');
-    console.error('PC State:', { /* ... log states ... */ });
-    endCall(); // End the attempt
-    showConfirmationModal('Call Failed', 'Could not establish video connection.');
-}
+// --- END: Agora Functions ---
 
-// Handle disconnection
-function handlePeerDisconnection() {
-    console.log('Doctor: Peer disconnected.');
-    showConnectionStatus('Patient disconnected. Attempting to reconnect...', 'warning');
-    // WebRTC might handle reconnection, otherwise state will eventually go to 'failed'
-}
 
-// Reset connection logic
-async function resetConnection() {
-    console.log("Doctor: Resetting connection...");
-    const wasActive = isCallActive;
-    isCallActive = false;
-    endCall();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    isCallActive = wasActive;
-    initializeWebRTC();
-}
         // In doctor.html, inside the <script> block
 // REPLACE your async showPatientSummary with this improved version:
 
@@ -1706,52 +1595,7 @@ async function showPatientSummary(patientId, patientName) { // Changed parameter
                     </div>`).join('');
             }
             // Define this function in the main script scope
-function setupWebRTC() {
-    // Attach listeners to call control buttons specific to doctor UI
-    document.getElementById('startCallBtn')?.addEventListener('click', startCall); // Check if exists
-    document.getElementById('endCallBtn')?.addEventListener('click', endCall);     // Check if exists
 
-    // Add listener for the "Join Demo Call" button
-    document.getElementById('joinDemoCallBtn')?.addEventListener('click', () => {
-        // Use the same consistent ID as the patient's demo button
-        showCallScreen('Live Demo Patient', 'demo-call-123');
-    });
-
-    // Start polling for signaling messages (will only run if isCallActive is true)
-    setInterval(pollSignaling, 1000); // Poll every second
-
-    console.log("Doctor: WebRTC event listeners attached.");
-
-    // Note: The main 'call' button listeners on the appointment list
-    // should be handled within your generateAppointments function.
-    // Ensure they correctly call showCallScreen(patientName, appointmentId).
-}
-// Test function for debugging WebRTC issues
-function testWebRTCConnection() {
-    console.log('Doctor: Testing WebRTC connection...');
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.error('Doctor: WebRTC not supported');
-        showConnectionStatus('WebRTC not supported', 'error');
-        return;
-    }
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
-            console.log('Doctor: Media device test successful');
-            stream.getTracks().forEach(track => track.stop());
-            showConnectionStatus('WebRTC test successful', 'success');
-        })
-        .catch(error => {
-            console.error('Doctor: Media device test failed:', error);
-            showConnectionStatus('Media device test failed: ' + error.message, 'error');
-        });
-}
-
-// Add test button event listener for debugging
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.shiftKey && e.key === 'T') { // Ctrl+Shift+T
-        testWebRTCConnection();
-    }
-});
             
             
 
@@ -1790,13 +1634,7 @@ document.addEventListener('keydown', function(e) {
                 modal.classList.add('active');
             }
 
-            function startCall() {
-                if (!currentAppointment) return;
-                document.getElementById('aiSummaryModal').classList.remove('active');
-                document.getElementById('consultationHeader').textContent = `Consultation with ${currentAppointment.patient}`;
-                document.getElementById('prescriptionPatientName').textContent = currentAppointment.patient;
-                showScreen('consultationScreen');
-            }
+            
 
             function generateEarningsHistory() {
                  const container = document.getElementById('earningsList');
@@ -1982,10 +1820,10 @@ document.addEventListener('keydown', function(e) {
     }
     // --- END ADDED Listener ---
                 // --- ADD THIS EVENT LISTENER FOR THE END CALL BUTTON ---
-                document.getElementById('endCallBtn').addEventListener('click', endCall);
+                document.getElementById('endCallBtn')?.addEventListener('click', leaveCall);
 
                 // --- ADD WebRTC EVENT LISTENERS ---
-                document.getElementById('startCallBtn').addEventListener('click', startCall);
+                //document.getElementById('startCallBtn').addEventListener('click', startCall);
             }
 
             function showConfirmationModal(title, message) {
@@ -1999,17 +1837,71 @@ document.addEventListener('keydown', function(e) {
                 if(isAuthenticated){
                     setupNavigation();
                     setupThemeAndLanguage();
-                    setupWebRTC();
+                    
                     generateAppointments();
                     generateHistoryList();
                     generateEarningsHistory();
                     setupFormsAndModals();
                     setupAiPrescription();
                     // --- ADD THIS EVENT LISTENER ---
-                    document.getElementById('joinDemoCallBtn').addEventListener('click', () => {
-                        // Use the exact same ID as the patient's demo button
-                        showCallScreen('Live Demo Patient', 'demo-call-123');
-                    });
+                    // Add this listener during initialization (e.g., inside initializeApp or setupFormsAndModals)
+
+const startCallButton = document.getElementById('startCallBtn');
+if (startCallButton) {
+    startCallButton.addEventListener('click', () => {
+        // Check if we have a valid channel name from showCallScreen
+        if (currentChannelName) {
+            console.log(`Start Call button clicked. Attempting to join channel: ${currentChannelName}`);
+            startCallButton.textContent = 'Joining...';
+            startCallButton.disabled = true;
+
+            // --- IMPORTANT ---
+            // In Production: Fetch your secure token from the backend HERE
+            // using currentChannelName before calling joinAndPublish.
+            // Example:
+            // const token = await fetchAgoraToken(currentChannelName);
+            // if (token) {
+            //    joinAndPublish(currentChannelName, token);
+            // } else {
+            //    showConnectionStatus("Error getting call token", "error");
+            //    startCallButton.textContent = 'Start Call';
+            //    startCallButton.disabled = false;
+            // }
+
+            // For Testing with TEMP_TOKEN:
+            joinAndPublish(currentChannelName, TEMP_TOKEN);
+
+        } else {
+            console.error("Cannot start call, channel name (appointmentId) is missing.");
+            showConnectionStatus("Error: Appointment ID missing.", "error");
+            startCallButton.textContent = 'Start Call'; // Reset button if context is missing
+            startCallButton.disabled = false;
+        }
+    });
+} else {
+    console.error("Could not find the Start Call button element!");
+}
+                    // Inside initializeApp() or where the listener is added:
+document.getElementById('joinDemoCallBtn')?.addEventListener('click', () => {
+    // Use a consistent ID and token for the demo channel
+    const demoChannelName = 'demo-call-123';
+    // Use the same TEMP_TOKEN or fetch a specific demo token if needed
+    const demoToken = TEMP_TOKEN;
+
+    // Set context for prescription forms etc. if needed for demo
+    currentAppointment = { id: demoChannelName, patientId: 'DEMO_PATIENT_ID', patient: 'Live Demo Patient' };
+    // ... (rest of the context setting code from your existing listener) ...
+
+    // Show the call screen which will initialize Agora and join
+    document.getElementById('consultationHeader').textContent = `Consultation with Live Demo Patient`;
+    showScreen('consultationScreen');
+    hideConnectionStatus();
+    if (!agoraClient) {
+        initializeAgoraClient();
+    }
+    console.log(`Attempting to join demo channel: ${demoChannelName}`);
+    joinAndPublish(demoChannelName, demoToken);
+});
                     // --- END OF NEW LISTENER ---
 
                     // Inside your doctor.html <script> tag, find the logoutBtn event listener
