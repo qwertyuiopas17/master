@@ -120,7 +120,15 @@
         .btn { padding: 0.6rem 1.2rem; border-radius: 9999px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.25s ease; }
         .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
         .btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
-        .btn-sos { background-color: var(--sos-color); color: white; }
+        .btn-sos { 
+    background-color: var(--sos-color); 
+    color: white; 
+    animation: pulse 2s infinite; 
+}
+.btn-sos:hover { 
+    animation: pulse 1s infinite; 
+    transform: scale(1.05); 
+}
         /* And add the animation properties to it like this: */
 .btn-sos { 
     background-color: var(--sos-color); 
@@ -1714,7 +1722,31 @@ async function triggerSos(user) {
                     if (text) el.textContent = text;
                 });
             }
-            function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId)?.classList.add('active'); document.querySelectorAll('.nav-button, .top-nav a').forEach(link => { link.classList.toggle('active', link.dataset.screen === screenId); }); }
+            // Add this new function
+function updateView(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId)?.classList.add('active');
+    
+    document.querySelectorAll('.nav-button, .top-nav a').forEach(link => {
+        link.classList.toggle('active', link.dataset.screen === screenId);
+    });
+}
+            // Replace your old showScreen function with this
+// Replace your old showScreen function with this
+function showScreen(screenId) {
+    updateView(screenId); // Update the UI
+    
+    const state = { screen: screenId };
+    const url = '#' + screenId;
+
+    if (screenId === 'homeScreen') {
+        // If navigating TO the home screen, REPLACE the current history
+        history.replaceState(state, '', url);
+    } else {
+        // For any other screen, PUSH a new history state
+        history.pushState(state, '', url);
+    }
+}
             
             function showConfirmationModal(title, message) {
                 document.getElementById('modalTitle').textContent = title;
@@ -1904,6 +1936,23 @@ async function triggerSos(user) {
         console.error('Failed to load prescriptions:', e);
         container.innerHTML = '<p>Failed to load prescriptions.</p>';
     }
+}// In patient.html, add this new function near your other 'generate' functions
+async function loadOrderHistory() {
+    if (!user || !user.patientId) return; // Don't run if not logged in
+    try {
+        const response = await fetch(`${API_BASE_URL}/v1/orders/history?userId=${user.patientId}`);
+        const data = await response.json();
+        if (data.success && data.orders) {
+            appData.orders = data.orders; // Populate the local array
+        } else {
+            appData.orders = []; // Clear any old data if fetch fails
+        }
+    } catch (error) {
+        console.error('Failed to load order history:', error);
+        appData.orders = []; // Clear on error
+    }
+    // Finally, render the list with the fetched (or empty) data
+    generateOrdersList();
 }
 
 
@@ -2184,8 +2233,11 @@ function showTrackingModal(orderId) {
         window.location.href = 'index.html'; // Redirect to your login page
     }, 1500); // Wait 1.5 seconds before redirecting
 });
-
-                document.getElementById('confirmSos').addEventListener('click', () => { document.getElementById('sosModal').classList.remove('active'); showConfirmationModal('SOS Activated', 'Emergency services have been notified.'); });
+// REPLACE the old 'confirmSos' listener with this:
+document.getElementById('confirmSos').addEventListener('click', () => { 
+    document.getElementById('sosModal').classList.remove('active'); 
+    startSosCountdown(user); // This correctly starts the countdown
+});
                 document.getElementById('reportIssueForm')?.addEventListener('submit', (e) => { e.preventDefault(); showConfirmationModal('Report Submitted', 'Your report has been sent for review.'); e.target.reset(); setTimeout(() => showScreen('moreScreen'), 2000); });
                 document.getElementById('prevMonth').addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } generateCalendar(); });
                 document.getElementById('nextMonth').addEventListener('click', () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } generateCalendar(); });
@@ -3966,6 +4018,12 @@ function displayMessage(message, sender) {
                         if (prescCard) {
                             const highlight = prescCard.querySelector('.highlight');
                             highlight.textContent = data.prescriptionCount + ' Total';
+                        // This populates the local records from the server
+            if (data.healthRecords) {
+                appData.records = data.healthRecords;
+                generateTimeline(); // NOW we render the timeline, *after* data is loaded
+            }
+            // --- END OF FIX ---
                         }
                     }
                 } catch (e) {
@@ -4262,6 +4320,11 @@ function displayMessage(message, sender) {
                             ${data.reminders.map(reminder => `
                                 <div class="medicine-card card">
                                     <div class="medicine-name">${reminder.medicine_name}</div>
+                                    ${reminder.source === 'prescription_upload' ?
+            `<span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; margin-bottom: 1rem; display: inline-block; font-weight: 500;">
+                Generated from Prescription
+            </span>`
+            : ''}
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
                                         <div>
                                             <strong>Dosage:</strong> ${reminder.dosage}<br>
@@ -4614,16 +4677,27 @@ function displayMessage(message, sender) {
 
                 // 4. Setup Basic UI Elements (Theme, Language, Static Nav)
                 updateUIText();            // Apply initial language translations
-                setupNavigation();         // Make nav buttons clickable
+                setupNavigation();
+  // Replace your old popstate listener with this
+// Replace your old popstate listener with this
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.screen) {
+        // State exists, so just update the view to match the state
+        updateView(event.state.screen);
+    }
+    // NO ELSE BLOCK. This allows the browser to go back to index.html
+    // when event.state is null.
+});       // Make nav buttons clickable
                 setupThemeAndLanguage();   // Setup theme/language toggles
 
                 // 5. Render Initial Screen Content (Depends on Core Data)
-                generateTimeline();        // Render health records timeline
+                       // Render health records timeline
                 await generateAppointments(); // Fetch and render appointments list (also updates homepage 'Next Appt')
                 await generateAllPrescriptions(); // Fetch and render prescriptions list
                 await loadDashboard();     // Fetch specific dashboard stats (like prescription count)
                 await loadChatHistory();   // Fetch past chat messages
-                generateOrdersList();      // Render past medicine orders list
+                // --- WITH THIS LINE ---
+                await loadOrderHistory();  // Fetch and render past medicine orders    // Render past medicine orders list
                 loadAndDisplaySummary();   // Fetch latest prescription summary for chat
                 renderBookingStep(1);      // Setup the first step of the booking screen
 
@@ -4669,7 +4743,6 @@ if (startCallButton) {
 } else {
     console.error("Could not find the Start Call button element!");
 }
-                document.getElementById('sosButton').addEventListener('click', () => { startSosCountdown(user); }); // Attach SOS listener
 
                 // 7. Perform Final Checks and UI Refreshes (Run AFTER main UI is rendered)
                 console.log("initializeApp: Performing final reminder check...");
@@ -4687,6 +4760,10 @@ if (startCallButton) {
                 }
 
                 console.log("initializeApp: Initialization complete.");
+                // Add these 3 lines at the VERY END of your initializeApp function
+const initialScreen = 'homeScreen';
+history.replaceState({ screen: initialScreen }, '', '#' + initialScreen);
+updateView(initialScreen); // Make sure the view matches this initial state
             }
 
             // Post-appointment follow-up check

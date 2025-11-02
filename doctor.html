@@ -1236,15 +1236,31 @@ async function showPatientSummary(appointmentId) {
                     if (text) el.textContent = text;
                 });
             }
+            // Add this new function
+function updateView(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId)?.classList.add('active');
+    
+    document.querySelectorAll('.nav-button, .top-nav a').forEach(link => {
+        link.classList.toggle('active', link.dataset.screen === screenId);
+    });
+}
 
-            function showScreen(screenId) {
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.getElementById(screenId)?.classList.add('active');
-                
-                document.querySelectorAll('.nav-button, .top-nav a').forEach(link => {
-                    link.classList.toggle('active', link.dataset.screen === screenId);
-                });
-            }
+// Replace your old showScreen function with this
+function showScreen(screenId) {
+    updateView(screenId); // Update the UI
+    
+    const state = { screen: screenId };
+    const url = '#' + screenId;
+
+    if (screenId === 'dashboardScreen') {
+        // If navigating TO the dashboard, REPLACE the current history
+        history.replaceState(state, '', url);
+    } else {
+        // For any other screen, PUSH a new history state
+        history.pushState(state, '', url);
+    }
+}
             
             function setupNavigation() {
                 document.querySelectorAll('[data-screen]').forEach(el => {
@@ -1878,6 +1894,16 @@ async function showPatientSummary(patientId, patientName) { // Changed parameter
                 const isAuthenticated = await checkAuth();
                 if(isAuthenticated){
                     setupNavigation();
+                    // Replace your old popstate listener with this
+// Replace your old popstate listener with this
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.screen) {
+        // State exists, so just update the view to match the state
+        updateView(event.state.screen);
+    }
+    // NO ELSE BLOCK. This allows the browser to go back to index.html
+    // when event.state is null.
+});
                     setupThemeAndLanguage();
                     
                     generateAppointments();
@@ -1916,7 +1942,7 @@ if (startCallButton) {
             startCallButton.disabled = false;
         }
     });
-} else {
+}else {
     console.error("Could not find the Start Call button element!");
 }
                     // Inside initializeApp() or where the listener is added:
@@ -2028,8 +2054,12 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 
     updateUIText();
     // ... (rest of initializeApp if any) ...
+                }
+                // Add these 3 lines at the VERY END of your initializeApp function
+const initialScreen = 'dashboardScreen';
+history.replaceState({ screen: initialScreen }, '', '#' + initialScreen);
+updateView(initialScreen); // Make sure the view matches this initial state
 }
-            }
 
             initializeApp();
         });
