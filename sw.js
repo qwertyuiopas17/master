@@ -105,15 +105,16 @@ self.addEventListener('notificationclick', event => {
             clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
                 // Check if the app is already open
                 for (let client of clientList) {
-                    if (client.url.includes('patient(57).html') && 'focus' in client) {
+                    if (client.url.includes('patient.html') && 'focus' in client) {
                         return client.focus(); // Just focus the open window
                     }
                 }
                 // If no client is open, open a new window
                 if (clients.openWindow) {
-                    return clients.openWindow('/patient(5G).html'); // Open a new window
+                    return clients.openWindow('/patient.html'); // Open a new window
                 }
             })
         );
     }
 });
+
