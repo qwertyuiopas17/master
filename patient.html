@@ -4092,7 +4092,8 @@ function displayMessage(message, sender) {
             // --- END: Add Detailed Logging ---
 
             // Show alerts in chat if any (This part remains the same)
-            if (alerts && alerts.length > 0 && document.getElementById('chatbotScreen').classList.contains('active')) {
+            //if (alerts && alerts.length > 0 && document.getElementById('chatbotScreen').classList.contains('active')) {
+            if (alerts && alerts.length > 0) {
                  console.log("updateRemindersDisplay: Showing alerts in chat"); // Log chat alert trigger
                 showMedicineAlerts(alerts);
             } else {
@@ -4106,6 +4107,11 @@ function displayMessage(message, sender) {
 
                 alerts.forEach(alert => {
                     const alertDiv = document.createElement('div');
+                    // --- ADD A UNIQUE ID ---
+                    // Replace invalid characters for ID
+                    const safeName = alert.medicine_name.replace(/[^a-zA-Z0-9]/g, '-');
+                    alertDiv.id = `alert-card-${safeName}`;
+                    // --- END ID ---
                     alertDiv.className = 'medicine-reminder-card card';
                     alertDiv.innerHTML = `
                         <div class="reminder-item">
@@ -4393,6 +4399,14 @@ function displayMessage(message, sender) {
                         })
                     });
                     if (response.ok) {
+                        // --- START: ADD THESE LINES ---
+                        // Hide the card from the chat window
+                        const safeName = medicineName.replace(/[^a-zA-Z0-9]/g, '-');
+                        const card = document.getElementById(`alert-card-${safeName}`);
+                        if (card) {
+                            card.style.display = 'none';
+                        }
+                        // --- END: ADD THESE LINES ---
                         await loadMedicineRemindersScreen();
                         showConfirmationModal('Success', `${medicineName} marked as taken!`);
                     }
@@ -4401,9 +4415,36 @@ function displayMessage(message, sender) {
                 }
             }
 
+            // --- ADD THIS ENTIRE NEW FUNCTION ---
             window.skipMedicine = async function(medicineName) {
-                await loadMedicineRemindersScreen();
+                try {
+                    const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: user.patientId,
+                            action: 'skip_alert',
+                            medicine_name: medicineName
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        // Hide the card from the chat window
+                        const safeName = medicineName.replace(/[^a-zA-Z0-9]/g, '-');
+                        const card = document.getElementById(`alert-card-${safeName}`);
+                        if (card) {
+                            card.style.display = 'none';
+                        }
+                        // We don't need to show a modal, it just disappears.
+                        console.log(`Skipped alert for ${medicineName}`);
+                    } else {
+                        showConfirmationModal('Error', 'Failed to skip reminder.');
+                    }
+                } catch (error) {
+                    console.error('Skip medicine error:', error);
+                }
             }
+            // --- END NEW FUNCTION ---
 
             window.deleteReminder = async function(medicineName) {
                 if (!confirm(`Are you sure you want to delete the reminder for ${medicineName}?`)) {
