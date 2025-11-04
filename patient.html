@@ -700,6 +700,52 @@
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
+/* New Gradient & Modal Styles */
+        .modal-gradient-unique {
+            /* Unique Teal-to-Blue gradient matching your site's primary color */
+            background: linear-gradient(135deg, #0d9488, #14b8a6, #2dd4bf);
+            border: 1px solid #2dd4bf;
+        }
+
+        #missedReminderList .reminder-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column; /* Stack info and actions */
+            gap: 0.75rem;
+        }
+
+        #missedReminderList .reminder-info strong {
+            font-size: 1.1rem;
+        }
+
+        #missedReminderList .reminder-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Button styles for the new modal */
+        #missedReminderList .btn-taken {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        #missedReminderList .btn-skip {
+            background-color: #ffc107;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
 
 @media (max-width: 768px) {
     .form-row {
@@ -1152,7 +1198,19 @@
    </div>
    <div id="orders-list-container"></div>
 </section>
-
+<div id="missedReminderModal" class="modal">
+        <div class="modal-content modal-gradient-unique" style="color: white;">
+            <h3 id="missedReminderTitle" style="color: white;">⏰ Missed Reminders</h3>
+            <p>You didn't acknowledge the following medicine reminders:</p>
+            
+            <div id="missedReminderList" style="text-align: left; margin-top: 1.5rem; max-height: 200px; overflow-y: auto;">
+                </div>
+            
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                 <button class="btn" id="closeMissedReminderModal" style="background: rgba(255,255,255,0.2);">Close</button>
+            </div>
+        </div>
+    </div>
 <div id="cartModal" class="modal">
    <div class="modal-content" style="max-width: 600px; width: 90%;">
        <h3>🛒 Shopping Cart</h3>
@@ -4074,62 +4132,59 @@ function displayMessage(message, sender) {
     }
 
             function updateRemindersDisplay(reminders, alerts) {
-            // --- START: Add Detailed Logging ---
-            console.log("updateRemindersDisplay: Received reminders count:", reminders ? reminders.length : 'N/A'); // Log count received
-            console.log("updateRemindersDisplay: Received alerts count:", alerts ? alerts.length : 'N/A'); // Log count received
+                // (This logic for the homepage card remains the same)
+                console.log("updateRemindersDisplay: Received reminders count:", reminders ? reminders.length : 'N/A');
+                console.log("updateRemindersDisplay: Received alerts count:", alerts ? alerts.length : 'N/A');
 
-            const pendingEl = document.getElementById('pendingReminders');
-            console.log("updateRemindersDisplay: Found pendingEl:", pendingEl); // Log if the element was found
+                const pendingEl = document.getElementById('pendingReminders');
+                console.log("updateRemindersDisplay: Found pendingEl:", pendingEl);
 
-            if (pendingEl) {
-                const totalActiveReminders = reminders ? reminders.length : 0;
-                console.log("updateRemindersDisplay: Setting text content to:", `${totalActiveReminders} Total Active`); // Log the text being set
-                pendingEl.textContent = `${totalActiveReminders} Total Active`;
-                console.log("updateRemindersDisplay: Text content AFTER setting:", pendingEl.textContent); // Verify it was set
-            } else {
-                console.error("updateRemindersDisplay: Could not find element with ID 'pendingReminders'"); // Error if element is missing
+                if (pendingEl) {
+                    const totalActiveReminders = reminders ? reminders.length : 0;
+                    console.log("updateRemindersDisplay: Setting text content to:", `${totalActiveReminders} Total Active`);
+                    pendingEl.textContent = `${totalActiveReminders} Total Active`;
+                } else {
+                    console.error("updateRemindersDisplay: Could not find element with ID 'pendingReminders'");
+                }
+
+                // --- THIS IS THE MODIFICATION ---
+                // Instead of showing alerts in chat, show the popup modal.
+                if (alerts && alerts.length > 0) {
+                     console.log("updateRemindersDisplay: Showing missed reminder modal");
+                    showMissedReminderModal(alerts); // Call the new modal function
+                } else {
+                     console.log("updateRemindersDisplay: No pending alerts to show in modal.");
+                }
+                // --- END MODIFICATION ---
             }
-            // --- END: Add Detailed Logging ---
 
-            // Show alerts in chat if any (This part remains the same)
-            //if (alerts && alerts.length > 0 && document.getElementById('chatbotScreen').classList.contains('active')) {
-            if (alerts && alerts.length > 0) {
-                 console.log("updateRemindersDisplay: Showing alerts in chat"); // Log chat alert trigger
-                showMedicineAlerts(alerts);
-            } else {
-                 console.log("updateRemindersDisplay: Not showing alerts in chat (alerts:", alerts ? alerts.length : 'N/A', ", chatbot active:", document.getElementById('chatbotScreen').classList.contains('active'), ")");
-            }
-        }
+            // This new function shows the popup modal
+            function showMissedReminderModal(alerts) {
+                const modal = document.getElementById('missedReminderModal');
+                const listContainer = document.getElementById('missedReminderList');
+                if (!modal || !listContainer) return;
 
-            function showMedicineAlerts(alerts) {
-                const chatWindow = document.getElementById('chatWindow');
-                if (!chatWindow) return;
-
-                alerts.forEach(alert => {
-                    const alertDiv = document.createElement('div');
-                    // --- ADD A UNIQUE ID ---
-                    // Replace invalid characters for ID
-                    const safeName = alert.medicine_name.replace(/[^a-zA-Z0-9]/g, '-');
-                    alertDiv.id = `alert-card-${safeName}`;
-                    // --- END ID ---
-                    alertDiv.className = 'medicine-reminder-card card';
-                    alertDiv.innerHTML = `
-                        <div class="reminder-item">
-                            <div class="reminder-info">
-                                <h4>⏰ Medicine Reminder</h4>
-                                <p><strong>${alert.medicine_name}</strong> - ${alert.dosage}</p>
-                                <p>Time: ${alert.time}</p>
-                            </div>
-                            <div class="reminder-actions">
-                                <button class="btn-taken" onclick="markMedicineTaken('${alert.medicine_name}')">Taken</button>
-                                <button class="btn-skip" onclick="skipMedicine('${alert.medicine_name}')">Skip</button>
-                            </div>
+                // Build the HTML for all missed reminders
+                listContainer.innerHTML = alerts.map(alert => `
+                    <div class="reminder-item" id="modal-alert-${alert.medicine_name.replace(/[^a-zA-Z0-9]/g, '-')}">
+                        <div class="reminder-info">
+                            <strong>${alert.medicine_name}</strong> (${alert.dosage})
+                            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Scheduled for: ${alert.time}</p>
                         </div>
-                    `;
-                    chatWindow.appendChild(alertDiv);
-                });
+                        <div class="reminder-actions">
+                            <button class="btn-taken" onclick="markMedicineTaken('${alert.medicine_name}', true)">Mark as Taken</button>
+                            <button class="btn-skip" onclick="skipMedicine('${alert.medicine_name}', true)">Skip This Time</button>
+                        </div>
+                    </div>
+                `).join('');
 
-                chatWindow.scrollTop = chatWindow.scrollHeight;
+                // Add listener to the main close button
+                document.getElementById('closeMissedReminderModal').onclick = () => {
+                    modal.classList.remove('active');
+                };
+                
+                // Show the modal
+                modal.classList.add('active');
             }
 
             
@@ -4385,8 +4440,8 @@ function displayMessage(message, sender) {
             let currentlyEditing = null;
 
             // Make functions globally accessible for onclick attributes
-            window.markMedicineTaken = async function(medicineName) {
-                // ... (This function remains the same as before)
+            // Add a new parameter 'fromModal'
+            window.markMedicineTaken = async function(medicineName, fromModal = false) {
                 try {
                     const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
                         method: 'POST',
@@ -4398,16 +4453,28 @@ function displayMessage(message, sender) {
                             taken_time: new Date().toTimeString().slice(0, 5)
                         })
                     });
+
                     if (response.ok) {
-                        // --- START: ADD THESE LINES ---
-                        // Hide the card from the chat window
+                        // Hide the card from the chat window (if it's there)
                         const safeName = medicineName.replace(/[^a-zA-Z0-9]/g, '-');
-                        const card = document.getElementById(`alert-card-${safeName}`);
-                        if (card) {
-                            card.style.display = 'none';
+                        const chatCard = document.getElementById(`alert-card-${safeName}`);
+                        if (chatCard) chatCard.style.display = 'none';
+
+                        // --- START: NEW MODAL LOGIC ---
+                        if (fromModal) {
+                            // Hide just this item from the modal list
+                            const modalItem = document.getElementById(`modal-alert-${safeName}`);
+                            if (modalItem) modalItem.style.display = 'none';
+                            
+                            // Check if all items are hidden, if so, close the modal
+                            const modal = document.getElementById('missedReminderModal');
+                            if (modal.querySelectorAll('.reminder-item[style*="display: none"]').length === modal.querySelectorAll('.reminder-item').length) {
+                                modal.classList.remove('active');
+                            }
                         }
-                        // --- END: ADD THESE LINES ---
-                        await loadMedicineRemindersScreen();
+                        // --- END: NEW MODAL LOGIC ---
+
+                        await loadMedicineRemindersScreen(); // Refresh dedicated page
                         showConfirmationModal('Success', `${medicineName} marked as taken!`);
                     }
                 } catch (error) {
@@ -4416,7 +4483,8 @@ function displayMessage(message, sender) {
             }
 
             // --- ADD THIS ENTIRE NEW FUNCTION ---
-            window.skipMedicine = async function(medicineName) {
+            // Add a new parameter 'fromModal'
+            window.skipMedicine = async function(medicineName, fromModal = false) {
                 try {
                     const response = await fetch(`${API_BASE_URL}/v1/medicine-reminders`, {
                         method: 'POST',
@@ -4429,13 +4497,25 @@ function displayMessage(message, sender) {
                     });
                     
                     if (response.ok) {
-                        // Hide the card from the chat window
+                        // Hide the card from the chat window (if it's there)
                         const safeName = medicineName.replace(/[^a-zA-Z0-9]/g, '-');
-                        const card = document.getElementById(`alert-card-${safeName}`);
-                        if (card) {
-                            card.style.display = 'none';
+                        const chatCard = document.getElementById(`alert-card-${safeName}`);
+                        if (chatCard) chatCard.style.display = 'none';
+
+                        // --- START: NEW MODAL LOGIC ---
+                        if (fromModal) {
+                            // Hide just this item from the modal list
+                            const modalItem = document.getElementById(`modal-alert-${safeName}`);
+                            if (modalItem) modalItem.style.display = 'none';
+
+                            // Check if all items are hidden, if so, close the modal
+                            const modal = document.getElementById('missedReminderModal');
+                            if (modal.querySelectorAll('.reminder-item[style*="display: none"]').length === modal.querySelectorAll('.reminder-item').length) {
+                                modal.classList.remove('active');
+                            }
                         }
-                        // We don't need to show a modal, it just disappears.
+                        // --- END: NEW MODAL LOGIC ---
+                        
                         console.log(`Skipped alert for ${medicineName}`);
                     } else {
                         showConfirmationModal('Error', 'Failed to skip reminder.');
