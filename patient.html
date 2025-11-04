@@ -866,6 +866,22 @@
             animation: pulse-loading 1.5s ease-in-out infinite;
             cursor: not-allowed;
         }
+        /* Mobile-specific styles for appointment cards */
+@media (max-width: 767px) {
+    .appointment-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .appointment-card-footer > div {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+    .appointment-card-footer .btn {
+        flex: 1;
+        text-align: center;
+    }
+}
 
         @keyframes pulse-loading {
             0% { opacity: 0.7; transform: scale(1); }
@@ -1617,7 +1633,12 @@ async function triggerSos(user) {
         let medicineCart = [], selectedPharmacy = null;
 
         document.addEventListener('DOMContentLoaded', async function() {
-            let user = null, currentLanguage = 'en', bookingState = {}, currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), medicineCart = [], selectedPharmacy = null, doctors = [];
+            // --- REPLACE this line: let user = null, currentLanguage = 'en', ...
+            let user = null, bookingState = {}, currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear(), medicineCart = [], selectedPharmacy = null, doctors = [];
+            
+            // --- ADD THIS BLOCK to load the saved language ---
+            let currentLanguage = localStorage.getItem('userLanguage') || 'en'; // Load saved lang, default to 'en'
+            // --- END ADD ---
 
             const translations = {
                 en: { welcome_message: "Welcome, {name}", welcome_subtitle: "Your health dashboard is ready.", next_appointment: "Next Appointment", new_prescriptions: "New Prescriptions", from_last_visit: "From past visits", home_nav: "Home", appointments_nav: "Appointments", records_nav: "Records", book_nav: "Book", more_nav: "More", appointments_title: "My Appointments", records_title: "Digital Health Record", book_title: "Book a Consultation", more_title: "More Options", prescriptions_title: "My Prescriptions", scan_medicine: "Scan Medicine", book_medicine: "Book Medicine", health_chatbot: "Health Chatbot", scan_medicine_title: "Scan Medicine", book_medicine_title: "Book Medicine", health_chatbot_title: "Health Assistant", select_pharmacy: "Select a Pharmacy"},
@@ -1669,7 +1690,7 @@ async function triggerSos(user) {
             const response = await fetch(`${API_BASE_URL}/v1/history`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.patientId, limit: 50 })
+                body: JSON.stringify({ userId: user.patientId, limit: 50, language: currentLanguage })
             });
             const data = await response.json();
             if (data.success && data.history) {
@@ -1836,7 +1857,7 @@ function showScreen(screenId) {
                 Object.keys(translations).forEach(lang => { const option = document.createElement('a'); option.href = "#"; option.className = 'language-option'; option.dataset.lang = lang; option.textContent = new Intl.DisplayNames([lang], { type: 'language' }).of(lang); langMenu.appendChild(option); });
                 langDropdown.querySelector('.language-dropdown-toggle').addEventListener('click', () => langDropdown.classList.toggle('open'));
                 document.addEventListener('click', e => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('open'); });
-                langMenu.addEventListener('click', e => { if (e.target.classList.contains('language-option')) { currentLanguage = e.target.dataset.lang; document.getElementById('selectedLanguage').textContent = e.target.textContent; updateUIText(); langDropdown.classList.remove('open'); } });
+                langMenu.addEventListener('click', e => { if (e.target.classList.contains('language-option')) { currentLanguage = e.target.dataset.lang; document.getElementById('selectedLanguage').textContent = e.target.textContent; localStorage.setItem('userLanguage', currentLanguage); updateUIText(); langDropdown.classList.remove('open'); } });
             }
 
             function generateTimeline() { document.getElementById('timeline-container').innerHTML = appData.records.map(rec => `<div class="timeline-item"><div class="timeline-dot"></div><p class="timeline-date">${new Date(rec.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</p><div class="card"><h4>${rec.title}</h4><p>${rec.description}</p></div></div>`).join(''); }
@@ -1922,10 +1943,14 @@ function showScreen(screenId) {
                             <span class="appointment-card-tag tag-video">Demo</span>
                         </div>
                         <div class="appointment-card-footer">
-                            <button class="btn btn-primary join-call-btn" data-doctor="Demo Doctor" data-appointment-id="demo-call-123">
-                                Join Call Now
-                            </button>
-                        </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <button class="btn call-doctor-btn">Call Doctor</button>
+        <button class="btn message-doctor-btn">Message Doctor</button>
+    </div>
+    <button class="btn btn-primary join-call-btn" data-doctor="Demo Doctor" data-appointment-id="demo-call-123">
+        Join Call Now
+    </button>
+</div>
                     </div>
                 `;
                 // --- END OF NEW CODE ---
@@ -1933,7 +1958,7 @@ function showScreen(screenId) {
                 let html = `<h3 class="appointments-section-title">Upcoming</h3>`;
                 html += demoCallHtml; // Add the demo call to the top of the list
             
-                html += upcoming.length ? upcoming.map(a => { const apptTime = new Date(`${a.date} ${a.time}`); const timeDiffMinutes = (apptTime - now) / 60000; const canJoin = timeDiffMinutes <= 10 && timeDiffMinutes >= -15; return `<div class="card appointment-card"><div class="appointment-card-header"><div class="appointment-card-doctor"><h4>${a.doctor}</h4><p>${a.type}</p><p>${new Date(a.date).toDateString()}, ${a.time}</p></div><span class="appointment-card-tag ${a.mode === 'Video' ? 'tag-video' : 'tag-audio'}">${a.mode}</span></div><div class="appointment-card-footer"><button class="btn" style="background: var(--color-secondary); color: var(--text-color);">Reschedule</button><button class="btn btn-primary join-call-btn" data-doctor="${a.doctor}" data-appointment-id="${a.id}" ${canJoin ? '' : 'disabled'}>Join Call</button></div></div>`; }).join('') : '<p>No upcoming appointments.</p>';
+                html += upcoming.length ? upcoming.map(a => { const apptTime = new Date(`${a.date} ${a.time}`); const timeDiffMinutes = (apptTime - now) / 60000; const canJoin = timeDiffMinutes <= 10 && timeDiffMinutes >= -15; return `<div class="card appointment-card"><div class="appointment-card-header"><div class="appointment-card-doctor"><h4>${a.doctor}</h4><p>${a.type}</p><p>${new Date(a.date).toDateString()}, ${a.time}</p></div><span class="appointment-card-tag ${a.mode === 'Video' ? 'tag-video' : 'tag-audio'}">${a.mode}</span></div><div class="appointment-card-footer"><div style="display: flex; gap: 0.75rem;"><button class="btn call-doctor-btn">Call Doctor</button><button class="btn message-doctor-btn">Message Doctor</button></div><div style="display: flex; gap: 0.75rem;"><button class="btn" style="background: var(--color-secondary); color: var(--text-color);">Reschedule</button><button class="btn btn-primary join-call-btn" data-doctor="${a.doctor}" data-appointment-id="${a.id}" ${canJoin ? '' : 'disabled'}>Join Call</button></div></div></div>`; }).join('') : '<p>No upcoming appointments.</p>';
                 
                 html += `<h3 class="appointments-section-title" style="margin-top: 2rem;">Past</h3>`;
                 html += past.length ? past.map((a, index) => `<div class="card appointment-card"><div class="appointment-card-header"><div class="appointment-card-doctor"><h4>${a.doctor}</h4><p>${a.type}</p><p>${new Date(a.date).toDateString()}, ${a.time}</p></div><span class="appointment-card-tag ${a.mode === 'Video' ? 'tag-video' : 'tag-audio'}">${a.mode}</span></div><div class="appointment-card-footer">${a.prescription ? `<button class="btn btn-primary view-prescription-btn" data-past-index="${index}">View Prescription</button>` : ''}</div></div>`).join('') : '<p>No past appointments.</p>';
@@ -1941,6 +1966,26 @@ function showScreen(screenId) {
                 container.innerHTML = html;
                 container.querySelectorAll('.join-call-btn').forEach(btn => btn.addEventListener('click', (e) => showCallScreen(e.currentTarget.dataset.doctor, e.currentTarget.dataset.appointmentId)));
                 container.querySelectorAll('.view-prescription-btn').forEach(btn => btn.addEventListener('click', (e) => showPrescription(past[e.currentTarget.dataset.pastIndex])));
+            // ... existing event listeners for join-call-btn and view-prescription-btn
+
+container.querySelectorAll('.call-doctor-btn').forEach(btn => btn.addEventListener('click', () => {
+    const phoneNumber = '7003665342';
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.location.href = `tel:${phoneNumber}`;
+    } else {
+        window.open(`https://web.whatsapp.com/send?phone=${phoneNumber}`, '_blank');
+    }
+}));
+container.querySelectorAll('.message-doctor-btn').forEach(btn => btn.addEventListener('click', () => {
+    const phoneNumber = '7003665342';
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.location.href = `sms:${phoneNumber}`;
+    } else {
+        window.open(`https://web.whatsapp.com/send?phone=${phoneNumber}`, '_blank');
+    }
+}));
             }
             
              async function generateAllPrescriptions() {
@@ -3496,113 +3541,147 @@ async sendPredictRequest(message, buttonAction = null, parameters = null) {
                 chatWindow.appendChild(msgEl);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
             };
-            // --- FIX END ---
+            
+            function handleBotResponse(data) {
+                // This function is called by BOTH text and voice inputs
+                
+                // Check if the backend sent audio data
+                if (data.audioData) {
+                    // Play the Bhashini audio
+                    const audio = new Audio('data:audio/wav;base64,' + data.audioData);
+                    audio.play().catch(e => console.error("Audio play failed:", e));
+                }
+                
+                // Remove "Processing..." message if it exists
+                const userMessages = chatWindow.querySelectorAll('.user-message');
+                const lastUserMessage = userMessages[userMessages.length - 1];
+                if (lastUserMessage && lastUserMessage.textContent.includes("... (Processing voice input) ...")) {
+                    if (data.transcribed_text) {
+                        // If we got the transcription, replace the text
+                        lastUserMessage.textContent = data.transcribed_text;
+                    } else {
+                        // Otherwise, just remove it (fallback)
+                        lastUserMessage.remove(); 
+                    }
+                }
+
+                // Display the (translated) text response
+                enhancedChatbot.handleChatbotResponse(data);
+            }
 
             function setupChatbot() {
                 
                 const chatForm = document.getElementById('chatForm');
                 const chatInput = document.getElementById('chatInput');
-                const chatWindow = document.getElementById('chatWindow'); // Make sure chatWindow is defined here
+                const chatWindow = document.getElementById('chatWindow');
+                const recordButton = document.getElementById('record-button');
                 
-                // --- START: Speech-to-Text code ---
-const recordButton = document.getElementById('record-button');
+                let mediaRecorder;
+                let audioChunks = [];
+                let isRecording = false;
 
-// Check if the browser supports the Web Speech API
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                // --- 1. NEW MediaRecorder LOGIC ---
+                recordButton.addEventListener('click', () => {
+                    if (isRecording) {
+                        // --- STOP RECORDING ---
+                        mediaRecorder.stop();
+                        isRecording = false;
+                        recordButton.textContent = '🎤';
+                        recordButton.disabled = false;
+                        chatInput.disabled = false;
+                    } else {
+                        // --- START RECORDING ---
+                        navigator.mediaDevices.getUserMedia({ audio: true })
+                            .then(stream => {
+                                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
+                                mediaRecorder.start();
+                                isRecording = true;
+                                audioChunks = []; // Clear old chunks
+                                recordButton.textContent = '...'; // Show "listening"
+                                
+                                // --- THIS IS THE FIX ---
+                                // The button MUST remain enabled so you can click it to stop.
+                                recordButton.disabled = false; 
+                                // --- END OF FIX ---
 
-if (SpeechRecognition) {
-    const recognition = new SpeechRecognition();
+                                chatInput.disabled = true;
 
-    // Use the app's current language (assuming 'currentLanguage' is accessible)
-    recognition.lang = currentLanguage || 'en-US'; // Default to English if not set
-    recognition.interimResults = false; // We only want final results
-    recognition.continuous = false; // Stop listening after first utterance
+                                mediaRecorder.addEventListener("dataavailable", event => {
+                                    audioChunks.push(event.data);
+                                });
 
-    recordButton.addEventListener('click', () => {
-        console.log("Recording started...");
-        recordButton.textContent = '...'; // Show a "listening" state
-        recordButton.disabled = true;
-        try {
-            // Ensure recognition is not already running
-            recognition.stop(); // Stop any previous instance just in case
-            recognition.start();
-        } catch (e) {
-            console.error("Error starting recognition (maybe already running, or stopped prematurely):", e);
-            // If start() fails immediately, reset the button
-            recordButton.textContent = '🎤';
-            recordButton.disabled = false;
-        }
-    });
+                                mediaRecorder.addEventListener("stop", () => {
+                                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                                    sendVoiceToBackend(audioBlob);
+                                    
+                                    // Stop all audio tracks to turn off mic light
+                                    stream.getTracks().forEach(track => track.stop());
+                                });
+                            })
+                            .catch(err => {
+                                console.error("Microphone error:", err);
+                                alert("Microphone access denied. Please allow microphone access in your browser settings.");
+                                recordButton.textContent = '🎤';
+                                recordButton.disabled = false;
+                                chatInput.disabled = false;
+                            });
+                    }
+                });
+                
+                // --- 2. NEW FUNCTION TO SEND VOICE TO BACKEND ---
+                // --- 2. REPLACE your old 'sendVoiceToBackend' function with this ---
+                async function sendVoiceToBackend(audioBlob) {
+                    addMessage("... (Processing voice input) ...", 'user');
 
-    // This event fires when speech is recognized
-    recognition.onresult = (event) => {
-        const spokenText = event.results[0][0].transcript;
-        console.log("User said:", spokenText);
-        chatInput.value = spokenText; // Put the text in the chat box
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'recording.webm');
+                    formData.append('userId', user.patientId);
+                    formData.append('language', currentLanguage);
 
-        // --- Optional: Automatically send the message ---
-        // Uncomment the line below to send the message immediately after speech is recognized
-        // chatForm.dispatchEvent(new Event('submit'));
-    };
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.classList.add('chat-message', 'bot-message');
+                    typingIndicator.textContent = 'Thinking...';
+                    chatWindow.appendChild(typingIndicator);
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
 
-    // Handle end of speech processing
-    recognition.onend = () => {
-        console.log("Recognition ended.");
-        recordButton.textContent = '🎤'; // Reset button icon
-        recordButton.disabled = false;
-    };
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/v1/voice-input`, {
+                            method: 'POST',
+                            body: formData 
+                        });
 
-    // Handle errors during recognition
-    recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-        recordButton.textContent = '🎤'; // Reset button on error
-        recordButton.disabled = false;
+                        if (!response.ok) {
+                            // This will be caught by the catch block below
+                            throw new Error(`HTTP Error: ${response.status}`); 
+                        }
 
-        // Provide specific user feedback based on the error type
-        switch(event.error) {
-            case 'no-speech':
-                console.warn("No speech detected.");
-                // Optionally show a small message to the user
-                break;
-            case 'audio-capture':
-                alert("Could not capture audio. Please ensure your microphone is working and allowed.");
-                break;
-            case 'not-allowed':
-                alert("Microphone access denied. Please allow microphone access in your browser settings to use this feature.");
-                break;
-            case 'network':
-                console.error("Network error during speech recognition. Check internet connection.");
-                // Optionally inform the user about network issues
-                break;
-            case 'aborted':
-                console.log("Speech recognition aborted."); // Usually happens if stop() is called early or by user action
-                break;
-            default:
-                alert(`An unknown speech error occurred: ${event.error}`);
-        }
-    };
+                        const data = await response.json();
+                        handleBotResponse(data); 
 
-} else {
-    // Browser doesn't support the API
-    console.log("Speech recognition not supported in this browser.");
-    if(recordButton) { // Check if the button exists before trying to hide it
-       recordButton.style.display = 'none'; // Hide the button if not supported
-    }
-}
-// --- END: Speech-to-Text code ---
+                    } catch (error) {
+                        console.error('Voice Chat Error:', error); // This is line 3593
+                        addMessage("I'm sorry, I couldn't process your voice. Please try again.", 'bot');
+                    
+                    } finally {
+                        // This 'finally' block runs *no matter what* (after try OR catch)
+                        // This fixes your 'removeChild' bug.
+                        if (chatWindow.contains(typingIndicator)) {
+                            chatWindow.removeChild(typingIndicator); // This removes the indicator
+                        }
+                        // Re-enable buttons after processing
+                        recordButton.disabled = false;
+                        chatInput.disabled = false;
+                    }
+                }
 
-
-                // This is your FULL original event listener, now it works correctly.
+                // --- 3. MODIFIED TEXT SUBMIT LISTENER ---
                 chatForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const userInput = chatInput.value.trim();
                     if (!userInput) return;
 
-                    // Store the last user message for contextual button generation
                     enhancedChatbot.lastUserMessage = userInput;
-
-                    console.log('Frontend: Sending message:', userInput, 'userId:', user.patientId);
-                    addMessage(userInput, 'user'); // This call now works
+                    addMessage(userInput, 'user');
                     chatInput.value = '';
 
                     const typingIndicator = document.createElement('div');
@@ -3616,8 +3695,7 @@ if (SpeechRecognition) {
                         const sosCheck = await checkForEmergency(userInput);
                         if (sosCheck.emergency_detected) {
                             chatWindow.removeChild(typingIndicator);
-
-                            // Show SOS alert
+                            // (Your SOS UI logic here...)
                             const sosAlert = document.createElement('div');
                             sosAlert.className = 'sos-alert';
                             sosAlert.innerHTML = `
@@ -3626,27 +3704,24 @@ if (SpeechRecognition) {
                                 <p><strong>Emergency Number: 108</strong></p>
                             `;
                             chatWindow.appendChild(sosAlert);
-
-                            // Auto-dial for critical emergencies
                             if (sosCheck.critical && sosCheck.parameters.auto_dial) {
                                 setTimeout(() => {
                                     window.location.href = `tel:${sosCheck.parameters.emergency_number}`;
                                 }, 3000);
                             }
-
                             chatWindow.scrollTop = chatWindow.scrollHeight;
                             chatInput.value = '';
                             return;
                         }
 
-                        // Your original predict call is preserved
+                        // Your original predict call, now with 'language' added
                         const response = await fetch(`${API_BASE_URL}/v1/predict`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 message: userInput,
                                 userId: user.patientId,
-                                language: currentLanguage
+                                language: currentLanguage 
                             })
                         });
 
@@ -3655,25 +3730,22 @@ if (SpeechRecognition) {
                         }
 
                         const data = await response.json();
-                        chatWindow.removeChild(typingIndicator);
-
-                        // Use enhanced chatbot handler
-                        await enhancedChatbot.handleChatbotResponse(data);
+                        handleBotResponse(data);
 
                     } catch (error) {
-                        console.error('Chat Error:', error);
+                        console.error('Text Chat Error:', error);
                         chatWindow.removeChild(typingIndicator);
                         addMessage("I'm sorry, I'm having trouble connecting right now. Please try again in a moment.", 'bot');
                     }
                 });
-
-                // The rest of your function is also preserved
-                addMessage("Welcome to Enhanced Sehat Sahara! I can help with appointments, prescriptions, medicine reminders, and health guidance.", "bot");
-
-                checkMedicineReminders();
                 
+                // --- 4. Your existing initial messages ---
+                addMessage("Welcome to Enhanced Sehat Sahara! I can help with appointments, prescriptions, medicine reminders, and health guidance.", "bot");
+                checkMedicineReminders();
                 testPrescriptionEndpoint();
             }
+
+            
 
             
 // --- START: Agora Variables ---
@@ -4801,7 +4873,12 @@ window.addEventListener('popstate', (event) => {
     // NO ELSE BLOCK. This allows the browser to go back to index.html
     // when event.state is null.
 });       // Make nav buttons clickable
-                setupThemeAndLanguage();   // Setup theme/language toggles
+                setupThemeAndLanguage();  
+                // --- ADD THIS BLOCK TO SET THE DROPDOWN TEXT ON LOAD ---
+                const initialLangText = document.querySelector(`.language-option[data-lang="${currentLanguage}"]`);
+                if (initialLangText) {
+                    document.getElementById('selectedLanguage').textContent = initialLangText.textContent;
+                } // Setup theme/language toggles
 
                 // 5. Render Initial Screen Content (Depends on Core Data)
                        // Render health records timeline
@@ -4905,63 +4982,7 @@ updateView(initialScreen); // Make sure the view matches this initial state
             }
 
             initializeApp();
-            // --- START: Text-to-Speech (TTS) Logic ---
-const chatWindowForTTS = document.getElementById('chatWindow');
 
-// Check if Speech Synthesis is supported
-if ('speechSynthesis' in window) {
-    const synth = window.speechSynthesis;
-    let currentUtterance = null; // To track the currently speaking utterance
-
-    // Use event delegation for dynamically added buttons
-    chatWindowForTTS.addEventListener('click', (event) => {
-        // Check if the clicked element is our speak button
-        if (event.target.classList.contains('speak-button')) {
-            const button = event.target;
-            const textToSpeak = button.dataset.textToSpeak; // Get text from dataset
-
-            if (textToSpeak) {
-                // If currently speaking, stop it first
-                if (synth.speaking && currentUtterance) {
-                    synth.cancel();
-                }
-
-                // Create a new utterance
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-
-                // Optional: Configure voice, rate, pitch
-                utterance.lang = currentLanguage || 'en-US'; // Use the selected language
-                // utterance.rate = 1; // Speed (0.1 to 10)
-                // utterance.pitch = 1; // Pitch (0 to 2)
-
-                // Keep track of this utterance
-                currentUtterance = utterance;
-
-                // Handle the end of speech
-                utterance.onend = () => {
-                    console.log('Finished speaking.');
-                    currentUtterance = null;
-                };
-
-                // Handle errors
-                utterance.onerror = (e) => {
-                    console.error('Speech synthesis error:', e);
-                    currentUtterance = null;
-                };
-
-                // Speak the text
-                synth.speak(utterance);
-            }
-        }
-    });
-
-} else {
-    console.warn("Speech Synthesis (Text-to-Speech) is not supported in this browser.");
-    // Optionally hide all speak buttons if TTS is not supported
-    // This might require adding a class to hide them via CSS initially
-    // and only showing them if 'speechSynthesis' in window is true.
-}
-// --- END: Text-to-Speech (TTS) Logic ---
         });
     </script>
     <!-- Notification Banner for Push Reminders -->
