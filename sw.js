@@ -1,4 +1,5 @@
 const CACHE_NAME = 'sahara-v1';
+const API_BASE_URL = 'https://sahara-sathi.onrender.com'; // This MUST be the full URL
 const urlsToCache = [
   '/',
   '/index.html',
@@ -6,12 +7,24 @@ const urlsToCache = [
   // Add other assets
 ];
 
+// --- NEW: Force the service worker to update and activate ---
 self.addEventListener('install', event => {
+  console.log('[Service Worker] Install event');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting()) // <-- ADD THIS LINE
   );
 });
+
+// --- NEW: Add this entire 'activate' listener ---
+self.addEventListener('activate', event => {
+  console.log('[Service Worker] Activate event');
+  event.waitUntil(
+    clients.claim() // <-- This line takes immediate control
+  );
+});
+// --- END NEW ---
 
 self.addEventListener('fetch', event => {
   event.respondWith(
@@ -21,10 +34,7 @@ self.addEventListener('fetch', event => {
 
 });
 
-// In sw.js
-const API_BASE_URL = 'https://sahara-sathi.onrender.com';
-
-// NEW: Listener for push events from the server
+// --- PUSH LISTENER (No changes needed) ---
 self.addEventListener('push', event => {
     console.log('[Service Worker] Push Received.');
     
@@ -37,10 +47,7 @@ self.addEventListener('push', event => {
 });
 
 
-// In sw(2).js, replace your ENTIRE 'notificationclick' listener with this:
-
-// This is the correct notificationclick listener for your sw.js file
-
+// --- NOTIFICATION CLICK LISTENER (No changes needed) ---
 self.addEventListener('notificationclick', event => {
     event.notification.close();
     const notificationData = event.notification.data;
@@ -104,4 +111,3 @@ self.addEventListener('notificationclick', event => {
         );
     }
 });
-
