@@ -4568,14 +4568,6 @@ function displayMessage(message, sender) {
 
         // 2. Check for *any* existing subscription in the browser
         let subscription = await navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription());
-
-        // --- CRITICAL FIX: Delete any existing subscription to ensure we get a clean one ---
-        if (subscription !== null) {
-            console.log('Existing subscription found. Unsubscribing to ensure clean re-registration...');
-            // This is the key line to clear the expired "address" from the browser
-            await subscription.unsubscribe(); 
-            subscription = null; 
-        }
         
         // At this point, 'subscription' is guaranteed to be null (or was never granted permission)
 
