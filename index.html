@@ -436,6 +436,117 @@
         .auth-switch a { color: var(--color-primary); font-weight: 600; cursor: pointer; text-decoration: none; }
         .auth-switch a:hover { text-decoration: underline; }
 
+        /* --- START: Added Hint Box Styles --- */
+        /* --- START: Added Hint Box Styles --- */
+        .hint-box {
+            position: absolute;
+            top: 100%; /* Below the parent item */
+            left: 50%; /* --- CHANGED: Centered on the parent item */
+            transform: translateX(-50%); /* --- CHANGED: Centered on the parent item */
+            margin-top: 12px; /* Space */
+            background: var(--color-teal-700);
+            color: var(--color-white);
+            padding: 10px 15px;
+            border-radius: var(--radius-base);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            width: 220px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0; /* Fade in */
+            animation: fadeInHint 0.5s 1.5s forwards; /* Fade in after 1.5s delay */
+        }
+        .hint-arrow {
+            position: absolute;
+            bottom: 100%; /* At the top of the box */
+            left: 50%; /* --- CHANGED: Centered */
+            transform: translateX(-50%); /* --- CHANGED: Centered */
+            width: 0; 
+            height: 0; 
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid var(--color-teal-700);
+        }
+
+        /* --- START: Added Mobile Menu Hint Styles --- */
+        .hint-box-mobile-nav {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 50%; /* Vertically center */
+            left: 100%; /* --- CHANGED: Position to the right of the icon */
+            transform: translateY(-50%); /* Apply vertical centering */
+            margin-left: 12px; /* Space from icon */
+            background: var(--color-teal-700);
+            color: var(--color-white);
+            padding: 8px 12px;
+            border-radius: var(--radius-base);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            width: 180px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+      .hint-arrow-mobile-nav {
+            position: absolute;
+            top: 50%;
+            right: 100%; /* --- CHANGED: At the left edge of the hint box */
+            transform: translateY(-50%);
+            width: 0; 
+            height: 0; 
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid var(--color-teal-700); /* --- CHANGED: Pointing left */
+            border-left: 0; /* --- CHANGED --- */
+        }  
+        /* New keyframe for this specific hint */
+        /* New keyframe for this specific hint */
+        @keyframes fadeInHintMobileNav {
+            from { opacity: 0; transform: translateX(-10px) translateY(-50%); }
+            to { opacity: 1; transform: translateX(0) translateY(-50%); }
+        }
+        /* --- END: Added Mobile Menu Hint Styles --- */
+        .hint-close-btn {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        @keyframes fadeInHint {
+            from { opacity: 0; transform: translateY(10px) translateX(-50%); } /* --- CHANGED */
+            to { opacity: 1; transform: translateY(0) translateX(-50%); } /* --- CHANGED */
+        }
+
+        @media (max-width: 768px) {
+            .hint-box {
+                position: relative; /* --- CHANGED: Makes it flow in the menu */
+                top: auto;
+                left: auto;
+                transform: none; /* --- CHANGED */
+                margin-top: 8px; 
+                margin-left: 0;
+                width: 100%; 
+                animation-name: fadeInHintMobile;
+            }
+            .hint-arrow {
+                display: none; /* Hide arrow on mobile */
+            }
+            @keyframes fadeInHintMobile {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+        /* --- END: Added Hint Box Styles --- */
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .nav {
@@ -471,6 +582,13 @@
             .language-dropdown-menu::-webkit-scrollbar,
             ::-webkit-scrollbar {
                 display: none;
+            }
+            /* --- START: MODIFIED THIS --- */
+            .hint-box-mobile-nav {
+                display: block; /* Show it ONLY on mobile */
+                opacity: 0;
+                /* Use the NEW animation */
+                animation: fadeInHintMobileNav 0.5s 1.5s forwards; 
             }
             .nav__brand h2 {
                 font-size: 1.25rem;
@@ -514,18 +632,27 @@
     <header class="header">
         <nav class="nav">
             <div class="nav__left">
+            <div style="position: relative;">
                 <button class="hamburger" id="hamburgerBtn">☰</button>
-                <div class="mobile-menu" id="mobileMenu">
+                <div id="menuHint" class="hint-box-mobile-nav">
+                    <button class="hint-close-btn" id="closeMenuHint">&times;</button>
+                    <span data-key="mobile_menu_hint">Click here to open the menu.</span>
+                    <div class="hint-arrow-mobile-nav"></div>
+                </div>
+            </div>
+            <div class="mobile-menu" id="mobileMenu">
                     <div class="nav__brand" style="cursor: pointer;" onclick="document.getElementById('landingView').scrollIntoView();">
                         <h2 data-key="sahara_logo">SAHARA SAATHI</h2>
                     </div>
                     <a href="#footer" id="contactBtn" class="btn" data-key="contact">Contact</a>
-                    <div class="language-dropdown">
-                        <button class="language-dropdown-toggle">
-                            <span id="selectedLanguage">English</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        <div class="language-dropdown-menu">
+                    
+                    <div style="position: relative;"> 
+                        <div class="language-dropdown">
+                            <button class="language-dropdown-toggle">
+                                <span id="selectedLanguage">English</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div class="language-dropdown-menu">
                             <a class="language-option" data-lang="en">English</a>
                             <a class="language-option" data-lang="hi">हिंदी</a>
                             <a class="language-option" data-lang="pa">ਪੰਜਾਬੀ</a>
@@ -538,6 +665,12 @@
                             <a class="language-option" data-lang="or">Odia</a>
                             <a class="language-option" data-lang="ta">Tamil</a>
                             <a class="language-option" data-lang="te">Telugu</a>
+                        </div>
+                        </div>
+                    <div id="langHint" class="hint-box">
+                            <button class="hint-close-btn" id="closeLangHint">&times;</button>
+                            <span data-key="lang_hint_message">Select your language here to continue.</span>
+                            <div class="hint-arrow"></div>
                         </div>
                     </div>
                     <button class="btn" id="installPwaBtnMobile" style="display: none;">Install App</button>
@@ -877,7 +1010,9 @@ window.addEventListener('pageshow', clearSessionOnPageShow);
         success_message: "Your account has been created.",
         login_info_message: "You can log in with your Full Name, Email, or the Patient ID below.",
         patient_id_is: "Your Patient ID is:",
-        proceed_to_login: "Proceed to Login"
+        proceed_to_login: "Proceed to Login",
+        lang_hint_message: "Select your language here to continue.",
+        mobile_menu_hint: "Click to open menu."
     },
     hi: {
         sahara_logo: "सहारा साथी",
@@ -947,7 +1082,9 @@ window.addEventListener('pageshow', clearSessionOnPageShow);
         success_message: "आपका खाता बना दिया गया है।",
         login_info_message: "आप अपने पूरे नाम, ईमेल, या नीचे दिए गए रोगी आईडी से लॉग इन कर सकते हैं।",
         patient_id_is: "आपकी रोगी आईडी है:",
-        proceed_to_login: "लॉगिन करने के लिए आगे बढ़ें"
+        proceed_to_login: "लॉगिन करने के लिए आगे बढ़ें",
+        lang_hint_message: "जारी रखने के लिए यहां अपनी भाषा चुनें।",
+        mobile_menu_hint: "मेनू खोलने के लिए क्लिक करें।"
     },
     pa: {
         sahara_logo: "ਸਹਾਰਾ ਸਾਥੀ",
@@ -1016,7 +1153,9 @@ window.addEventListener('pageshow', clearSessionOnPageShow);
         success_message: "ਤੁਹਾਡਾ ਖਾਤਾ ਬਣ ਗਿਆ ਹੈ।",
         login_info_message: "ਤੁਸੀਂ ਆਪਣੇ ਪੂਰੇ ਨਾਮ, ਈਮੇਲ, ਜਾਂ ਹੇਠਾਂ ਦਿੱਤੇ ਮਰੀਜ਼ ਆਈਡੀ ਨਾਲ ਲਾਗਇਨ ਕਰ ਸਕਦੇ ਹੋ।",
         patient_id_is: "ਤੁਹਾਡਾ ਮਰੀਜ਼ ਆਈਡੀ ਹੈ:",
-        proceed_to_login: "ਲਾਗਿਨ ਕਰਨ ਲਈ ਅੱਗੇ ਵਧੋ"
+        proceed_to_login: "ਲਾਗਿਨ ਕਰਨ ਲਈ ਅੱਗੇ ਵਧੋ",
+        lang_hint_message: "ਜਾਰੀ ਰੱਖਣ ਲਈ ਇੱਥੇ ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ।",
+        mobile_menu_hint: "ਮੀਨੂ ਲਈ ਕਲਿੱਕ ਕਰੋ।"
     }
 };
 
@@ -1214,6 +1353,7 @@ window.addEventListener('pageshow', clearSessionOnPageShow);
         }
 
         const languageDropdown = document.querySelector('.language-dropdown');
+        const langHint = document.getElementById('langHint'); // <-- GET HINT
         if (languageDropdown) {
             const dropdownToggle = languageDropdown.querySelector('.language-dropdown-toggle');
             const languageOptions = languageDropdown.querySelectorAll('.language-option');
@@ -1221,13 +1361,33 @@ window.addEventListener('pageshow', clearSessionOnPageShow);
 
             dropdownToggle.addEventListener('click', () => languageDropdown.classList.toggle('open'));
             document.addEventListener('click', (e) => { if (!languageDropdown.contains(e.target)) languageDropdown.classList.remove('open'); });
+            
+            // --- START: HINT LOGIC ---
+            if (localStorage.getItem('langHintDismissed')) {
+                langHint.style.display = 'none';
+            }
+            document.getElementById('closeLangHint').addEventListener('click', () => {
+                langHint.style.display = 'none';
+                localStorage.setItem('langHintDismissed', 'true');
+            });
+            // --- END: HINT LOGIC ---
+
             languageOptions.forEach(option => {
                 option.addEventListener('click', (e) => {
                     e.preventDefault();
                     currentLanguage = option.getAttribute('data-lang') || 'en';
+                    
+                    // --- START: SAVE TO LOCALSTORAGE ---
+                    localStorage.setItem('userLanguage', currentLanguage);
+                    // --- END: SAVE TO LOCALSTORAGE ---
+
                     selectedLanguageSpan.textContent = option.textContent;
                     updateUIText();
                     languageDropdown.classList.remove('open');
+                    
+                    // --- HIDE HINT ON SELECTION ---
+                    langHint.style.display = 'none';
+                    localStorage.setItem('langHintDismissed', 'true');
                 });
             });
         }
@@ -1235,11 +1395,40 @@ window.addEventListener('pageshow', clearSessionOnPageShow);
         // Hamburger menu for mobile
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const mobileMenu = document.getElementById('mobileMenu');
+        
+        // --- START: ADDED HINT LOGIC FOR MOBILE MENU ---
+        const menuHint = document.getElementById('menuHint');
+        const closeMenuHint = document.getElementById('closeMenuHint');
+
+        // Check if hint was already dismissed
+        if (localStorage.getItem('menuHintDismissed')) {
+            menuHint.style.display = 'none';
+        }
+        
+        // Function to dismiss the hint
+        const dismissMenuHint = () => {
+            if (menuHint.style.display !== 'none') {
+                menuHint.style.display = 'none';
+                localStorage.setItem('menuHintDismissed', 'true');
+            }
+        };
+
+        // Dismiss on 'x' button click
+        closeMenuHint.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent hamburger click
+            dismissMenuHint();
+        });
+        
+        // MODIFIED hamburger click listener
         hamburgerBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('open');
+            dismissMenuHint(); // Dismiss hint when user clicks the button
         });
+        // --- END: ADDED HINT LOGIC ---
+
         document.addEventListener('click', (e) => {
-            if (!hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+            // MODIFIED: Check for the new parent wrapper, not just the button
+            if (hamburgerBtn && !hamburgerBtn.parentElement.contains(e.target) && !mobileMenu.contains(e.target)) {
                 mobileMenu.classList.remove('open');
             }
         });
