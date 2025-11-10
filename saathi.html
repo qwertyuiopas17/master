@@ -348,7 +348,7 @@
 </div>
 
     <script>
-        const API_BASE_URL = '/api';
+        const API_BASE_URL = '';
         document.addEventListener('DOMContentLoaded', function() {
             let saathi = null;
             let currentLanguage = 'en';
@@ -531,7 +531,7 @@
             async function loadNotifications() {
     try {
         // NOTE: This endpoint does not exist in your backend yet.
-        const response = await fetch(`${API_BASE_URL}/v1/sos-events`, { 
+        const response = await fetch(`${API_BASE_URL}/v1/sos-events`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -562,6 +562,40 @@
 }
             }
 
+            // Function to update saathi location
+            async function updateSaathiLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(async (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        try {
+                            // Send location to backend
+                            const response = await fetch(`${API_BASE_URL}/v1/saathi/update-location`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    latitude: latitude,
+                                    longitude: longitude
+                                })
+                            });
+
+                            if (response.ok) {
+                                console.log('Saathi location updated successfully');
+                            } else {
+                                console.error('Failed to update saathi location');
+                            }
+                        } catch (error) {
+                            console.error('Error updating saathi location:', error);
+                        }
+                    }, (error) => {
+                        console.error('Geolocation error:', error);
+                    });
+                } else {
+                    console.error('Geolocation is not supported by this browser');
+                }
+            }
+
 function updateEmergencyCount() {
     const emergencyCount = appData.notifications.filter(n => n.status === 'pending').length;
     document.getElementById('emergencyCount').textContent = emergencyCount;
@@ -583,11 +617,19 @@ function generateNotificationsList() {
             <div class="notification-content">
                 <p>${notification.message}</p>
                 ${notification.location ? `<p><small>📍 Location: ${notification.location.latitude.toFixed(4)}, ${notification.location.longitude.toFixed(4)}</small></p>` : ''}
+                ${notification.patient_details ? `
+                    <div class="patient-details" style="margin-top: 1rem; padding: 0.5rem; background-color: var(--color-secondary); border-radius: 8px;">
+                        <p><strong>📞 Phone:</strong> <a href="tel:${notification.patient_details.phone_number}" style="color: var(--primary-color);">${notification.patient_details.phone_number || 'Not available'}</a></p>
+                        <p><strong>🏠 Address:</strong> ${notification.patient_details.full_address || 'Not available'}</p>
+                        <p><strong>📏 Distance:</strong> ${notification.distance_km ? notification.distance_km + ' km away' : 'Unknown'}</p>
+                    </div>
+                ` : ''}
             </div>
             <div class="notification-actions">
                 ${notification.status === 'pending' ?
                     `<button class="btn btn-primary respond-btn" data-id="${notification.id}">Respond</button>
-                     <button class="btn dismiss-btn" data-id="${notification.id}">Dismiss</button>` :
+                     <button class="btn btn-primary track-btn" data-id="${notification.id}" style="margin-left: 0.5rem;">📍 Track Location</button>
+                     <button class="btn dismiss-btn" data-id="${notification.id}" style="margin-left: 0.5rem;">Dismiss</button>` :
                     '<span class="status-resolved">Resolved</span>'
                 }
             </div>
@@ -596,6 +638,9 @@ function generateNotificationsList() {
 
     container.querySelectorAll('.respond-btn').forEach(btn => {
         btn.addEventListener('click', (e) => respondToNotification(e.target.dataset.id));
+    });
+    container.querySelectorAll('.track-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => trackPatientLocation(e.target.dataset.id));
     });
     container.querySelectorAll('.dismiss-btn').forEach(btn => {
         btn.addEventListener('click', (e) => dismissNotification(e.target.dataset.id));
@@ -644,6 +689,21 @@ async function dismissNotification(notificationId) {
     }
     updateEmergencyCount();
     generateNotificationsList();
+}
+
+async function trackPatientLocation(notificationId) {
+    const notification = appData.notifications.find(n => n.id == notificationId);
+    if (!notification || !notification.location) {
+        alert('Patient location not available');
+        return;
+    }
+
+    const lat = notification.location.latitude;
+    const lng = notification.location.longitude;
+
+    // Open Google Maps with the patient's location
+    const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}&ll=${lat},${lng}&z=16`;
+    window.open(mapsUrl, '_blank');
 }
 
 function urlB64ToUint8Array(base64String) {
@@ -722,7 +782,14 @@ async function initializeApp() {
                 console.log('Service Worker registered successfully');
                 setupNotificationBanner();
                 // We call subscribeUser here to ensure it runs after registration
-                subscribeUser(); 
+                subscribeUser();
+
+                // Update saathi location on app initialization
+                updateSaathiLocation();
+
+                // Update location every 5 minutes
+                setInterval(updateSaathiLocation, 5 * 60 * 1000);
+
             } catch (error) {
                 console.error('Service Worker registration failed:', error);
             }
